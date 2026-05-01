@@ -37,6 +37,16 @@ interface SchoolMapProps {
   onSchoolClick: (school: SchoolWithIndex) => void;
   selectedSchoolId: string | null;
   loading?: boolean;
+  onMapReady?: (map: L.Map) => void;
+}
+
+// MapController exposes the leaflet map instance to the parent
+function MapController({ onMapReady }: { onMapReady?: (map: L.Map) => void }) {
+  const map = useMap();
+  useEffect(() => {
+    if (onMapReady) onMapReady(map);
+  }, [map, onMapReady]);
+  return null;
 }
 
 // Custom Legend Control Component
@@ -85,7 +95,7 @@ function LegendControl() {
   return null;
 }
 
-export default function SchoolMap({ schools, onSchoolClick, selectedSchoolId, loading = false }: SchoolMapProps) {
+export default function SchoolMap({ schools, onSchoolClick, selectedSchoolId, loading = false, onMapReady }: SchoolMapProps) {
   useEffect(() => {
     fixLeafletIcons();
   }, []);
@@ -125,6 +135,8 @@ export default function SchoolMap({ schools, onSchoolClick, selectedSchoolId, lo
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
           url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
         />
+
+        <MapController onMapReady={onMapReady} />
 
         <LegendControl />
 

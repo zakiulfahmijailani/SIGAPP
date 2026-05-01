@@ -5,6 +5,7 @@ export interface School {
   jenjang: 'SD' | 'SMP' | 'SMA' | 'SMK'
   kecamatan: string
   kelurahan: string
+  kota?: string
   address: string
   latitude: number
   longitude: number
