@@ -1,7 +1,23 @@
+export type PriorityTier = 'KRITIS' | 'TINGGI' | 'SEDANG' | 'RENDAH';
+
+export const TIER_TEXT_COLORS: Record<PriorityTier, string> = {
+  KRITIS: "text-red-600",
+  TINGGI: "text-orange-500",
+  SEDANG: "text-yellow-600",
+  RENDAH: "text-green-600",
+};
+
+export const TIER_BG_COLORS: Record<PriorityTier, string> = {
+  KRITIS: "#EF4444",
+  TINGGI: "#F97316",
+  SEDANG: "#EAB308",
+  RENDAH: "#22C55E",
+};
+
 /**
  * Returns a Tailwind color class string based on the priority tier.
  */
-export function getTierColor(tier: 'KRITIS' | 'TINGGI' | 'SEDANG' | 'RENDAH'): string {
+export function getTierColor(tier: PriorityTier): string {
   switch (tier) {
     case 'KRITIS':
       return 'text-red-600 bg-red-100'
@@ -21,7 +37,7 @@ export function getTierColor(tier: 'KRITIS' | 'TINGGI' | 'SEDANG' | 'RENDAH'): s
  * Higher index = higher urgency.
  * NOTE: These are fallback thresholds. Prefer using priority_tier from Supabase directly.
  */
-export function getTierFromIndex(index: number): 'KRITIS' | 'TINGGI' | 'SEDANG' | 'RENDAH' {
+export function getTierFromIndex(index: number): PriorityTier {
   if (index >= 0.75) return 'KRITIS'
   if (index >= 0.50) return 'TINGGI'
   if (index >= 0.25) return 'SEDANG'

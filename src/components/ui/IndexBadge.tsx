@@ -1,18 +1,18 @@
-import { getTierFromIndex, formatIndex } from "@/lib/utils";
+import { getTierFromIndex, formatIndex, PriorityTier, TIER_BG_COLORS } from "@/lib/utils";
 
 interface IndexBadgeProps {
   index?: number;
-  tier?: "KRITIS" | "TINGGI" | "SEDANG" | "RENDAH";
+  tier?: PriorityTier;
 }
 
 const tierConfig: Record<
-  string,
+  PriorityTier,
   { label: string; bg: string; text: string }
 > = {
-  KRITIS: { label: "Kritis",  bg: "#EF4444", text: "#FFFFFF" },
-  TINGGI: { label: "Tinggi",  bg: "#F97316", text: "#FFFFFF" },
-  SEDANG: { label: "Sedang",  bg: "#EAB308", text: "#422006" },
-  RENDAH: { label: "Rendah",  bg: "#22C55E", text: "#FFFFFF" },
+  KRITIS: { label: "Kritis",  bg: TIER_BG_COLORS.KRITIS, text: "#FFFFFF" },
+  TINGGI: { label: "Tinggi",  bg: TIER_BG_COLORS.TINGGI, text: "#FFFFFF" },
+  SEDANG: { label: "Sedang",  bg: TIER_BG_COLORS.SEDANG, text: "#422006" },
+  RENDAH: { label: "Rendah",  bg: TIER_BG_COLORS.RENDAH, text: "#FFFFFF" },
 };
 
 export function IndexBadge({ index, tier }: IndexBadgeProps) {

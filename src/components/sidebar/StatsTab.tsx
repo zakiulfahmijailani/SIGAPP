@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { SchoolWithIndex } from "@/lib/types";
+import { PriorityTier, TIER_BG_COLORS } from "@/lib/utils";
 
 interface StatsTabProps {
   schools: SchoolWithIndex[];
@@ -9,7 +10,7 @@ interface StatsTabProps {
 
 interface DistributionItem {
   label: string;
-  tier: 'KRITIS' | 'TINGGI' | 'SEDANG' | 'RENDAH';
+  tier: PriorityTier;
   color: string;
   count: number;
   total: number;
@@ -36,14 +37,14 @@ export function StatsTab({ schools }: StatsTabProps) {
   ];
 
   const distribution: DistributionItem[] = [
-    { label: 'Sangat Prioritas (Kritis)', tier: 'KRITIS', color: '#DC2626', count: 0, total: totalSchools || 1 },
-    { label: 'Prioritas Tinggi',          tier: 'TINGGI', color: '#F97316', count: 0, total: totalSchools || 1 },
-    { label: 'Prioritas Sedang',          tier: 'SEDANG', color: '#EAB308', count: 0, total: totalSchools || 1 },
-    { label: 'Prioritas Rendah',          tier: 'RENDAH', color: '#22C55E', count: 0, total: totalSchools || 1 },
+    { label: 'Sangat Prioritas (Kritis)', tier: 'KRITIS', color: TIER_BG_COLORS.KRITIS, count: 0, total: totalSchools || 1 },
+    { label: 'Prioritas Tinggi',          tier: 'TINGGI', color: TIER_BG_COLORS.TINGGI, count: 0, total: totalSchools || 1 },
+    { label: 'Prioritas Sedang',          tier: 'SEDANG', color: TIER_BG_COLORS.SEDANG, count: 0, total: totalSchools || 1 },
+    { label: 'Prioritas Rendah',          tier: 'RENDAH', color: TIER_BG_COLORS.RENDAH, count: 0, total: totalSchools || 1 },
   ].map(item => ({
     ...item,
     count: withIndex.filter(s => s.school_index.priority_tier === item.tier).length,
-  }));
+  })) as DistributionItem[];
 
   return (
     <div className="flex flex-col gap-6">

@@ -5,7 +5,7 @@ import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { SchoolWithIndex } from "@/lib/types";
-import { getTierFromIndex } from "@/lib/utils";
+import { getTierFromIndex, TIER_BG_COLORS } from "@/lib/utils";
 import { IndexBadge } from "./IndexBadge";
 
 // Fix Leaflet's default icon path issues by using a custom divIcon
@@ -18,12 +18,6 @@ function createCustomIcon(color: string) {
   });
 }
 
-const TIER_COLORS: Record<string, string> = {
-  CRITICAL: "#EF4444",
-  HIGH: "#F97316",
-  MEDIUM: "#EAB308",
-  LOW: "#22C55E",
-};
 
 interface MapProps {
   schools: SchoolWithIndex[];
@@ -62,7 +56,7 @@ export default function Map({ schools }: MapProps) {
           if (!s.latitude || !s.longitude || !s.school_index) return null;
 
           const tier = s.school_index.priority_tier ?? getTierFromIndex(s.school_index.sigapp_index);
-          const color = TIER_COLORS[tier] || "#94A3B8";
+          const color = TIER_BG_COLORS[tier as keyof typeof TIER_BG_COLORS] || "#94A3B8";
 
           return (
             <Marker

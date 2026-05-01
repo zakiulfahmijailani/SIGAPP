@@ -24,7 +24,7 @@ import {
 } from "recharts";
 import { getSupabase } from "@/lib/supabase";
 import { SchoolDetail } from "@/lib/types";
-import { formatIndex, getTierFromIndex, getPillarName } from "@/lib/utils";
+import { formatIndex, getTierFromIndex, getPillarName, TIER_BG_COLORS, PriorityTier } from "@/lib/utils";
 import { IndexBadge } from "@/components/ui/IndexBadge";
 
 // ── Pillar config ────────────────────────────────────────────────
@@ -38,18 +38,9 @@ const PILLARS = [
 type PillarKey = (typeof PILLARS)[number]["key"];
 
 function pillarBarColor(score: number): string {
-  if (score >= 0.75) return "#EF4444";
-  if (score >= 0.5) return "#F97316";
-  if (score >= 0.25) return "#EAB308";
-  return "#22C55E";
+  const tier = getTierFromIndex(score);
+  return TIER_BG_COLORS[tier];
 }
-
-const TIER_COLORS: Record<string, string> = {
-  KRITIS: "#EF4444",
-  TINGGI: "#F97316",
-  SEDANG: "#EAB308",
-  RENDAH: "#22C55E",
-};
 
 // ── Key variable cards config ───────────────────────────────────
 const KEY_VARS = [
@@ -192,8 +183,8 @@ export default function SchoolDetailPage() {
 
   const si = school.school_index;
   const pv = school.pillar_variables;
-  const tier = si?.priority_tier ?? getTierFromIndex(si?.sigapp_index ?? 0);
-  const tierColor = TIER_COLORS[tier] ?? "#94A3B8";
+  const tier = (si?.priority_tier ?? getTierFromIndex(si?.sigapp_index ?? 0)) as PriorityTier;
+  const tierColor = TIER_BG_COLORS[tier] ?? "#94A3B8";
 
   return (
     <div className="p-6 lg:p-8 max-w-[1400px]">
