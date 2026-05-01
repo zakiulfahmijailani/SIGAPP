@@ -9,8 +9,13 @@ import {
   MapPin,
   ArrowRight,
   RotateCcw,
-  Map,
 } from "lucide-react";
+import dynamic from "next/dynamic";
+
+const DynamicMap = dynamic(() => import("@/components/ui/Map"), {
+  ssr: false,
+  loading: () => <div className="skeleton-shimmer rounded-xl w-full h-full min-h-[400px]"></div>
+});
 import {
   BarChart,
   Bar,
@@ -282,27 +287,9 @@ export default function DashboardPage() {
 
           {/* ── Map + Top 10 ──────────────────────────────────── */}
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6 mb-8">
-            {/* Map placeholder */}
-            <div
-              className="rounded-xl border-2 border-dashed flex flex-col items-center justify-center"
-              style={{
-                borderColor: "#00B4B4",
-                backgroundColor: "rgba(0,180,180,0.03)",
-                minHeight: 400,
-              }}
-            >
-              <div
-                className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4"
-                style={{ backgroundColor: "rgba(0,180,180,0.1)" }}
-              >
-                <Map size={28} style={{ color: "#00B4B4" }} />
-              </div>
-              <p className="text-sm font-semibold text-slate-600 mb-1">
-                Interactive Map
-              </p>
-              <p className="text-xs text-slate-400">
-                Coming in Phase 2
-              </p>
+            {/* Interactive Leaflet Map */}
+            <div className="relative rounded-xl" style={{ minHeight: 400, height: 500 }}>
+              <DynamicMap schools={filtered} />
             </div>
 
             {/* Top 10 */}
