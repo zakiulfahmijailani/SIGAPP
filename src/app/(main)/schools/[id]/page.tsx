@@ -27,7 +27,7 @@ import { SchoolDetail } from "@/lib/types";
 import { formatIndex, getTierFromIndex, getPillarName } from "@/lib/utils";
 import { IndexBadge } from "@/components/ui/IndexBadge";
 
-// ── Pillar config ─────────────────────────────────────────────
+// ── Pillar config ────────────────────────────────────────────────
 const PILLARS = [
   { key: "p1_quality_gap", weight: 35 },
   { key: "p2_spatial_inequity", weight: 25 },
@@ -45,13 +45,13 @@ function pillarBarColor(score: number): string {
 }
 
 const TIER_COLORS: Record<string, string> = {
-  CRITICAL: "#EF4444",
-  HIGH: "#F97316",
-  MEDIUM: "#EAB308",
-  LOW: "#22C55E",
+  KRITIS: "#EF4444",
+  TINGGI: "#F97316",
+  SEDANG: "#EAB308",
+  RENDAH: "#22C55E",
 };
 
-// ── Key variable cards config ─────────────────────────────────
+// ── Key variable cards config ───────────────────────────────────
 const KEY_VARS = [
   { key: "literacy_score", label: "Literacy Score", icon: BookOpen, format: (v: number) => formatIndex(v) },
   { key: "numeracy_score", label: "Numeracy Score", icon: Calculator, format: (v: number) => formatIndex(v) },
@@ -61,9 +61,9 @@ const KEY_VARS = [
   { key: "complaint_frequency", label: "Complaint Frequency", icon: MessageSquareWarning, format: (v: number) => v.toFixed(0) },
 ] as const;
 
-// ══════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════
 // Component
-// ══════════════════════════════════════════════════════════════
+// ════════════════════════════════════════════════════════════
 export default function SchoolDetailPage() {
   const { id } = useParams<{ id: string }>();
   const [school, setSchool] = useState<SchoolDetail | null>(null);
@@ -71,7 +71,7 @@ export default function SchoolDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // ── Fetch school ────────────────────────────────────────────
+  // ── Fetch school ─────────────────────────────────────────────
   useEffect(() => {
     if (!id) return;
 
@@ -92,7 +92,6 @@ export default function SchoolDetailPage() {
         return;
       }
 
-      // Normalize array → object
       const normalized: SchoolDetail = {
         ...data,
         school_index: Array.isArray(data.school_index)
@@ -105,7 +104,6 @@ export default function SchoolDetailPage() {
 
       setSchool(normalized);
 
-      // Fetch rank: count schools with a higher sigapp_index
       if (normalized.school_index) {
         const { count } = await sb
           .from("school_index")
@@ -121,7 +119,7 @@ export default function SchoolDetailPage() {
     fetchSchool();
   }, [id]);
 
-  // ── Derived: radar chart data ───────────────────────────────
+  // ── Derived: radar chart data ──────────────────────────────────
   const radarData = useMemo(() => {
     if (!school?.school_index) return [];
     return PILLARS.map(({ key }) => ({
@@ -131,7 +129,7 @@ export default function SchoolDetailPage() {
     }));
   }, [school]);
 
-  // ── Derived: highest pillar ─────────────────────────────────
+  // ── Derived: highest pillar ─────────────────────────────────────
   const highestPillar = useMemo(() => {
     if (!school?.school_index) return null;
     let max = { key: "", score: -1 };
@@ -142,7 +140,7 @@ export default function SchoolDetailPage() {
     return max;
   }, [school]);
 
-  // ── Derived: analysis text ──────────────────────────────────
+  // ── Derived: analysis text ──────────────────────────────────────
   const analysisText = useMemo(() => {
     if (!school?.school_index) return "";
     const si = school.school_index;
@@ -155,7 +153,7 @@ export default function SchoolDetailPage() {
     return `School ${school.school_name} in ${school.kecamatan} received a SIGAPP Index of ${formatIndex(si.sigapp_index)}, placing it in the ${si.priority_tier} priority tier. The primary concern is ${pillarLabel} (score: ${pillarScore}), which indicates structural and academic vulnerabilities requiring immediate attention.`;
   }, [school, highestPillar]);
 
-  // ── Loading skeleton ────────────────────────────────────────
+  // ── Loading skeleton ──────────────────────────────────────────────
   if (loading) {
     return (
       <div className="p-6 lg:p-8 max-w-[1400px]">
@@ -175,7 +173,7 @@ export default function SchoolDetailPage() {
     );
   }
 
-  // ── Error state ─────────────────────────────────────────────
+  // ── Error state ──────────────────────────────────────────────────
   if (error || !school) {
     return (
       <div className="p-6 lg:p-8 max-w-[1400px]">
@@ -197,12 +195,8 @@ export default function SchoolDetailPage() {
   const tier = si?.priority_tier ?? getTierFromIndex(si?.sigapp_index ?? 0);
   const tierColor = TIER_COLORS[tier] ?? "#94A3B8";
 
-  // ══════════════════════════════════════════════════════════════
-  // Render
-  // ══════════════════════════════════════════════════════════════
   return (
     <div className="p-6 lg:p-8 max-w-[1400px]">
-      {/* ── Back link ─────────────────────────────────────────── */}
       <Link
         href="/schools"
         id="back-to-schools"
@@ -211,7 +205,6 @@ export default function SchoolDetailPage() {
         <ArrowLeft size={15} /> All Schools
       </Link>
 
-      {/* ── Header ────────────────────────────────────────────── */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-slate-800 mb-2">
           {school.school_name}
@@ -229,18 +222,13 @@ export default function SchoolDetailPage() {
         </div>
       </div>
 
-      {/* ── Metric cards ──────────────────────────────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-        {/* SIGAPP Index */}
         <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
           <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
             SIGAPP Index
           </p>
           {si ? (
-            <p
-              className="text-4xl font-bold tabular-nums"
-              style={{ color: tierColor }}
-            >
+            <p className="text-4xl font-bold tabular-nums" style={{ color: tierColor }}>
               {formatIndex(si.sigapp_index)}
             </p>
           ) : (
@@ -248,7 +236,6 @@ export default function SchoolDetailPage() {
           )}
         </div>
 
-        {/* Priority Tier */}
         <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
           <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
             Priority Tier
@@ -260,7 +247,6 @@ export default function SchoolDetailPage() {
           )}
         </div>
 
-        {/* Rank */}
         <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
           <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
             Rank
@@ -274,15 +260,11 @@ export default function SchoolDetailPage() {
         </div>
       </div>
 
-      {/* ── Two-column: Pillar Breakdown + Analysis ───────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        {/* LEFT — Pillar Breakdown */}
         <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
           <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wider mb-5">
             Pillar Breakdown
           </h2>
-
-          {/* Pillar rows */}
           <div className="space-y-4 mb-6">
             {PILLARS.map(({ key, weight }) => {
               const score = si?.[key as PillarKey] ?? 0;
@@ -290,92 +272,54 @@ export default function SchoolDetailPage() {
               return (
                 <div key={key}>
                   <div className="flex items-center justify-between text-sm mb-1.5">
-                    <span className="font-medium text-slate-700">
-                      {getPillarName(key)}
-                    </span>
+                    <span className="font-medium text-slate-700">{getPillarName(key)}</span>
                     <div className="flex items-center gap-3">
-                      <span className="text-xs text-slate-400 w-8 text-right">
-                        {weight}%
-                      </span>
-                      <span
-                        className="font-semibold tabular-nums w-10 text-right"
-                        style={{ color: barColor }}
-                      >
+                      <span className="text-xs text-slate-400 w-8 text-right">{weight}%</span>
+                      <span className="font-semibold tabular-nums w-10 text-right" style={{ color: barColor }}>
                         {formatIndex(score)}
                       </span>
                     </div>
                   </div>
-                  {/* Progress bar */}
                   <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
                     <div
                       className="h-full rounded-full transition-all duration-500"
-                      style={{
-                        width: `${Math.min(score * 100, 100)}%`,
-                        backgroundColor: barColor,
-                      }}
+                      style={{ width: `${Math.min(score * 100, 100)}%`, backgroundColor: barColor }}
                     />
                   </div>
                 </div>
               );
             })}
           </div>
-
-          {/* Radar chart */}
           {radarData.length > 0 && (
             <div className="mt-2 -mx-2">
               <ResponsiveContainer width="100%" height={260}>
                 <RadarChart data={radarData} outerRadius="75%">
                   <PolarGrid stroke="#E2E8F0" />
-                  <PolarAngleAxis
-                    dataKey="pillar"
-                    tick={{ fontSize: 11, fill: "#64748B" }}
-                  />
-                  <PolarRadiusAxis
-                    angle={90}
-                    domain={[0, 1]}
-                    tick={{ fontSize: 10, fill: "#94A3B8" }}
-                    tickCount={5}
-                  />
+                  <PolarAngleAxis dataKey="pillar" tick={{ fontSize: 11, fill: "#64748B" }} />
+                  <PolarRadiusAxis angle={90} domain={[0, 1]} tick={{ fontSize: 10, fill: "#94A3B8" }} tickCount={5} />
                   <Tooltip
-                    contentStyle={{
-                      background: "#0D2137",
-                      border: "none",
-                      borderRadius: 8,
-                      fontSize: 12,
-                      color: "#fff",
-                    }}
+                    contentStyle={{ background: "#0D2137", border: "none", borderRadius: 8, fontSize: 12, color: "#fff" }}
                     // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     formatter={(value: any) => [formatIndex(Number(value ?? 0)), "Score"]}
                   />
-                  <Radar
-                    name="Score"
-                    dataKey="score"
-                    stroke="#00B4B4"
-                    fill="#00B4B4"
-                    fillOpacity={0.2}
-                    strokeWidth={2}
-                  />
+                  <Radar name="Score" dataKey="score" stroke="#00B4B4" fill="#00B4B4" fillOpacity={0.2} strokeWidth={2} />
                 </RadarChart>
               </ResponsiveContainer>
             </div>
           )}
         </div>
 
-        {/* RIGHT — Analysis Summary */}
         <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm flex flex-col">
           <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wider mb-4">
             Analysis Summary
           </h2>
-          <p className="text-sm text-slate-600 leading-relaxed flex-1">
-            {analysisText}
-          </p>
+          <p className="text-sm text-slate-600 leading-relaxed flex-1">{analysisText}</p>
           <p className="mt-6 text-xs italic text-slate-400">
             Note: LLM-powered narrative coming in Phase 2.
           </p>
         </div>
       </div>
 
-      {/* ── Key Variables ─────────────────────────────────────── */}
       {pv && (
         <div>
           <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wider mb-4">
@@ -385,17 +329,10 @@ export default function SchoolDetailPage() {
             {KEY_VARS.map(({ key, label, icon: Icon, format }) => {
               const value = pv[key as keyof typeof pv] as number;
               return (
-                <div
-                  key={key}
-                  className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm"
-                >
+                <div key={key} className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
                   <Icon size={18} className="text-teal mb-2" />
-                  <p className="text-xs text-slate-400 font-medium mb-1">
-                    {label}
-                  </p>
-                  <p className="text-lg font-bold text-slate-800 tabular-nums">
-                    {format(value)}
-                  </p>
+                  <p className="text-xs text-slate-400 font-medium mb-1">{label}</p>
+                  <p className="text-lg font-bold text-slate-800 tabular-nums">{format(value)}</p>
                 </div>
               );
             })}

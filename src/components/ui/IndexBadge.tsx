@@ -2,22 +2,22 @@ import { getTierFromIndex, formatIndex } from "@/lib/utils";
 
 interface IndexBadgeProps {
   index?: number;
-  tier?: "CRITICAL" | "HIGH" | "MEDIUM" | "LOW";
+  tier?: "KRITIS" | "TINGGI" | "SEDANG" | "RENDAH";
 }
 
 const tierConfig: Record<
   string,
   { label: string; bg: string; text: string }
 > = {
-  CRITICAL: { label: "Critical", bg: "#EF4444", text: "#FFFFFF" },
-  HIGH: { label: "High", bg: "#F97316", text: "#FFFFFF" },
-  MEDIUM: { label: "Medium", bg: "#EAB308", text: "#422006" },
-  LOW: { label: "Low", bg: "#22C55E", text: "#FFFFFF" },
+  KRITIS: { label: "Kritis",  bg: "#EF4444", text: "#FFFFFF" },
+  TINGGI: { label: "Tinggi",  bg: "#F97316", text: "#FFFFFF" },
+  SEDANG: { label: "Sedang",  bg: "#EAB308", text: "#422006" },
+  RENDAH: { label: "Rendah",  bg: "#22C55E", text: "#FFFFFF" },
 };
 
 export function IndexBadge({ index, tier }: IndexBadgeProps) {
-  const resolvedTier = tier ?? (index !== undefined ? getTierFromIndex(index) : "LOW");
-  const config = tierConfig[resolvedTier] ?? tierConfig.LOW;
+  const resolvedTier = tier ?? (index !== undefined ? getTierFromIndex(index) : "RENDAH");
+  const config = tierConfig[resolvedTier] ?? tierConfig.RENDAH;
 
   return (
     <span
