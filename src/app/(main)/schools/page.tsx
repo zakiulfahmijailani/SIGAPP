@@ -263,10 +263,10 @@ export default function SchoolsPage() {
                       {school.school_index ? (
                         <span
                           className={`
-                            ${school.school_index.priority_tier === "CRITICAL" ? "text-red-600" : ""}
-                            ${school.school_index.priority_tier === "HIGH" ? "text-orange-500" : ""}
-                            ${school.school_index.priority_tier === "MEDIUM" ? "text-yellow-600" : ""}
-                            ${school.school_index.priority_tier === "LOW" ? "text-green-600" : ""}
+                            ${school.school_index.priority_tier === "KRITIS" ? "text-red-600" : ""}
+                            ${school.school_index.priority_tier === "TINGGI" ? "text-orange-500" : ""}
+                            ${school.school_index.priority_tier === "SEDANG" ? "text-yellow-600" : ""}
+                            ${school.school_index.priority_tier === "RENDAH" ? "text-green-600" : ""}
                           `}
                         >
                           {school.school_index.priority_tier}
