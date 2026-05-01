@@ -9,7 +9,7 @@ interface StatsTabProps {
 
 interface DistributionItem {
   label: string;
-  tier: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
+  tier: 'KRITIS' | 'TINGGI' | 'SEDANG' | 'RENDAH';
   color: string;
   count: number;
   total: number;
@@ -19,8 +19,8 @@ export function StatsTab({ schools }: StatsTabProps) {
   const totalSchools = schools.length;
   const withIndex = schools.filter(s => s.school_index);
 
-  const criticalCount = withIndex.filter(s => s.school_index.priority_tier === 'CRITICAL').length;
-  const highCount = withIndex.filter(s => s.school_index.priority_tier === 'HIGH').length;
+  const kritisCount = withIndex.filter(s => s.school_index.priority_tier === 'KRITIS').length;
+  const tinggiCount = withIndex.filter(s => s.school_index.priority_tier === 'TINGGI').length;
 
   const avgIndex = withIndex.length > 0
     ? withIndex.reduce((sum, s) => sum + s.school_index.sigapp_index, 0) / withIndex.length
@@ -29,17 +29,17 @@ export function StatsTab({ schools }: StatsTabProps) {
   const uniqueKecamatan = new Set(schools.map(s => s.kecamatan)).size;
 
   const kpis = [
-    { title: "Total Sekolah",    value: totalSchools.toString(),                   subtitle: "DKI Jakarta (Sampel)",    color: "#0D2137" },
-    { title: "Kritis + Tinggi",  value: (criticalCount + highCount).toString(),    subtitle: "Butuh intervensi segera", color: "#DC2626" },
-    { title: "Rata-rata Index",  value: avgIndex.toFixed(2),                      subtitle: "Skala 0.0 – 1.0",         color: "#00B4B4" },
-    { title: "Kec. Terdampak",   value: uniqueKecamatan.toString(),                subtitle: "Dari 44 kecamatan",       color: "#F97316" },
+    { title: "Total Sekolah",   value: totalSchools.toString(),                subtitle: "DKI Jakarta (Sampel)",    color: "#0D2137" },
+    { title: "Kritis + Tinggi", value: (kritisCount + tinggiCount).toString(), subtitle: "Butuh intervensi segera", color: "#DC2626" },
+    { title: "Rata-rata Index", value: avgIndex.toFixed(2),                   subtitle: "Skala 0.0 – 1.0",         color: "#00B4B4" },
+    { title: "Kec. Terdampak",  value: uniqueKecamatan.toString(),             subtitle: "Dari 44 kecamatan",       color: "#F97316" },
   ];
 
   const distribution: DistributionItem[] = [
-    { label: 'Sangat Prioritas (Kritis)', tier: 'CRITICAL', color: '#DC2626', count: 0, total: totalSchools || 1 },
-    { label: 'Prioritas Tinggi',          tier: 'HIGH',     color: '#F97316', count: 0, total: totalSchools || 1 },
-    { label: 'Prioritas Sedang',          tier: 'MEDIUM',   color: '#EAB308', count: 0, total: totalSchools || 1 },
-    { label: 'Prioritas Rendah',          tier: 'LOW',      color: '#22C55E', count: 0, total: totalSchools || 1 },
+    { label: 'Sangat Prioritas (Kritis)', tier: 'KRITIS', color: '#DC2626', count: 0, total: totalSchools || 1 },
+    { label: 'Prioritas Tinggi',          tier: 'TINGGI', color: '#F97316', count: 0, total: totalSchools || 1 },
+    { label: 'Prioritas Sedang',          tier: 'SEDANG', color: '#EAB308', count: 0, total: totalSchools || 1 },
+    { label: 'Prioritas Rendah',          tier: 'RENDAH', color: '#22C55E', count: 0, total: totalSchools || 1 },
   ].map(item => ({
     ...item,
     count: withIndex.filter(s => s.school_index.priority_tier === item.tier).length,
@@ -47,7 +47,6 @@ export function StatsTab({ schools }: StatsTabProps) {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* KPI CARDS */}
       <section>
         <h3 className="text-xs uppercase tracking-widest text-gray-400 font-medium mb-3">
           Ringkasan Data
@@ -69,7 +68,6 @@ export function StatsTab({ schools }: StatsTabProps) {
         </div>
       </section>
 
-      {/* DISTRIBUTION BARS */}
       <section>
         <h3 className="text-xs uppercase tracking-widest text-gray-400 font-medium mb-3">
           Distribusi Prioritas
