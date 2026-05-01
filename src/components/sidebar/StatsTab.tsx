@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { SchoolWithIndex } from "@/lib/types";
-import { getPriorityClassFromTier } from "@/hooks/useSchools";
 
 interface StatsTabProps {
   schools: SchoolWithIndex[];
@@ -20,7 +19,6 @@ export function StatsTab({ schools }: StatsTabProps) {
   const totalSchools = schools.length;
   const withIndex = schools.filter(s => s.school_index);
 
-  // Gunakan priority_tier dari Supabase
   const kritisCount = withIndex.filter(s => s.school_index.priority_tier === 'KRITIS').length;
   const tinggiCount = withIndex.filter(s => s.school_index.priority_tier === 'TINGGI').length;
 
@@ -31,13 +29,12 @@ export function StatsTab({ schools }: StatsTabProps) {
   const uniqueKecamatan = new Set(schools.map(s => s.kecamatan)).size;
 
   const kpis = [
-    { title: "Total Sekolah",    value: totalSchools.toString(),             subtitle: "DKI Jakarta (Sampel)",    color: "#0D2137" },
+    { title: "Total Sekolah",    value: totalSchools.toString(),                subtitle: "DKI Jakarta (Sampel)",    color: "#0D2137" },
     { title: "Kritis + Tinggi",  value: (kritisCount + tinggiCount).toString(), subtitle: "Butuh intervensi segera", color: "#DC2626" },
-    { title: "Rata-rata Index",  value: avgIndex.toFixed(2),                subtitle: "Skala 0.0 – 1.0",         color: "#00B4B4" },
-    { title: "Kec. Terdampak",   value: uniqueKecamatan.toString(),          subtitle: "Dari 44 kecamatan",       color: "#F97316" },
+    { title: "Rata-rata Index",  value: avgIndex.toFixed(2),                   subtitle: "Skala 0.0 – 1.0",         color: "#00B4B4" },
+    { title: "Kec. Terdampak",   value: uniqueKecamatan.toString(),             subtitle: "Dari 44 kecamatan",       color: "#F97316" },
   ];
 
-  // Distribusi pakai priority_tier dari Supabase
   const distribution: DistributionItem[] = [
     { label: 'Sangat Prioritas (Kritis)', tier: 'KRITIS', color: '#DC2626', count: 0, total: totalSchools || 1 },
     { label: 'Prioritas Tinggi',          tier: 'TINGGI', color: '#F97316', count: 0, total: totalSchools || 1 },
