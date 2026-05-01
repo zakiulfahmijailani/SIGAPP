@@ -19,6 +19,7 @@ export interface SidebarProps {
   showChips: boolean;
   setShowChips: React.Dispatch<React.SetStateAction<boolean>>;
   onUndock: () => void;
+  schools: SchoolWithIndex[];
 }
 
 export function Sidebar({ 
@@ -32,7 +33,8 @@ export function Sidebar({
   setMessages,
   showChips,
   setShowChips,
-  onUndock
+  onUndock,
+  schools
 }: SidebarProps) {
   return (
     <div className="flex flex-col h-full w-full bg-white">
@@ -79,7 +81,7 @@ export function Sidebar({
 
       {/* 3. TAB CONTENT AREA */}
       <div className="flex-1 overflow-y-auto p-4">
-        {activeTab === 'stats' && <StatsTab />}
+        {activeTab === 'stats' && <StatsTab schools={schools} />}
         {activeTab === 'list' && (
           <RankedTab
             selectedSchoolId={selectedSchoolId}

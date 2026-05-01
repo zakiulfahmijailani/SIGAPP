@@ -2,22 +2,45 @@
 
 import { useEffect, useState } from "react";
 
-const KPI_DATA = [
-  { title: "Total Sekolah", value: "500", subtitle: "DKI Jakarta (Sampel)", color: "#0D2137" },
-  { title: "Sangat Prioritas", value: "47", subtitle: "Butuh intervensi segera", color: "#DC2626" },
-  { title: "Rata-rata Index", value: "0.51", subtitle: "Skala 0.0 – 1.0", color: "#00B4B4" },
-  { title: "Kec. Terdampak", value: "32", subtitle: "Dari 44 kecamatan", color: "#F97316" },
-];
+import { SchoolWithIndex } from "@/lib/types";
+import { getPriorityClass } from "@/hooks/useSchools";
 
-const DISTRIBUTION_DATA = [
-  { label: 'Sangat Prioritas', count: 47,  color: '#DC2626', total: 500 },
-  { label: 'Prioritas Tinggi', count: 123, color: '#F97316', total: 500 },
-  { label: 'Prioritas Sedang', count: 187, color: '#EAB308', total: 500 },
-  { label: 'Prioritas Rendah', count: 103, color: '#22C55E', total: 500 },
-  { label: 'Tidak Prioritas',  count: 40,  color: '#94A3B8', total: 500 },
-];
+interface StatsTabProps {
+  schools: SchoolWithIndex[];
+}
 
-export function StatsTab() {
+export function StatsTab({ schools }: StatsTabProps) {
+  // Calculate KPIs
+  const totalSchools = schools.length;
+  const withIndex = schools.filter(s => s.school_index);
+  
+  const sangatPrioritasCount = withIndex.filter(s => s.school_index.sigapp_index >= 0.8).length;
+  
+  const avgIndex = withIndex.length > 0 
+    ? withIndex.reduce((sum, s) => sum + s.school_index.sigapp_index, 0) / withIndex.length
+    : 0;
+
+  const uniqueKecamatan = new Set(schools.map(s => s.kecamatan)).size;
+
+  const kpis = [
+    { title: "Total Sekolah", value: totalSchools.toString(), subtitle: "DKI Jakarta (Sampel)", color: "#0D2137" },
+    { title: "Sangat Prioritas", value: sangatPrioritasCount.toString(), subtitle: "Butuh intervensi segera", color: "#DC2626" },
+    { title: "Rata-rata Index", value: avgIndex.toFixed(2), subtitle: "Skala 0.0 – 1.0", color: "#00B4B4" },
+    { title: "Kec. Terdampak", value: uniqueKecamatan.toString(), subtitle: "Dari 44 kecamatan", color: "#F97316" },
+  ];
+
+  // Calculate Distribution
+  const distribution = [
+    { label: 'Sangat Prioritas', key: 'sangat_prioritas', color: '#DC2626' },
+    { label: 'Prioritas Tinggi',  key: 'prioritas_tinggi', color: '#F97316' },
+    { label: 'Prioritas Sedang',  key: 'prioritas_sedang', color: '#EAB308' },
+    { label: 'Prioritas Rendah',  key: 'prioritas_rendah', color: '#22C55E' },
+    { label: 'Tidak Prioritas',   key: 'tidak_prioritas',  color: '#94A3B8' },
+  ].map(item => {
+    const count = withIndex.filter(s => getPriorityClass(s.school_index.sigapp_index) === item.key).length;
+    return { ...item, count, total: totalSchools || 1 };
+  });
+
   return (
     <div className="flex flex-col gap-6">
       {/* SECTION 1: KPI CARDS */}
@@ -26,7 +49,7 @@ export function StatsTab() {
           Ringkasan Data
         </h3>
         <div className="grid grid-cols-2 gap-3">
-          {KPI_DATA.map((kpi, idx) => (
+          {kpis.map((kpi, idx) => (
             <div key={idx} className="bg-white rounded-lg border border-gray-100 shadow-sm p-3">
               <h4 className="text-[10px] text-gray-400 uppercase tracking-wide mb-1 truncate" title={kpi.title}>
                 {kpi.title}
@@ -48,7 +71,7 @@ export function StatsTab() {
           Distribusi Prioritas
         </h3>
         <div>
-          {DISTRIBUTION_DATA.map((item, idx) => (
+          {distribution.map((item, idx) => (
             <AnimatedBar key={idx} item={item} index={idx} />
           ))}
         </div>
@@ -61,7 +84,7 @@ function AnimatedBar({
   item, 
   index 
 }: { 
-  item: typeof DISTRIBUTION_DATA[0]; 
+  item: any; 
   index: number;
 }) {
   const [width, setWidth] = useState(0);

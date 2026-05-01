@@ -165,6 +165,7 @@ export default function DashboardRoot() {
             showChips={showChips}
             setShowChips={setShowChips}
             onUndock={() => handleChatStateChange('expanded')}
+            schools={schools}
           />
         </aside>
 
