@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
 import { SchoolWithIndex } from "@/lib/types";
-import { getPriorityClass } from "@/hooks/useSchools";
+import { getPriorityClassFromTier } from "@/hooks/useSchools";
 
 interface StatsTabProps {
   schools: SchoolWithIndex[];
@@ -11,47 +10,47 @@ interface StatsTabProps {
 
 interface DistributionItem {
   label: string;
-  key: string;
+  tier: string;
   color: string;
   count: number;
   total: number;
 }
 
 export function StatsTab({ schools }: StatsTabProps) {
-  // Calculate KPIs
   const totalSchools = schools.length;
   const withIndex = schools.filter(s => s.school_index);
-  
-  const sangatPrioritasCount = withIndex.filter(s => s.school_index.sigapp_index >= 0.8).length;
-  
-  const avgIndex = withIndex.length > 0 
+
+  // Gunakan priority_tier dari Supabase
+  const kritisCount = withIndex.filter(s => s.school_index.priority_tier === 'KRITIS').length;
+  const tinggiCount = withIndex.filter(s => s.school_index.priority_tier === 'TINGGI').length;
+
+  const avgIndex = withIndex.length > 0
     ? withIndex.reduce((sum, s) => sum + s.school_index.sigapp_index, 0) / withIndex.length
     : 0;
 
   const uniqueKecamatan = new Set(schools.map(s => s.kecamatan)).size;
 
   const kpis = [
-    { title: "Total Sekolah", value: totalSchools.toString(), subtitle: "DKI Jakarta (Sampel)", color: "#0D2137" },
-    { title: "Sangat Prioritas", value: sangatPrioritasCount.toString(), subtitle: "Butuh intervensi segera", color: "#DC2626" },
-    { title: "Rata-rata Index", value: avgIndex.toFixed(2), subtitle: "Skala 0.0 – 1.0", color: "#00B4B4" },
-    { title: "Kec. Terdampak", value: uniqueKecamatan.toString(), subtitle: "Dari 44 kecamatan", color: "#F97316" },
+    { title: "Total Sekolah",    value: totalSchools.toString(),             subtitle: "DKI Jakarta (Sampel)",    color: "#0D2137" },
+    { title: "Kritis + Tinggi",  value: (kritisCount + tinggiCount).toString(), subtitle: "Butuh intervensi segera", color: "#DC2626" },
+    { title: "Rata-rata Index",  value: avgIndex.toFixed(2),                subtitle: "Skala 0.0 – 1.0",         color: "#00B4B4" },
+    { title: "Kec. Terdampak",   value: uniqueKecamatan.toString(),          subtitle: "Dari 44 kecamatan",       color: "#F97316" },
   ];
 
-  // Calculate Distribution
+  // Distribusi pakai priority_tier dari Supabase
   const distribution: DistributionItem[] = [
-    { label: 'Sangat Prioritas', key: 'sangat_prioritas', color: '#DC2626', count: 0, total: totalSchools || 1 },
-    { label: 'Prioritas Tinggi',  key: 'prioritas_tinggi', color: '#F97316', count: 0, total: totalSchools || 1 },
-    { label: 'Prioritas Sedang',  key: 'prioritas_sedang', color: '#EAB308', count: 0, total: totalSchools || 1 },
-    { label: 'Prioritas Rendah',  key: 'prioritas_rendah', color: '#22C55E', count: 0, total: totalSchools || 1 },
-    { label: 'Tidak Prioritas',   key: 'tidak_prioritas',  color: '#94A3B8', count: 0, total: totalSchools || 1 },
+    { label: 'Sangat Prioritas (Kritis)', tier: 'KRITIS', color: '#DC2626', count: 0, total: totalSchools || 1 },
+    { label: 'Prioritas Tinggi',          tier: 'TINGGI', color: '#F97316', count: 0, total: totalSchools || 1 },
+    { label: 'Prioritas Sedang',          tier: 'SEDANG', color: '#EAB308', count: 0, total: totalSchools || 1 },
+    { label: 'Prioritas Rendah',          tier: 'RENDAH', color: '#22C55E', count: 0, total: totalSchools || 1 },
   ].map(item => ({
     ...item,
-    count: withIndex.filter(s => getPriorityClass(s.school_index.sigapp_index) === item.key).length,
+    count: withIndex.filter(s => s.school_index.priority_tier === item.tier).length,
   }));
 
   return (
     <div className="flex flex-col gap-6">
-      {/* SECTION 1: KPI CARDS */}
+      {/* KPI CARDS */}
       <section>
         <h3 className="text-xs uppercase tracking-widest text-gray-400 font-medium mb-3">
           Ringkasan Data
@@ -73,7 +72,7 @@ export function StatsTab({ schools }: StatsTabProps) {
         </div>
       </section>
 
-      {/* SECTION 2: DISTRIBUTION BARS */}
+      {/* DISTRIBUTION BARS */}
       <section>
         <h3 className="text-xs uppercase tracking-widest text-gray-400 font-medium mb-3">
           Distribusi Prioritas
@@ -88,22 +87,20 @@ export function StatsTab({ schools }: StatsTabProps) {
   );
 }
 
-function AnimatedBar({ 
-  item, 
-  index 
-}: { 
-  item: DistributionItem; 
+function AnimatedBar({
+  item,
+  index,
+}: {
+  item: DistributionItem;
   index: number;
 }) {
   const [width, setWidth] = useState(0);
 
   useEffect(() => {
     const targetWidth = (item.count / item.total) * 100;
-    
     const timer = setTimeout(() => {
       setWidth(targetWidth);
     }, index * 100 + 50);
-
     return () => clearTimeout(timer);
   }, [item.count, item.total, index]);
 
@@ -114,7 +111,7 @@ function AnimatedBar({
         <span className="text-xs text-gray-400">{item.count}</span>
       </div>
       <div className="bg-gray-100 rounded-full h-2 w-full overflow-hidden">
-        <div 
+        <div
           className="h-full rounded-full transition-all duration-700 ease-out"
           style={{ width: `${width}%`, backgroundColor: item.color }}
         />

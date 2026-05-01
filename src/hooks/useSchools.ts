@@ -2,7 +2,18 @@ import { useEffect, useState } from "react";
 import { getSupabase } from "@/lib/supabase";
 import { SchoolWithIndex } from "@/lib/types";
 
-// Helper to determine the priority class based on the 0.0-1.0 index
+// Map Supabase priority_tier (KRITIS/TINGGI/SEDANG/RENDAH) to CSS key
+export function getPriorityClassFromTier(tier: string): string {
+  switch (tier) {
+    case 'KRITIS': return 'sangat_prioritas';
+    case 'TINGGI': return 'prioritas_tinggi';
+    case 'SEDANG': return 'prioritas_sedang';
+    case 'RENDAH': return 'prioritas_rendah';
+    default:       return 'tidak_prioritas';
+  }
+}
+
+// Fallback: calculate from raw index (absolute thresholds)
 export function getPriorityClass(index: number): string {
   if (index >= 0.8) return 'sangat_prioritas';
   if (index >= 0.6) return 'prioritas_tinggi';
