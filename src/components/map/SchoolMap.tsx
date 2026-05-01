@@ -5,23 +5,14 @@ import { MapContainer, TileLayer, CircleMarker, Tooltip, useMap } from "react-le
 import "leaflet/dist/leaflet.css";
 import { fixLeafletIcons } from "./LeafletFix";
 import { SchoolWithIndex } from "@/lib/types";
-import { getPriorityClass } from "@/hooks/useSchools";
+import { getTierFromIndex, TIER_BG_COLORS, PriorityTier } from "@/lib/utils";
 import L from "leaflet";
 
-const TIER_COLORS: Record<string, string> = {
-  sangat_prioritas: "#DC2626",
-  prioritas_tinggi: "#F97316",
-  prioritas_sedang: "#EAB308",
-  prioritas_rendah: "#22C55E",
-  tidak_prioritas: "#94A3B8",
-};
-
-const TIER_LABELS: Record<string, string> = {
-  sangat_prioritas: "Sangat Prioritas",
-  prioritas_tinggi: "Prioritas Tinggi",
-  prioritas_sedang: "Prioritas Sedang",
-  prioritas_rendah: "Prioritas Rendah",
-  tidak_prioritas: "Tidak Prioritas",
+const TIER_LABELS: Record<PriorityTier, string> = {
+  KRITIS: "Sangat Prioritas (Kritis)",
+  TINGGI: "Prioritas Tinggi",
+  SEDANG: "Prioritas Sedang",
+  RENDAH: "Prioritas Rendah",
 };
 
 const CITY_LABELS = [
@@ -67,11 +58,11 @@ function LegendControl() {
 
       let html = `<h4 style="margin: 0 0 8px 0; font-weight: bold; color: #00B4B4;">Prioritas Intervensi</h4>`;
       
-      const keys = ["sangat_prioritas", "prioritas_tinggi", "prioritas_sedang", "prioritas_rendah", "tidak_prioritas"];
+      const keys: PriorityTier[] = ["KRITIS", "TINGGI", "SEDANG", "RENDAH"];
       for (const key of keys) {
         html += `
           <div style="display: flex; align-items: center; margin-bottom: 4px;">
-            <span style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background-color: ${TIER_COLORS[key]}; margin-right: 8px;"></span>
+            <span style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background-color: ${TIER_BG_COLORS[key]}; margin-right: 8px;"></span>
             ${TIER_LABELS[key]}
           </div>
         `;
@@ -170,8 +161,8 @@ export default function SchoolMap({ schools, onSchoolClick, selectedSchoolId, lo
           if (!school.latitude || !school.longitude || !school.school_index) return null;
 
           const isSelected = selectedSchoolId === school.id;
-          const priorityClass = getPriorityClass(school.school_index.sigapp_index);
-          const color = TIER_COLORS[priorityClass] || "#94A3B8";
+          const tier = (school.school_index.priority_tier || getTierFromIndex(school.school_index.sigapp_index)) as PriorityTier;
+          const color = TIER_BG_COLORS[tier] || "#94A3B8";
 
           return (
             <CircleMarker

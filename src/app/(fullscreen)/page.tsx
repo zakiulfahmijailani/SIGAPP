@@ -6,7 +6,8 @@ import Link from "next/link";
 import { Sidebar } from "@/components/sidebar/Sidebar";
 import { FilterBar } from "@/components/ui/FilterBar";
 import ChatWidget, { ChatState, Message } from "@/components/chat/ChatWidget";
-import { useSchools, getPriorityClass } from "@/hooks/useSchools";
+import { useSchools } from "@/hooks/useSchools";
+import { getTierFromIndex } from "@/lib/utils";
 import dynamic from 'next/dynamic';
 import type { Map as LeafletMap } from 'leaflet';
 import { SchoolWithIndex } from "@/lib/types";
@@ -56,7 +57,7 @@ export default function DashboardRoot() {
       return (
         (kotaFilter === 'all' || sKota === kotaFilter) &&
         (jenjangFilter === 'all' || s.jenjang === jenjangFilter) &&
-        (prioritasFilter === 'all' || getPriorityClass(s.school_index?.sigapp_index || 0) === prioritasFilter)
+        (prioritasFilter === 'all' || (s.school_index?.priority_tier || getTierFromIndex(s.school_index?.sigapp_index || 0)) === prioritasFilter)
       );
     }),
     [schools, kotaFilter, jenjangFilter, prioritasFilter]

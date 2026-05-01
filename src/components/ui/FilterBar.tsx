@@ -81,11 +81,10 @@ export function FilterBar({
             className="text-sm text-gray-700 font-medium border-none outline-none bg-transparent cursor-pointer focus:ring-0 min-w-fit p-0"
           >
             <option value="all">Semua</option>
-            <option value="sangat_prioritas">🔴 Sangat</option>
-            <option value="prioritas_tinggi">🟠 Tinggi</option>
-            <option value="prioritas_sedang">🟡 Sedang</option>
-            <option value="prioritas_rendah">🟢 Rendah</option>
-            <option value="tidak_prioritas">⚪ Tidak</option>
+            <option value="KRITIS">🔴 Kritis</option>
+            <option value="TINGGI">🟠 Tinggi</option>
+            <option value="SEDANG">🟡 Sedang</option>
+            <option value="RENDAH">🟢 Rendah</option>
           </select>
         </div>
 
