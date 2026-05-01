@@ -2,6 +2,7 @@
 
 import { useState, useRef, useMemo } from "react";
 import { ChevronLeft } from "lucide-react";
+import Link from "next/link";
 import { Sidebar } from "@/components/sidebar/Sidebar";
 import { FilterBar } from "@/components/ui/FilterBar";
 import ChatWidget, { ChatState, Message } from "@/components/chat/ChatWidget";
@@ -25,7 +26,7 @@ const SchoolMap = dynamic(
   }
 );
 
-export default function DashboardSkeleton() {
+export default function DashboardRoot() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeTab, setActiveTab] = useState<'stats'|'list'|'chat'>('stats');
   const [selectedSchoolId, setSelectedSchoolId] = useState<string | null>(null);
@@ -50,8 +51,6 @@ export default function DashboardSkeleton() {
 
   const filteredSchools = useMemo(() => 
     schools.filter(s => {
-      // Note: 'kota' is not natively on the School model but requested by the prompt.
-      // We added it as an optional parameter to lib/types.ts to satisfy ESLint.
       const sKota = s.kota;
       
       return (
@@ -88,18 +87,15 @@ export default function DashboardSkeleton() {
 
   const handleChatStateChange = (state: ChatState) => {
     setChatState(state);
-    // When docking: auto switch sidebar to chat tab + open sidebar
     if (state === 'docked') {
       setActiveTab('chat');
       setSidebarOpen(true);
     }
-    // When undocking: switch sidebar back to stats tab
     if (state === 'expanded' && chatState === 'docked') {
       setActiveTab('stats');
     }
   };
 
-  // Today's date formatted as requested
   const today = new Date().toLocaleDateString('id-ID', { dateStyle: 'long' });
 
   return (
@@ -107,10 +103,19 @@ export default function DashboardSkeleton() {
       <div className="flex flex-col h-screen w-full overflow-hidden bg-slate-50">
       {/* 1. NAVBAR */}
       <nav className="h-14 bg-[#0D2137] flex-shrink-0 flex items-center justify-between px-6 z-50 shadow-md">
-        <div className="flex items-baseline gap-3">
-          <span className="text-[#00B4B4] font-bold text-xl tracking-wide">SIGAPP</span>
-          <span className="text-white/50 text-sm font-medium">Jakarta Dashboard</span>
+        <div className="flex items-center gap-8">
+          <div className="flex items-baseline gap-3">
+            <span className="text-[#00B4B4] font-bold text-xl tracking-wide">SIGAPP</span>
+            <span className="text-white/50 text-sm font-medium">Jakarta Dashboard</span>
+          </div>
+
+          <div className="flex items-center gap-6 border-l border-white/10 pl-8 ml-2">
+            <Link href="/schools" className="text-white/60 hover:text-[#00B4B4] text-xs uppercase tracking-widest font-semibold transition-colors">Schools</Link>
+            <Link href="/insights" className="text-white/60 hover:text-[#00B4B4] text-xs uppercase tracking-widest font-semibold transition-colors">Insights</Link>
+            <Link href="/about" className="text-white/60 hover:text-[#00B4B4] text-xs uppercase tracking-widest font-semibold transition-colors">About</Link>
+          </div>
         </div>
+        
         <div className="text-white/80 text-sm font-medium">
           {today}
         </div>
