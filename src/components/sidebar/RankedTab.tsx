@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { Search, School as SchoolIcon } from "lucide-react";
 import { useSchools } from "@/hooks/useSchools";
 import { SchoolWithIndex } from "@/lib/types";
-import { getTierFromIndex, getTierColor } from "@/lib/utils";
+import { getTierFromIndex, getTierColor, PriorityTier } from "@/lib/utils";
 
 export interface RankedTabProps {
   selectedSchoolId: string | null;
@@ -72,7 +72,7 @@ export function RankedTab({ selectedSchoolId, onSchoolSelect }: RankedTabProps) 
             const isSelected = selectedSchoolId === school.id;
             const idxVal = school.school_index?.sigapp_index || 0;
             const tier = school.school_index?.priority_tier || getTierFromIndex(idxVal);
-            const badgeColors = getTierColor(tier as any);
+            const badgeColors = getTierColor(tier as PriorityTier);
 
             return (
               <div
