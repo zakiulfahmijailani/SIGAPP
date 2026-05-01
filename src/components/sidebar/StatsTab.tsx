@@ -9,6 +9,14 @@ interface StatsTabProps {
   schools: SchoolWithIndex[];
 }
 
+interface DistributionItem {
+  label: string;
+  key: string;
+  color: string;
+  count: number;
+  total: number;
+}
+
 export function StatsTab({ schools }: StatsTabProps) {
   // Calculate KPIs
   const totalSchools = schools.length;
@@ -30,16 +38,16 @@ export function StatsTab({ schools }: StatsTabProps) {
   ];
 
   // Calculate Distribution
-  const distribution = [
-    { label: 'Sangat Prioritas', key: 'sangat_prioritas', color: '#DC2626' },
-    { label: 'Prioritas Tinggi',  key: 'prioritas_tinggi', color: '#F97316' },
-    { label: 'Prioritas Sedang',  key: 'prioritas_sedang', color: '#EAB308' },
-    { label: 'Prioritas Rendah',  key: 'prioritas_rendah', color: '#22C55E' },
-    { label: 'Tidak Prioritas',   key: 'tidak_prioritas',  color: '#94A3B8' },
-  ].map(item => {
-    const count = withIndex.filter(s => getPriorityClass(s.school_index.sigapp_index) === item.key).length;
-    return { ...item, count, total: totalSchools || 1 };
-  });
+  const distribution: DistributionItem[] = [
+    { label: 'Sangat Prioritas', key: 'sangat_prioritas', color: '#DC2626', count: 0, total: totalSchools || 1 },
+    { label: 'Prioritas Tinggi',  key: 'prioritas_tinggi', color: '#F97316', count: 0, total: totalSchools || 1 },
+    { label: 'Prioritas Sedang',  key: 'prioritas_sedang', color: '#EAB308', count: 0, total: totalSchools || 1 },
+    { label: 'Prioritas Rendah',  key: 'prioritas_rendah', color: '#22C55E', count: 0, total: totalSchools || 1 },
+    { label: 'Tidak Prioritas',   key: 'tidak_prioritas',  color: '#94A3B8', count: 0, total: totalSchools || 1 },
+  ].map(item => ({
+    ...item,
+    count: withIndex.filter(s => getPriorityClass(s.school_index.sigapp_index) === item.key).length,
+  }));
 
   return (
     <div className="flex flex-col gap-6">
@@ -84,7 +92,7 @@ function AnimatedBar({
   item, 
   index 
 }: { 
-  item: any; 
+  item: DistributionItem; 
   index: number;
 }) {
   const [width, setWidth] = useState(0);
@@ -92,10 +100,9 @@ function AnimatedBar({
   useEffect(() => {
     const targetWidth = (item.count / item.total) * 100;
     
-    // Delay each bar by index * 100ms
     const timer = setTimeout(() => {
       setWidth(targetWidth);
-    }, index * 100 + 50); // Add a tiny 50ms initial delay so the animation feels right
+    }, index * 100 + 50);
 
     return () => clearTimeout(timer);
   }, [item.count, item.total, index]);
