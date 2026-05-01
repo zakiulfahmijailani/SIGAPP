@@ -4,6 +4,7 @@ import { useState, useRef, useMemo } from "react";
 import { ChevronLeft } from "lucide-react";
 import { Sidebar } from "@/components/sidebar/Sidebar";
 import { FilterBar } from "@/components/ui/FilterBar";
+import ChatWidget, { ChatState, Message } from "@/components/chat/ChatWidget";
 import { useSchools, getPriorityClass } from "@/hooks/useSchools";
 import dynamic from 'next/dynamic';
 import type { Map as LeafletMap } from 'leaflet';
@@ -28,6 +29,16 @@ export default function DashboardSkeleton() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeTab, setActiveTab] = useState<'stats'|'list'|'chat'>('stats');
   const [selectedSchoolId, setSelectedSchoolId] = useState<string | null>(null);
+  const [chatState, setChatState] = useState<ChatState>('bubble');
+
+  // Chat State
+  const [messages, setMessages] = useState<Message[]>([
+    { id: '0', role: 'bot', 
+      text: "Halo! Saya asisten SIGAPP. Pilih pertanyaan di bawah atau ketik sendiri.", 
+      timestamp: new Date() 
+    }
+  ]);
+  const [showChips, setShowChips] = useState(true);
 
   // Filters
   const [kotaFilter, setKotaFilter] = useState('all');
@@ -75,11 +86,25 @@ export default function DashboardSkeleton() {
     setSidebarOpen(true);
   };
 
+  const handleChatStateChange = (state: ChatState) => {
+    setChatState(state);
+    // When docking: auto switch sidebar to chat tab + open sidebar
+    if (state === 'docked') {
+      setActiveTab('chat');
+      setSidebarOpen(true);
+    }
+    // When undocking: switch sidebar back to stats tab
+    if (state === 'expanded' && chatState === 'docked') {
+      setActiveTab('stats');
+    }
+  };
+
   // Today's date formatted as requested
   const today = new Date().toLocaleDateString('id-ID', { dateStyle: 'long' });
 
   return (
-    <div className="flex flex-col h-screen w-full overflow-hidden bg-slate-50">
+    <>
+      <div className="flex flex-col h-screen w-full overflow-hidden bg-slate-50">
       {/* 1. NAVBAR */}
       <nav className="h-14 bg-[#0D2137] flex-shrink-0 flex items-center justify-between px-6 z-50 shadow-md">
         <div className="flex items-baseline gap-3">
@@ -129,6 +154,12 @@ export default function DashboardSkeleton() {
             onClose={() => setSidebarOpen(false)}
             selectedSchoolId={selectedSchoolId}
             onSchoolSelect={handleSchoolSelect}
+            chatState={chatState}
+            messages={messages}
+            setMessages={setMessages}
+            showChips={showChips}
+            setShowChips={setShowChips}
+            onUndock={() => handleChatStateChange('expanded')}
           />
         </aside>
 
@@ -144,6 +175,16 @@ export default function DashboardSkeleton() {
         )}
 
       </main>
-    </div>
+      </div>
+
+      <ChatWidget 
+        chatState={chatState} 
+        onChatStateChange={handleChatStateChange}
+        messages={messages}
+        setMessages={setMessages}
+        showChips={showChips}
+        setShowChips={setShowChips}
+      />
+    </>
   );
 }
