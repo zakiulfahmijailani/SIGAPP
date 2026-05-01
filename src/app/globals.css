@@ -59,3 +59,25 @@ body {
   background: rgba(255, 255, 255, 0.15);
   border-radius: 2px;
 }
+
+/* Leaflet Overrides */
+.city-label-tooltip {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  font-weight: 700 !important;
+  font-size: 14px !important;
+  color: #1E293B !important;
+  text-shadow: 2px 2px 0px #fff, -2px -2px 0px #fff, 2px -2px 0px #fff, -2px 2px 0px #fff !important;
+}
+
+.city-label-tooltip::before {
+  display: none !important;
+}
+
+.info.legend {
+  padding: 12px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
