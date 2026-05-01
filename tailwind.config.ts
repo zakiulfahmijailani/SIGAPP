@@ -8,9 +8,20 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ["var(--font-inter)", "Inter", "system-ui", "sans-serif"],
+      },
       colors: {
-        background: "var(--background)",
-        foreground: "var(--foreground)",
+        navy: {
+          DEFAULT: "#0D2137",
+          light: "#132D47",
+        },
+        teal: {
+          DEFAULT: "#00B4B4",
+          muted: "#009E9E",
+        },
+        surface: "#F4F6F9",
+        card: "#FFFFFF",
       },
     },
   },
