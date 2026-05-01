@@ -130,10 +130,10 @@ export default function InsightsPage() {
       weakestPillarName = `${getPillarName(avgs[0].key)} (${formatIndex(avgs[0].avg)})`;
     }
 
-    // Students in Critical+High schools
+    // Students in Kritis+Tinggi schools
     let atRiskStudents = 0;
     for (const s of schools) {
-      if (s.school_index && (s.school_index.priority_tier === "CRITICAL" || s.school_index.priority_tier === "HIGH")) {
+      if (s.school_index && (s.school_index.priority_tier === "KRITIS" || s.school_index.priority_tier === "TINGGI")) {
         atRiskStudents += s.total_students || 0;
       }
     }
@@ -255,7 +255,7 @@ export default function InsightsPage() {
                 <div className="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600">
                   <Users size={20} />
                 </div>
-                <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Students in Critical/High</h3>
+                <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Siswa di Sekolah Kritis/Tinggi</h3>
               </div>
               <p className="text-xl font-bold text-slate-800 tabular-nums">{stats.studentsAtRisk.toLocaleString()}</p>
             </div>
