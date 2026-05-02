@@ -105,9 +105,9 @@ export default function DashboardRoot() {
       {/* 1. NAVBAR */}
       <nav className="h-14 bg-[#0D2137] flex-shrink-0 flex items-center justify-between px-6 z-50 shadow-md">
         <div className="flex items-center gap-8">
-          <div className="flex items-baseline gap-3">
-            <span className="text-[#00B4B4] font-bold text-xl tracking-wide">SIGAPP</span>
-            <span className="text-white/50 text-sm font-medium">Jakarta Dashboard</span>
+          <div className="flex items-center gap-3">
+            <img src="/logo-dark.png" alt="SIGAPP Logo" className="h-8 w-auto" />
+            <span className="text-white/30 text-xs font-medium border-l border-white/10 pl-3 ml-1">Jakarta Dashboard</span>
           </div>
 
           <div className="flex items-center gap-6 border-l border-white/10 pl-8 ml-2">

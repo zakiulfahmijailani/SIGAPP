@@ -18,42 +18,8 @@ const navItems = [
 
 function SigappLogo() {
   return (
-    <div className="flex items-center gap-2.5 px-5 py-6">
-      {/* Inline SVG diamond/layers icon */}
-      <svg
-        width="28"
-        height="28"
-        viewBox="0 0 28 28"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        aria-hidden="true"
-      >
-        <path
-          d="M14 2L26 14L14 26L2 14L14 2Z"
-          fill="#00B4B4"
-          fillOpacity="0.15"
-          stroke="#00B4B4"
-          strokeWidth="1.5"
-        />
-        <path
-          d="M14 7L22 14L14 21L6 14L14 7Z"
-          fill="#00B4B4"
-          fillOpacity="0.35"
-          stroke="#00B4B4"
-          strokeWidth="1.2"
-        />
-        <path
-          d="M14 11L18 14L14 17L10 14L14 11Z"
-          fill="#00B4B4"
-          fillOpacity="0.7"
-        />
-      </svg>
-      <span
-        className="text-xl font-bold tracking-wide"
-        style={{ color: "#00B4B4" }}
-      >
-        SIGAPP
-      </span>
+    <div className="flex items-center gap-3 px-5 py-6">
+      <img src="/logo-dark.png" alt="SIGAPP Logo" className="h-9 w-auto" />
     </div>
   );
 }
