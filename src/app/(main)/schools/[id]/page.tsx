@@ -26,6 +26,12 @@ import { getSupabase } from "@/lib/supabase";
 import { SchoolDetail } from "@/lib/types";
 import { formatIndex, getTierFromIndex, getPillarName, TIER_BG_COLORS, PriorityTier } from "@/lib/utils";
 import { IndexBadge } from "@/components/ui/IndexBadge";
+import dynamic from 'next/dynamic';
+
+const SchoolSankeyChart = dynamic(
+  () => import('@/components/charts/SchoolSankeyChart'),
+  { ssr: false, loading: () => <div className="h-[480px] skeleton-shimmer rounded-xl" /> }
+)
 
 // ── Pillar config ────────────────────────────────────────────────
 const PILLARS = [
@@ -327,6 +333,21 @@ export default function SchoolDetailPage() {
                 </div>
               );
             })}
+          </div>
+        </div>
+      )}
+
+      {si && pv && (
+        <div className="mt-8">
+          <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wider mb-2">
+            Data Flow — Transparansi Metodologi
+          </h2>
+          <p className="text-xs text-slate-400 mb-4">
+            Alur nilai dari sumber data → variabel → pilar → SIGAPP Index untuk sekolah ini.
+            Hover pada node atau link untuk melihat nilai aktual.
+          </p>
+          <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm overflow-hidden">
+            <SchoolSankeyChart schoolIndex={si} pillarVariables={pv} />
           </div>
         </div>
       )}
