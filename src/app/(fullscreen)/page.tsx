@@ -81,9 +81,7 @@ export default function DashboardRoot() {
   };
 
   const handleMapDotClick = (school: SchoolWithIndex) => {
-    setSelectedSchoolId(school.id);
-    setActiveTab('list');
-    setSidebarOpen(true);
+    handleSchoolSelect(school);
   };
 
   const handleChatStateChange = (state: ChatState) => {

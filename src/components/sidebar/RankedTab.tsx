@@ -17,13 +17,22 @@ export function RankedTab({ selectedSchoolId, onSchoolSelect }: RankedTabProps) 
   const itemRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   useEffect(() => {
-    if (selectedSchoolId && itemRefs.current[selectedSchoolId]) {
-      itemRefs.current[selectedSchoolId]?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'nearest'
-      });
+    if (selectedSchoolId) {
+      // If the selected school is not in the current filtered list, clear the query
+      const isVisible = filteredAndSorted.some(s => s.id === selectedSchoolId);
+      if (!isVisible) {
+        setQuery("");
+      }
+
+      // Scroll to the item
+      if (itemRefs.current[selectedSchoolId]) {
+        itemRefs.current[selectedSchoolId]?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest'
+        });
+      }
     }
-  }, [selectedSchoolId]);
+  }, [selectedSchoolId, filteredAndSorted]);
 
   // Filter and sort schools
   const filteredAndSorted = schools
@@ -140,6 +149,16 @@ export function RankedTab({ selectedSchoolId, onSchoolSelect }: RankedTabProps) 
                     <p className="text-xs text-gray-500 italic mt-3">
                       {getSummaryText(school.school_index)}
                     </p>
+
+                    {/* DETAIL BUTTON */}
+                    <div className="mt-4">
+                      <a
+                        href={`/schools/${school.id}`}
+                        className="flex items-center justify-center gap-2 w-full py-2 bg-[#0D2137] text-white rounded-lg text-xs font-semibold hover:bg-[#1a3a5a] transition-colors"
+                      >
+                        Lihat Profil Lengkap
+                      </a>
+                    </div>
                   </div>
                 </div>
               </div>
