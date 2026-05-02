@@ -342,21 +342,13 @@ export default function SchoolDetailPage() {
           <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wider mb-2">
             Data Flow — Transparansi Metodologi
           </h2>
-          {pv ? (
-            <>
-              <p className="text-xs text-slate-400 mb-4">
-                Alur nilai dari sumber data → variabel → pilar → SIGAPP Index untuk sekolah ini.
-                Hover pada node atau link untuk melihat nilai aktual.
-              </p>
-              <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm overflow-hidden">
-                <SchoolSankeyChart schoolIndex={si} pillarVariables={pv} />
-              </div>
-            </>
-          ) : (
-            <div className="bg-slate-50 rounded-xl border border-dashed border-slate-200 p-12 text-center">
-              <p className="text-sm text-slate-400">Data variabel pilar tidak tersedia untuk sekolah ini.</p>
-            </div>
-          )}
+          <p className="text-xs text-slate-400 mb-4">
+            Alur nilai dari sumber data → variabel → pilar → SIGAPP Index untuk sekolah ini.
+            Hover pada node atau link untuk melihat nilai aktual.
+          </p>
+          <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm overflow-hidden">
+            <SchoolSankeyChart schoolIndex={si} pillarVariables={pv ?? null} />
+          </div>
         </div>
       )}
     </div>

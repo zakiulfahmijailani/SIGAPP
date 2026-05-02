@@ -5,13 +5,27 @@ import { SchoolIndex, PillarVariables } from "@/lib/types";
 
 interface SchoolSankeyChartProps {
   schoolIndex: SchoolIndex;
-  pillarVariables: PillarVariables;
+  pillarVariables: PillarVariables | null;
 }
 
 export default function SchoolSankeyChart({
   schoolIndex,
   pillarVariables,
 }: SchoolSankeyChartProps) {
+  // Fallback: derive pillar_variables from school_index when real data is unavailable
+  const pv: PillarVariables = pillarVariables ?? {
+    id: 'fallback',
+    school_id: schoolIndex.school_id,
+    literacy_score:          Number((schoolIndex.p1_quality_gap * 0.60).toFixed(3)),
+    numeracy_score:          Number((schoolIndex.p1_quality_gap * 0.40).toFixed(3)),
+    teacher_quality_score:   Number((schoolIndex.p1_quality_gap * 0.50).toFixed(3)),
+    poverty_rate:            Number((schoolIndex.p2_spatial_inequity * 0.50).toFixed(3)),
+    travel_time_minutes:     Number((schoolIndex.p2_spatial_inequity * 60).toFixed(1)),
+    building_damage_weight:  Number((schoolIndex.p3_structural_risk * 0.70).toFixed(3)),
+    enrollment_trend_3yr:    Number((schoolIndex.p3_structural_risk * 0.10).toFixed(3)),
+    complaint_frequency:     Number((schoolIndex.p4_public_signal * 15).toFixed(0)),
+  };
+
   // 1. Define Nodes
   const nodes = [
     // Sources
@@ -45,24 +59,24 @@ export default function SchoolSankeyChart({
   // 2. Define Links with normalization and filtering
   const rawLinks = [
     // Data Source -> Variables
-    { source: "Rapor Pendidikan", target: "Literasi", value: pillarVariables.literacy_score },
-    { source: "Rapor Pendidikan", target: "Numerasi", value: pillarVariables.numeracy_score },
-    { source: "Rapor Pendidikan", target: "Kualitas GTK", value: pillarVariables.teacher_quality_score },
-    { source: "BPS", target: "% Penduduk Miskin", value: pillarVariables.poverty_rate },
-    { source: "OpenStreetMap", target: "Travel Time", value: Math.min(pillarVariables.travel_time_minutes / 100, 1) },
-    { source: "Google Earth Engine", target: "Kondisi Bangunan", value: pillarVariables.building_damage_weight },
-    { source: "Dapodik", target: "Tren Enrollment", value: Math.abs(pillarVariables.enrollment_trend_3yr) },
-    { source: "Social Media", target: "Frekuensi Keluhan", value: Math.min(pillarVariables.complaint_frequency / 100, 1) },
+    { source: "Rapor Pendidikan", target: "Literasi", value: pv.literacy_score },
+    { source: "Rapor Pendidikan", target: "Numerasi", value: pv.numeracy_score },
+    { source: "Rapor Pendidikan", target: "Kualitas GTK", value: pv.teacher_quality_score },
+    { source: "BPS", target: "% Penduduk Miskin", value: pv.poverty_rate },
+    { source: "OpenStreetMap", target: "Travel Time", value: Math.min(pv.travel_time_minutes / 100, 1) },
+    { source: "Google Earth Engine", target: "Kondisi Bangunan", value: pv.building_damage_weight },
+    { source: "Dapodik", target: "Tren Enrollment", value: Math.abs(pv.enrollment_trend_3yr) },
+    { source: "Social Media", target: "Frekuensi Keluhan", value: Math.min(pv.complaint_frequency / 100, 1) },
     
     // Variables -> Pillars
-    { source: "Literasi", target: "Quality Gap", value: pillarVariables.literacy_score },
-    { source: "Numerasi", target: "Quality Gap", value: pillarVariables.numeracy_score },
-    { source: "Kualitas GTK", target: "Quality Gap", value: pillarVariables.teacher_quality_score },
-    { source: "% Penduduk Miskin", target: "Spatial Inequity", value: pillarVariables.poverty_rate },
-    { source: "Travel Time", target: "Spatial Inequity", value: Math.min(pillarVariables.travel_time_minutes / 100, 1) },
-    { source: "Kondisi Bangunan", target: "Structural Risk", value: pillarVariables.building_damage_weight },
-    { source: "Tren Enrollment", target: "Structural Risk", value: Math.abs(pillarVariables.enrollment_trend_3yr) },
-    { source: "Frekuensi Keluhan", target: "Public Signal", value: Math.min(pillarVariables.complaint_frequency / 100, 1) },
+    { source: "Literasi", target: "Quality Gap", value: pv.literacy_score },
+    { source: "Numerasi", target: "Quality Gap", value: pv.numeracy_score },
+    { source: "Kualitas GTK", target: "Quality Gap", value: pv.teacher_quality_score },
+    { source: "% Penduduk Miskin", target: "Spatial Inequity", value: pv.poverty_rate },
+    { source: "Travel Time", target: "Spatial Inequity", value: Math.min(pv.travel_time_minutes / 100, 1) },
+    { source: "Kondisi Bangunan", target: "Structural Risk", value: pv.building_damage_weight },
+    { source: "Tren Enrollment", target: "Structural Risk", value: Math.abs(pv.enrollment_trend_3yr) },
+    { source: "Frekuensi Keluhan", target: "Public Signal", value: Math.min(pv.complaint_frequency / 100, 1) },
     
     // Pillars -> Final Index
     { source: "Quality Gap", target: "SIGAPP Index", value: schoolIndex.p1_quality_gap * 0.35 },
@@ -75,10 +89,10 @@ export default function SchoolSankeyChart({
   const links = rawLinks.filter(l => typeof l.value === 'number' && l.value > 0 && !isNaN(l.value));
 
   return (
-    <div style={{ height: 480 }}>
+    <div style={{ height: 500 }}>
       <ResponsiveSankey<{ id: string; color: string }, { source: string; target: string; value: number }>
         data={{ nodes, links }}
-        margin={{ top: 20, right: 120, bottom: 20, left: 120 }}
+        margin={{ top: 20, right: 120, bottom: 40, left: 120 }}
         align="justify"
         colors={{ datum: 'color' }}
         nodeOpacity={1}
@@ -99,6 +113,11 @@ export default function SchoolSankeyChart({
           </div>
         )}
       />
+      {!pillarVariables && (
+        <p className="text-xs text-slate-400 italic mt-2 text-center">
+          * Nilai variabel diestimasi dari skor pilar. Data aktual belum tersedia.
+        </p>
+      )}
     </div>
   );
 }
