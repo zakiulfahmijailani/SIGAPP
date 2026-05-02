@@ -103,22 +103,22 @@ export default function DashboardRoot() {
     <>
       <div className="flex flex-col h-screen w-full overflow-hidden bg-slate-50">
       {/* 1. NAVBAR */}
-      <nav className="h-14 bg-[#0D2137] flex-shrink-0 flex items-center justify-between px-6 z-50 shadow-md">
-        <div className="flex items-center gap-8">
+      <nav className="h-16 bg-white flex-shrink-0 flex items-center justify-between px-6 z-50 shadow-sm border-b border-gray-100">
+        <div className="flex items-center gap-10">
           <div className="flex items-center gap-4">
-            <img src="/logo-dark.png" alt="SIGAPP Logo" className="h-10 w-auto object-contain" />
-            <div className="h-8 w-px bg-white/10 ml-1 hidden sm:block"></div>
-            <span className="text-white/40 text-xs font-medium tracking-tight hidden sm:block">Jakarta Dashboard</span>
+            <img src="/logo-light-mode-with-texts.png" alt="SIGAPP Logo" className="h-12 w-auto object-contain" />
+            <div className="h-10 w-px bg-gray-200 ml-1 hidden sm:block"></div>
+            <span className="text-[#0D2137]/40 text-[10px] uppercase tracking-widest font-bold hidden sm:block">Jakarta Dashboard</span>
           </div>
 
-          <div className="flex items-center gap-6 border-l border-white/10 pl-8 ml-2">
-            <Link href="/schools" className="text-white/60 hover:text-[#00B4B4] text-xs uppercase tracking-widest font-semibold transition-colors">Schools</Link>
-            <Link href="/insights" className="text-white/60 hover:text-[#00B4B4] text-xs uppercase tracking-widest font-semibold transition-colors">Insights</Link>
-            <Link href="/about" className="text-white/60 hover:text-[#00B4B4] text-xs uppercase tracking-widest font-semibold transition-colors">About</Link>
+          <div className="flex items-center gap-8">
+            <Link href="/schools" className="text-[#0D2137]/60 hover:text-[#00B4B4] text-xs uppercase tracking-widest font-bold transition-colors">Schools</Link>
+            <Link href="/insights" className="text-[#0D2137]/60 hover:text-[#00B4B4] text-xs uppercase tracking-widest font-bold transition-colors">Insights</Link>
+            <Link href="/about" className="text-[#0D2137]/60 hover:text-[#00B4B4] text-xs uppercase tracking-widest font-bold transition-colors">About</Link>
           </div>
         </div>
         
-        <div className="text-white/80 text-sm font-medium">
+        <div className="text-[#0D2137]/60 text-xs font-bold uppercase tracking-wide">
           {today}
         </div>
       </nav>

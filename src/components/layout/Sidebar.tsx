@@ -19,7 +19,7 @@ const navItems = [
 function SigappLogo() {
   return (
     <div className="flex items-center gap-3 px-5 py-8">
-      <img src="/logo-dark.png" alt="SIGAPP Logo" className="h-12 w-auto object-contain" />
+      <img src="/logo-light-mode-with-texts.png" alt="SIGAPP Logo" className="h-14 w-auto object-contain" />
     </div>
   );
 }
@@ -37,7 +37,8 @@ export function Sidebar() {
       className="fixed left-0 top-0 bottom-0 z-40 flex flex-col sidebar-scroll overflow-y-auto"
       style={{
         width: 240,
-        backgroundColor: "#0D2137",
+        backgroundColor: "#FFFFFF",
+        borderRight: "1px solid #F1F5F9",
       }}
     >
       {/* Logo */}
@@ -46,7 +47,7 @@ export function Sidebar() {
       {/* Divider */}
       <div
         className="mx-4 mb-2"
-        style={{ height: 1, backgroundColor: "rgba(255,255,255,0.08)" }}
+        style={{ height: 1, backgroundColor: "#F1F5F9" }}
       />
 
       {/* Navigation */}
@@ -88,10 +89,12 @@ export function Sidebar() {
                 className={`flex-shrink-0 ${
                   active
                     ? "text-[#00B4B4]"
-                    : "text-slate-500 group-hover:text-slate-300"
+                    : "text-slate-500 group-hover:text-slate-800"
                 }`}
               />
-              <span>{label}</span>
+              <span className={active ? "text-[#00B4B4]" : "text-slate-600 group-hover:text-slate-900"}>
+                {label}
+              </span>
             </Link>
           );
         })}
@@ -100,7 +103,7 @@ export function Sidebar() {
       {/* Footer */}
       <div
         className="px-5 py-4 text-xs"
-        style={{ color: "rgba(255,255,255,0.3)" }}
+        style={{ color: "#94A3B8" }}
       >
         MVP v0.1 · Jakarta
       </div>
