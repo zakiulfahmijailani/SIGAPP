@@ -156,7 +156,7 @@ export function RankedTab({ selectedSchoolId, onSchoolSelect }: RankedTabProps) 
                         href={`/schools/${school.id}`}
                         className="flex items-center justify-center gap-2 w-full py-2 bg-[#0D2137] text-white rounded-lg text-xs font-semibold hover:bg-[#1a3a5a] transition-colors"
                       >
-                        Lihat Profil Lengkap
+                        Lihat Laporan Lengkap
                       </a>
                     </div>
                   </div>
