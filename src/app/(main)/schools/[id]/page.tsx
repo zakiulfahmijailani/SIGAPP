@@ -23,7 +23,7 @@ import {
   Tooltip,
 } from "recharts";
 import { getSupabase } from "@/lib/supabase";
-import { SchoolDetail } from "@/lib/types";
+import { SchoolDetail, School } from "@/lib/types";
 import { formatIndex, getTierFromIndex, getPillarName, TIER_BG_COLORS, PriorityTier } from "@/lib/utils";
 import { IndexBadge } from "@/components/ui/IndexBadge";
 import dynamic from 'next/dynamic';
@@ -224,6 +224,57 @@ export default function SchoolDetailPage() {
         </div>
       </div>
 
+      {/* Agent Section */}
+      {si && (
+        <div className="mb-8">
+          <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wider mb-4">
+            SIGAPP Agents
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <AgentStatusPanel
+              agentType="report"
+              priorityTier={si.priority_tier}
+              sigappIndex={si.sigapp_index}
+              schoolName={school.school_name}
+              school={{
+                id: school.id,
+                school_name: school.school_name,
+                address: school.address,
+                kelurahan: school.kelurahan,
+                kecamatan: school.kecamatan,
+                kota: school.kota,
+                jenjang: school.jenjang,
+                npsn: school.npsn,
+                total_students: school.total_students,
+                total_teachers: school.total_teachers,
+              }}
+              schoolIndex={si}
+              pillarVariables={pv ?? null}
+            />
+            <AgentStatusPanel
+              agentType="email"
+              priorityTier={si.priority_tier}
+              sigappIndex={si.sigapp_index}
+              schoolName={school.school_name}
+              school={{
+                id: school.id,
+                school_name: school.school_name,
+                address: school.address,
+                kelurahan: school.kelurahan,
+                kecamatan: school.kecamatan,
+                kota: school.kota,
+                jenjang: school.jenjang,
+                npsn: school.npsn,
+                total_students: school.total_students,
+                total_teachers: school.total_teachers,
+              }}
+              schoolIndex={si}
+              pillarVariables={pv ?? null}
+            />
+          </div>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
           <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
@@ -349,61 +400,10 @@ export default function SchoolDetailPage() {
           </h2>
           <p className="text-xs text-slate-400 mb-4">
             Alur nilai dari sumber data → variabel → pilar → SIGAPP Index untuk sekolah ini.
-            Hover pada node atau link untuk melihat nilai aktual.
+            Hover pada node or link untuk melihat nilai aktual.
           </p>
           <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm overflow-hidden">
             <SchoolSankeyChart schoolIndex={si} pillarVariables={pv ?? null} />
-          </div>
-        </div>
-      )}
-
-      {/* Agent Section */}
-      {si && (
-        <div className="mt-10">
-          <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wider mb-4">
-            SIGAPP Agents
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <AgentStatusPanel
-              agentType="report"
-              priorityTier={si.priority_tier}
-              sigappIndex={si.sigapp_index}
-              schoolName={school.school_name}
-              school={{
-                id: school.id,
-                school_name: school.school_name,
-                address: school.address,
-                kelurahan: school.kelurahan,
-                kecamatan: school.kecamatan,
-                kota: school.kota,
-                jenjang: school.jenjang,
-                npsn: school.npsn,
-                total_students: school.total_students,
-                total_teachers: school.total_teachers,
-              }}
-              schoolIndex={si}
-              pillarVariables={pv ?? null}
-            />
-            <AgentStatusPanel
-              agentType="email"
-              priorityTier={si.priority_tier}
-              sigappIndex={si.sigapp_index}
-              schoolName={school.school_name}
-              school={{
-                id: school.id,
-                school_name: school.school_name,
-                address: school.address,
-                kelurahan: school.kelurahan,
-                kecamatan: school.kecamatan,
-                kota: school.kota,
-                jenjang: school.jenjang,
-                npsn: school.npsn,
-                total_students: school.total_students,
-                total_teachers: school.total_teachers,
-              }}
-              schoolIndex={si}
-              pillarVariables={pv ?? null}
-            />
           </div>
         </div>
       )}
