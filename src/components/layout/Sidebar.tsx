@@ -18,8 +18,8 @@ const navItems = [
 
 function SigappLogo() {
   return (
-    <div className="flex items-center gap-3 px-5 py-8">
-      <img src="/logo-light-mode-with-texts.png" alt="SIGAPP Logo" className="h-14 w-auto object-contain" />
+    <div className="flex items-center justify-center px-4 py-10">
+      <img src="/logo-light-mode-with-texts.png" alt="SIGAPP Logo" className="h-32 w-auto object-contain" />
     </div>
   );
 }
@@ -36,7 +36,7 @@ export function Sidebar() {
     <aside
       className="fixed left-0 top-0 bottom-0 z-40 flex flex-col sidebar-scroll overflow-y-auto"
       style={{
-        width: 240,
+        width: 300,
         backgroundColor: "#FFFFFF",
         borderRight: "1px solid #F1F5F9",
       }}
