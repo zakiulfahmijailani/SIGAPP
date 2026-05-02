@@ -340,7 +340,7 @@ export default function SchoolDetailPage() {
       {si && pv && (
         <div className="mt-8">
           <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wider mb-2">
-            Data Flow — Transparansi Metodologi
+            Data Flow — Transparansi Metodologi (DEBUG: LIVE)
           </h2>
           <p className="text-xs text-slate-400 mb-4">
             Alur nilai dari sumber data → variabel → pilar → SIGAPP Index untuk sekolah ini.
