@@ -108,8 +108,21 @@ export function RankedTab({ selectedSchoolId, onSchoolSelect }: RankedTabProps) 
                       {school.kecamatan} · {school.jenjang}
                     </p>
                   </div>
-                  <div className={`rounded-full px-2 py-0.5 text-xs font-bold ${badgeColors}`}>
-                    {idxVal.toFixed(2)}
+                  <div className="flex flex-col items-end gap-1 shrink-0">
+                    <div className={`rounded-full px-2 py-0.5 text-xs font-bold ${badgeColors}`}>
+                      {idxVal.toFixed(2)}
+                    </div>
+                    {/* Agent Badge */}
+                    <span 
+                      className={`
+                        text-[10px] px-1.5 py-0.5 rounded-full font-medium border
+                        ${tier === 'KRITIS' ? "bg-emerald-50 text-emerald-700 border-emerald-100" : 
+                          tier === 'TINGGI' ? "bg-amber-50 text-amber-700 border-amber-100" : 
+                          "bg-slate-50 text-slate-500 border-slate-100"}
+                      `}
+                    >
+                      {tier === 'KRITIS' ? "Agent Aktif" : tier === 'TINGGI' ? "Standby" : "Agent N/A"}
+                    </span>
                   </div>
                 </div>
 

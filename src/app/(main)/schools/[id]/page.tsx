@@ -33,6 +33,11 @@ const SchoolSankeyChart = dynamic(
   { ssr: false, loading: () => <div className="h-[480px] skeleton-shimmer rounded-xl" /> }
 )
 
+const AgentStatusPanel = dynamic(
+  () => import('@/components/agents/AgentStatusPanel'),
+  { ssr: false, loading: () => <div className="h-[200px] skeleton-shimmer rounded-xl" /> }
+)
+
 // ── Pillar config ────────────────────────────────────────────────
 const PILLARS = [
   { key: "p1_quality_gap", weight: 35 },
@@ -348,6 +353,29 @@ export default function SchoolDetailPage() {
           </p>
           <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm overflow-hidden">
             <SchoolSankeyChart schoolIndex={si} pillarVariables={pv ?? null} />
+          </div>
+        </div>
+      )}
+
+      {/* Agent Section */}
+      {si && (
+        <div className="mt-10">
+          <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wider mb-4">
+            SIGAPP Agents
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <AgentStatusPanel
+              agentType="report"
+              priorityTier={si.priority_tier}
+              sigappIndex={si.sigapp_index}
+              schoolName={school.school_name}
+            />
+            <AgentStatusPanel
+              agentType="email"
+              priorityTier={si.priority_tier}
+              sigappIndex={si.sigapp_index}
+              schoolName={school.school_name}
+            />
           </div>
         </div>
       )}
