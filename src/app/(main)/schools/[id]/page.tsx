@@ -369,12 +369,30 @@ export default function SchoolDetailPage() {
               priorityTier={si.priority_tier}
               sigappIndex={si.sigapp_index}
               schoolName={school.school_name}
+              school={{
+                id: school.id,
+                name: school.school_name,
+                address: school.address,
+                kelurahan: school.kelurahan,
+                kecamatan: school.kecamatan,
+              }}
+              schoolIndex={si}
+              pillarVariables={pv ?? null}
             />
             <AgentStatusPanel
               agentType="email"
               priorityTier={si.priority_tier}
               sigappIndex={si.sigapp_index}
               schoolName={school.school_name}
+              school={{
+                id: school.id,
+                name: school.school_name,
+                address: school.address,
+                kelurahan: school.kelurahan,
+                kecamatan: school.kecamatan,
+              }}
+              schoolIndex={si}
+              pillarVariables={pv ?? null}
             />
           </div>
         </div>

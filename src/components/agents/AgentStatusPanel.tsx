@@ -1,13 +1,29 @@
 "use client";
 
 import React from "react";
-import { Bot, FileText, Mail, Lock, CheckCircle2, AlertCircle, Slash } from "lucide-react";
+import { CheckCircle2, AlertCircle, Slash, Lock, FileText, Mail } from "lucide-react";
+import dynamic from "next/dynamic";
+import { SchoolIndex, PillarVariables } from "@/lib/types";
+
+const ReportAgent = dynamic(
+  () => import("./ReportAgent"),
+  { ssr: false }
+);
 
 interface AgentStatusPanelProps {
   agentType: "report" | "email";
   priorityTier: string; // From school_index.priority_tier: 'KRITIS' | 'TINGGI' | 'SEDANG' | 'RENDAH'
   sigappIndex: number;
   schoolName: string;
+  school?: {
+    id: string;
+    name: string;
+    address?: string;
+    kelurahan?: string;
+    kecamatan?: string;
+  };
+  schoolIndex?: SchoolIndex;
+  pillarVariables?: PillarVariables | null;
 }
 
 export default function AgentStatusPanel({
@@ -15,6 +31,9 @@ export default function AgentStatusPanel({
   priorityTier,
   sigappIndex,
   schoolName,
+  school,
+  schoolIndex,
+  pillarVariables,
 }: AgentStatusPanelProps) {
   // Map string priority_tier to numeric for logic consistency with prompt
   const tierMap: Record<string, number> = {
@@ -35,6 +54,18 @@ export default function AgentStatusPanel({
   const icon = isReport ? <FileText size={20} /> : <Mail size={20} />;
 
   if (status === "active") {
+    // For Tier 1 schools, we render the functional ReportAgent component
+    if (isReport && school && schoolIndex) {
+      return (
+        <ReportAgent
+          school={school}
+          schoolIndex={schoolIndex}
+          pillarVariables={pillarVariables ?? null}
+        />
+      );
+    }
+
+    // Default active UI (for email agent or if data is missing)
     return (
       <div className="border border-emerald-200 bg-emerald-50 rounded-xl p-5 shadow-sm">
         <div className="flex items-center justify-between mb-4">
