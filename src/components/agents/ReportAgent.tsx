@@ -16,10 +16,15 @@ interface ReportData {
 interface ReportAgentProps {
   school: {
     id: string;
-    name: string;
+    school_name: string;
     address?: string;
     kelurahan?: string;
     kecamatan?: string;
+    kota?: string;
+    jenjang?: string;
+    npsn?: string;
+    total_students?: number;
+    total_teachers?: number;
   };
   schoolIndex: SchoolIndex;
   pillarVariables: PillarVariables | null;
@@ -60,12 +65,13 @@ export default function ReportAgent({
 
     // Tier label
     const tierLabel =
-      schoolIndex.priority_tier === 'KRITIS' ? "Tier 1 — Prioritas Sangat Tinggi" :
-      schoolIndex.priority_tier === 'TINGGI' ? "Tier 2 — Prioritas Tinggi" :
-      "Tier 3+ — Prioritas Sedang/Rendah";
+      schoolIndex.priority_tier === 'KRITIS' ? "Prioritas Kritis" :
+      schoolIndex.priority_tier === 'TINGGI'  ? "Prioritas Tinggi" :
+      schoolIndex.priority_tier === 'SEDANG'  ? "Prioritas Sedang" :
+                                                "Prioritas Rendah";
 
     // Narasi summary otomatis
-    const summary = `${school.name} masuk dalam ${tierLabel} dengan SIGAPP Index ${schoolIndex.sigapp_index.toFixed(3)}. ` +
+    const summary = `${school.school_name} masuk dalam ${tierLabel} dengan SIGAPP Index ${schoolIndex.sigapp_index.toFixed(3)}. ` +
       `Pilar dengan kontribusi dominan adalah ${dominant.name} (skor: ${dominant.score.toFixed(3)}). ` +
       `Sekolah ini memerlukan perhatian segera terutama pada aspek ${dominant.name.toLowerCase()}.`;
 
@@ -130,42 +136,51 @@ export default function ReportAgent({
     // Info sekolah
     doc.setFontSize(13);
     doc.setTextColor(30, 30, 30);
-    doc.text(school.name, 20, 42);
+    doc.text(school.school_name, 20, 42);
     
     doc.setFontSize(10);
     doc.setTextColor(100, 100, 100);
-    if (school.address) doc.text(`Alamat: ${school.address}`, 20, 50);
-    if (school.kecamatan) doc.text(`Kecamatan: ${school.kecamatan}`, 20, 56);
-    doc.text(`Tanggal Laporan: ${new Date(reportData.generatedAt).toLocaleString("id-ID")}`, 20, 62);
+    let infoY = 50;
+    if (school.jenjang) { doc.text(`Jenjang: ${school.jenjang}`, 20, infoY); infoY += 6; }
+    if (school.npsn)    { doc.text(`NPSN: ${school.npsn}`, 20, infoY); infoY += 6; }
+    if (school.address) { doc.text(`Alamat: ${school.address}`, 20, infoY); infoY += 6; }
+    if (school.kecamatan) { doc.text(`Kecamatan: ${school.kecamatan}`, 20, infoY); infoY += 6; }
+    if (school.kota)    { doc.text(`Kota: ${school.kota}`, 20, infoY); infoY += 6; }
+    if (school.total_students) { doc.text(`Jumlah Siswa: ${school.total_students}`, 20, infoY); infoY += 6; }
+    if (school.total_teachers) { doc.text(`Jumlah Guru: ${school.total_teachers}`, 20, infoY); infoY += 6; }
+    doc.text(`Tanggal Laporan: ${new Date(reportData.generatedAt).toLocaleString("id-ID")}`, 20, infoY);
     
     // Status prioritas
+    const statusY = infoY + 12;
     doc.setFontSize(11);
     doc.setTextColor(11, 42, 74);
-    doc.text(`Status: ${reportData.tierLabel}`, 20, 74);
-    doc.text(`SIGAPP Index: ${schoolIndex.sigapp_index.toFixed(3)}`, 20, 81);
+    doc.text(`Status: ${reportData.tierLabel}`, 20, statusY);
+    doc.text(`SIGAPP Index: ${schoolIndex.sigapp_index.toFixed(3)}`, 20, statusY + 7);
     
     // Skor pilar
+    const pillarY = statusY + 19;
     doc.setFontSize(11);
     doc.setTextColor(30, 30, 30);
-    doc.text("Skor Pilar:", 20, 93);
+    doc.text("Skor Pilar:", 20, pillarY);
     doc.setFontSize(10);
     doc.setTextColor(80, 80, 80);
-    doc.text(`• Quality Gap:      ${schoolIndex.p1_quality_gap.toFixed(3)}`, 25, 101);
-    doc.text(`• Spatial Inequity: ${schoolIndex.p2_spatial_inequity.toFixed(3)}`, 25, 108);
-    doc.text(`• Structural Risk:  ${schoolIndex.p3_structural_risk.toFixed(3)}`, 25, 115);
-    doc.text(`• Public Signal:    ${schoolIndex.p4_public_signal.toFixed(3)}`, 25, 122);
+    doc.text(`• Quality Gap:      ${schoolIndex.p1_quality_gap.toFixed(3)}`, 25, pillarY + 8);
+    doc.text(`• Spatial Inequity: ${schoolIndex.p2_spatial_inequity.toFixed(3)}`, 25, pillarY + 15);
+    doc.text(`• Structural Risk:  ${schoolIndex.p3_structural_risk.toFixed(3)}`, 25, pillarY + 22);
+    doc.text(`• Public Signal:    ${schoolIndex.p4_public_signal.toFixed(3)}`, 25, pillarY + 29);
     
     // Ringkasan
+    const summaryY = pillarY + 42;
     doc.setFontSize(11);
     doc.setTextColor(11, 42, 74);
-    doc.text("Ringkasan Kondisi:", 20, 135);
+    doc.text("Ringkasan Kondisi:", 20, summaryY);
     doc.setFontSize(10);
     doc.setTextColor(50, 50, 50);
     const summaryLines = doc.splitTextToSize(reportData.summary, 165);
-    doc.text(summaryLines, 20, 143);
+    doc.text(summaryLines, 20, summaryY + 8);
     
     // Rekomendasi
-    const recY = 143 + (summaryLines.length * 6) + 10;
+    const recY = summaryY + 8 + (summaryLines.length * 6) + 10;
     doc.setFontSize(11);
     doc.setTextColor(11, 42, 74);
     doc.text("Rekomendasi Tindak Lanjut:", 20, recY);
@@ -185,7 +200,7 @@ export default function ReportAgent({
     );
     
     // Save
-    doc.save(`SIGAPP_${school.name.replace(/\s+/g, "_")}_Laporan.pdf`);
+    doc.save(`SIGAPP_${school.school_name.replace(/\s+/g, "_")}_Laporan.pdf`);
   };
 
   return (

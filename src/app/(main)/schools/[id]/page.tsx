@@ -371,10 +371,15 @@ export default function SchoolDetailPage() {
               schoolName={school.school_name}
               school={{
                 id: school.id,
-                name: school.school_name,
+                school_name: school.school_name,
                 address: school.address,
                 kelurahan: school.kelurahan,
                 kecamatan: school.kecamatan,
+                kota: school.kota,
+                jenjang: school.jenjang,
+                npsn: school.npsn,
+                total_students: school.total_students,
+                total_teachers: school.total_teachers,
               }}
               schoolIndex={si}
               pillarVariables={pv ?? null}
@@ -386,10 +391,15 @@ export default function SchoolDetailPage() {
               schoolName={school.school_name}
               school={{
                 id: school.id,
-                name: school.school_name,
+                school_name: school.school_name,
                 address: school.address,
                 kelurahan: school.kelurahan,
                 kecamatan: school.kecamatan,
+                kota: school.kota,
+                jenjang: school.jenjang,
+                npsn: school.npsn,
+                total_students: school.total_students,
+                total_teachers: school.total_teachers,
               }}
               schoolIndex={si}
               pillarVariables={pv ?? null}

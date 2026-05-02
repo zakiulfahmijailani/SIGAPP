@@ -12,15 +12,20 @@ const ReportAgent = dynamic(
 
 interface AgentStatusPanelProps {
   agentType: "report" | "email";
-  priorityTier: string; // From school_index.priority_tier: 'KRITIS' | 'TINGGI' | 'SEDANG' | 'RENDAH'
+  priorityTier: SchoolIndex['priority_tier'];
   sigappIndex: number;
   schoolName: string;
   school?: {
     id: string;
-    name: string;
+    school_name: string;
     address?: string;
     kelurahan?: string;
     kecamatan?: string;
+    kota?: string;
+    jenjang?: string;
+    npsn?: string;
+    total_students?: number;
+    total_teachers?: number;
   };
   schoolIndex?: SchoolIndex;
   pillarVariables?: PillarVariables | null;
@@ -35,18 +40,9 @@ export default function AgentStatusPanel({
   schoolIndex,
   pillarVariables,
 }: AgentStatusPanelProps) {
-  // Map string priority_tier to numeric for logic consistency with prompt
-  const tierMap: Record<string, number> = {
-    KRITIS: 1,
-    TINGGI: 2,
-    SEDANG: 3,
-    RENDAH: 4,
-  };
-  const numericTier = tierMap[priorityTier] || 4;
-
   const status = 
-    numericTier === 1 ? "active" : 
-    numericTier === 2 ? "standby" : 
+    priorityTier === 'KRITIS' ? "active" : 
+    priorityTier === 'TINGGI' ? "standby" : 
     "unavailable";
 
   const isReport = agentType === "report";
@@ -54,7 +50,7 @@ export default function AgentStatusPanel({
   const icon = isReport ? <FileText size={20} /> : <Mail size={20} />;
 
   if (status === "active") {
-    // For Tier 1 schools, we render the functional ReportAgent component
+    // For Tier 1 (KRITIS) schools, we render the functional ReportAgent component
     if (isReport && school && schoolIndex) {
       return (
         <ReportAgent
@@ -115,7 +111,7 @@ export default function AgentStatusPanel({
         </div>
 
         <p className="text-sm text-amber-800/80 mb-4 leading-relaxed">
-          Sekolah ini berada di Tier 2. Agent akan aktif otomatis jika sekolah naik ke Tier 1.
+          Sekolah ini berada di status {priorityTier}. Agent akan aktif otomatis jika sekolah naik ke Tier 1.
         </p>
 
         <div className="space-y-2 mb-4">
@@ -157,7 +153,7 @@ export default function AgentStatusPanel({
       </div>
 
       <p className="text-sm text-slate-600 mb-2">
-        Sekolah ini berada di Tier {numericTier}. Sumber daya agent diprioritaskan untuk Tier 1 dan 2.
+        Sekolah ini berada di status {priorityTier}. Sumber daya agent diprioritaskan untuk Tier 1 dan 2.
       </p>
       <p className="text-xs text-slate-400">
         Data sekolah tetap tersedia untuk analisis manual melalui panel di atas.
