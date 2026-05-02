@@ -103,12 +103,14 @@ export default function DashboardRoot() {
     <>
       <div className="flex flex-col h-screen w-full overflow-hidden bg-slate-50">
       {/* 1. NAVBAR */}
-      <nav className="h-28 bg-white flex-shrink-0 flex items-center justify-between px-8 z-50 shadow-sm border-b border-gray-100">
-        <div className="flex items-center gap-12">
-          <div className="flex items-center gap-6">
-            <img src="/logo-light-mode-with-texts.png" alt="SIGAPP Logo" className="h-24 w-auto object-contain" />
-            <div className="h-16 w-px bg-gray-200 ml-2 hidden lg:block"></div>
-            <span className="text-[#0D2137]/40 text-[10px] uppercase tracking-widest font-bold hidden lg:block">Jakarta Dashboard</span>
+      <nav className="h-56 bg-white flex-shrink-0 flex items-center justify-between px-12 z-50 shadow-sm border-b border-gray-100">
+        <div className="flex items-center gap-16">
+          <div className="flex items-center gap-10">
+            <img src="/logo-light-mode-with-texts.png" alt="SIGAPP Logo" className="h-48 w-auto object-contain" />
+            <div className="h-32 w-px bg-gray-200 ml-4 hidden xl:block"></div>
+            <span className="text-[#0D2137]/40 text-xs uppercase tracking-[0.3em] font-black hidden xl:block leading-tight">
+              Jakarta<br />Dashboard
+            </span>
           </div>
 
           <div className="flex items-center gap-8">
