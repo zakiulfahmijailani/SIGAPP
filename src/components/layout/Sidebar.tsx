@@ -18,8 +18,8 @@ const navItems = [
 
 function SigappLogo() {
   return (
-    <div className="flex items-center gap-3 px-5 py-6">
-      <img src="/logo-dark.png" alt="SIGAPP Logo" className="h-9 w-auto" />
+    <div className="flex items-center gap-3 px-5 py-8">
+      <img src="/logo-dark.png" alt="SIGAPP Logo" className="h-12 w-auto object-contain" />
     </div>
   );
 }
