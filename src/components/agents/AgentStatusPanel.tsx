@@ -3,10 +3,15 @@
 import React from "react";
 import { CheckCircle2, AlertCircle, Slash, Lock, FileText, Mail } from "lucide-react";
 import dynamic from "next/dynamic";
-import { SchoolIndex, PillarVariables } from "@/lib/types";
+import { SchoolIndex, PillarVariables, School } from "@/lib/types";
 
 const ReportAgent = dynamic(
   () => import("./ReportAgent"),
+  { ssr: false }
+);
+
+const EmailAgent = dynamic(
+  () => import("./EmailAgent"),
   { ssr: false }
 );
 
@@ -50,7 +55,7 @@ export default function AgentStatusPanel({
   const icon = isReport ? <FileText size={20} /> : <Mail size={20} />;
 
   if (status === "active") {
-    // For Tier 1 (KRITIS) schools, we render the functional ReportAgent component
+    // For Tier 1 (KRITIS) schools, we render the functional components
     if (isReport && school && schoolIndex) {
       return (
         <ReportAgent
@@ -61,7 +66,16 @@ export default function AgentStatusPanel({
       );
     }
 
-    // Default active UI (for email agent or if data is missing)
+    if (!isReport && school && schoolIndex) {
+      return (
+        <EmailAgent
+          school={school as School}
+          schoolIndex={schoolIndex}
+        />
+      );
+    }
+
+    // Default active UI (if data is missing)
     return (
       <div className="border border-emerald-200 bg-emerald-50 rounded-xl p-5 shadow-sm">
         <div className="flex items-center justify-between mb-4">
@@ -156,7 +170,7 @@ export default function AgentStatusPanel({
         Sekolah ini berada di status {priorityTier}. Sumber daya agent diprioritaskan untuk Tier 1 dan 2.
       </p>
       <p className="text-xs text-slate-400">
-        Data sekolah tetap tersedia untuk analisis manual melalui panel di atas.
+        Data sekolah tetap tersedia for analisis manual melalui panel di atas.
       </p>
     </div>
   );
