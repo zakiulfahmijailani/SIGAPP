@@ -40,7 +40,6 @@ export default function AgentStatusPanel({
   agentType,
   priorityTier,
   sigappIndex,
-  schoolName,
   school,
   schoolIndex,
   pillarVariables,

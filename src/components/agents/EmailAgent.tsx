@@ -116,7 +116,7 @@ export default function EmailAgent({ school, schoolIndex }: EmailAgentProps) {
         {/* Idle state */}
         {agentStatus === "idle" && (
           <p className="text-xs text-slate-500 italic leading-relaxed">
-            Laporan belum dikirim. Klik "Kirim Laporan" untuk mendistribusikan
+            Laporan belum dikirim. Klik &ldquo;Kirim Laporan&rdquo; untuk mendistribusikan
             prioritas intervensi ke seluruh pemangku kepentingan terkait secara otomatis.
           </p>
         )}
@@ -182,7 +182,7 @@ export default function EmailAgent({ school, schoolIndex }: EmailAgentProps) {
                       .find((m) => m.from === "recipient");
                     return lastReply ? (
                       <p className="mt-2.5 text-[11px] text-slate-500 italic truncate border-t border-slate-50 pt-2.5 px-1 font-medium">
-                        💬 "{lastReply.body.substring(0, 80)}..."
+                        💬 &ldquo;{lastReply.body.substring(0, 80)}...&rdquo;
                       </p>
                     ) : null;
                   })()}

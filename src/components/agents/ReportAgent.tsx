@@ -33,7 +33,6 @@ interface ReportAgentProps {
 export default function ReportAgent({
   school,
   schoolIndex,
-  pillarVariables,
 }: ReportAgentProps) {
   const [status, setStatus] = useState<"idle" | "generating" | "ready">("idle");
   const [loadingStep, setLoadingStep] = useState("");
@@ -232,7 +231,7 @@ export default function ReportAgent({
       {/* Status idle */}
       {status === "idle" && (
         <p className="text-xs text-slate-500 italic">
-          Laporan belum dibuat. Klik "Generate Laporan" untuk menyusun laporan kondisi sekolah ini.
+          Laporan belum dibuat. Klik &ldquo;Generate Laporan&rdquo; untuk menyusun laporan kondisi sekolah ini.
         </p>
       )}
 
