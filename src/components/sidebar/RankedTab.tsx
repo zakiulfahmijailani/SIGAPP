@@ -16,6 +16,15 @@ export function RankedTab({ selectedSchoolId, onSchoolSelect }: RankedTabProps) 
   const [query, setQuery] = useState("");
   const itemRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
+  // Filter and sort schools
+  const filteredAndSorted = schools
+    .filter((s) => s.school_name.toLowerCase().includes(query.toLowerCase()))
+    .sort((a, b) => {
+      const indexA = a.school_index?.sigapp_index || 0;
+      const indexB = b.school_index?.sigapp_index || 0;
+      return indexB - indexA;
+    });
+
   useEffect(() => {
     if (selectedSchoolId) {
       // If the selected school is not in the current filtered list, clear the query
@@ -33,15 +42,6 @@ export function RankedTab({ selectedSchoolId, onSchoolSelect }: RankedTabProps) 
       }
     }
   }, [selectedSchoolId, filteredAndSorted]);
-
-  // Filter and sort schools
-  const filteredAndSorted = schools
-    .filter((s) => s.school_name.toLowerCase().includes(query.toLowerCase()))
-    .sort((a, b) => {
-      const indexA = a.school_index?.sigapp_index || 0;
-      const indexB = b.school_index?.sigapp_index || 0;
-      return indexB - indexA;
-    });
 
   return (
     <div className="flex flex-col h-full">
