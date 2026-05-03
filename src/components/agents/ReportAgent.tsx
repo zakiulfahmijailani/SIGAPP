@@ -36,86 +36,92 @@ export default function ReportAgent({
   schoolIndex,
 }: ReportAgentProps) {
   const [status, setStatus] = useState<"idle" | "generating" | "ready">("idle");
+  const [isGenerating, setIsGenerating] = useState(false);
   const [loadingStep, setLoadingStep] = useState("");
   const [reportData, setReportData] = useState<ReportData | null>(null);
 
   const generateReport = async () => {
-    setStatus("generating");
-    
-    const steps = [
-      "Membaca data sekolah...",
-      "Menganalisis skor pilar...",
-      "Menyusun narasi laporan...",
-      "Membuat dokumen PDF...",
-    ];
+    setIsGenerating(true);
+    try {
+      setStatus("generating");
+      
+      const steps = [
+        "Membaca data sekolah...",
+        "Menganalisis skor pilar...",
+        "Menyusun narasi laporan...",
+        "Membuat dokumen PDF...",
+      ];
 
-    for (const step of steps) {
-      setLoadingStep(step);
-      await new Promise(r => setTimeout(r, 700));
+      for (const step of steps) {
+        setLoadingStep(step);
+        await new Promise(r => setTimeout(r, 700));
+      }
+
+      // Tentukan pillar dominan
+      const pillars = [
+        { name: "Quality Gap",      score: schoolIndex.p1_quality_gap,       weight: 0.35 },
+        { name: "Spatial Inequity", score: schoolIndex.p2_spatial_inequity,  weight: 0.25 },
+        { name: "Structural Risk",  score: schoolIndex.p3_structural_risk,   weight: 0.25 },
+        { name: "Public Signal",    score: schoolIndex.p4_public_signal,     weight: 0.15 },
+      ];
+      const dominant = pillars.reduce((a, b) => a.score > b.score ? a : b);
+
+      // Tier label
+      const tier = getTierFromIndex(schoolIndex.sigapp_index);
+      const tierLabel =
+        tier === 'KRITIS' ? "Prioritas Kritis" :
+        tier === 'TINGGI' ? "Prioritas Tinggi" :
+        tier === 'SEDANG' ? "Prioritas Sedang" :
+                            "Prioritas Rendah";
+
+      // Narasi summary otomatis
+      const summary = `${school.school_name} masuk dalam ${tierLabel} dengan SIGAPP Index ${schoolIndex.sigapp_index.toFixed(3)}. ` +
+        `Pilar dengan kontribusi dominan adalah ${dominant.name} (skor: ${dominant.score.toFixed(3)}). ` +
+        `Sekolah ini memerlukan perhatian segera terutama pada aspek ${dominant.name.toLowerCase()}.`;
+
+      // Rekomendasi berdasarkan pilar dominan
+      const recommendationMap: Record<string, string[]> = {
+        "Quality Gap": [
+          "Tingkatkan program pelatihan guru berbasis kompetensi literasi dan numerasi.",
+          "Alokasikan bantuan bahan ajar dan modul remedial untuk siswa tertinggal.",
+          "Lakukan supervisi klinis berkala oleh pengawas sekolah.",
+        ],
+        "Spatial Inequity": [
+          "Evaluasi aksesibilitas jalur menuju sekolah, terutama pada musim hujan.",
+          "Pertimbangkan program antar-jemput atau subsidi transportasi siswa.",
+          "Koordinasikan dengan dinas PUPR untuk perbaikan infrastruktur jalan.",
+        ],
+        "Structural Risk": [
+          "Lakukan audit kondisi bangunan sekolah secara menyeluruh.",
+          "Prioritaskan rehabilitasi ruang kelas dengan kerusakan berat.",
+          "Ajukan proposal rehab bangunan ke Dinas Pendidikan Kota/Kabupaten.",
+        ],
+        "Public Signal": [
+          "Tindaklanjuti keluhan masyarakat yang masuk melalui kanal resmi.",
+          "Adakan forum wali murid untuk mendengar aspirasi dan kekhawatiran.",
+          "Tingkatkan transparansi pengelolaan sekolah kepada komunitas.",
+        ],
+      };
+
+      const recommendations = recommendationMap[dominant.name] ?? [
+        "Lakukan evaluasi menyeluruh terhadap kondisi sekolah.",
+        "Koordinasikan dengan pemangku kepentingan terkait.",
+        "Susun rencana intervensi berbasis data SIGAPP.",
+      ];
+
+      setReportData({
+        generatedAt: new Date().toISOString(),
+        version: 1,
+        summary,
+        dominantPillar: dominant.name,
+        dominantScore: dominant.score,
+        recommendations,
+        tierLabel,
+      });
+      setStatus("ready");
+    } finally {
+      setIsGenerating(false);
     }
-
-    // Tentukan pillar dominan
-    const pillars = [
-      { name: "Quality Gap",      score: schoolIndex.p1_quality_gap,       weight: 0.35 },
-      { name: "Spatial Inequity", score: schoolIndex.p2_spatial_inequity,  weight: 0.25 },
-      { name: "Structural Risk",  score: schoolIndex.p3_structural_risk,   weight: 0.25 },
-      { name: "Public Signal",    score: schoolIndex.p4_public_signal,     weight: 0.15 },
-    ];
-    const dominant = pillars.reduce((a, b) => a.score > b.score ? a : b);
-
-    // Tier label
-    const tier = getTierFromIndex(schoolIndex.sigapp_index);
-    const tierLabel =
-      tier === 'KRITIS' ? "Prioritas Kritis" :
-      tier === 'TINGGI' ? "Prioritas Tinggi" :
-      tier === 'SEDANG' ? "Prioritas Sedang" :
-                          "Prioritas Rendah";
-
-    // Narasi summary otomatis
-    const summary = `${school.school_name} masuk dalam ${tierLabel} dengan SIGAPP Index ${schoolIndex.sigapp_index.toFixed(3)}. ` +
-      `Pilar dengan kontribusi dominan adalah ${dominant.name} (skor: ${dominant.score.toFixed(3)}). ` +
-      `Sekolah ini memerlukan perhatian segera terutama pada aspek ${dominant.name.toLowerCase()}.`;
-
-    // Rekomendasi berdasarkan pilar dominan
-    const recommendationMap: Record<string, string[]> = {
-      "Quality Gap": [
-        "Tingkatkan program pelatihan guru berbasis kompetensi literasi dan numerasi.",
-        "Alokasikan bantuan bahan ajar dan modul remedial untuk siswa tertinggal.",
-        "Lakukan supervisi klinis berkala oleh pengawas sekolah.",
-      ],
-      "Spatial Inequity": [
-        "Evaluasi aksesibilitas jalur menuju sekolah, terutama pada musim hujan.",
-        "Pertimbangkan program antar-jemput atau subsidi transportasi siswa.",
-        "Koordinasikan dengan dinas PUPR untuk perbaikan infrastruktur jalan.",
-      ],
-      "Structural Risk": [
-        "Lakukan audit kondisi bangunan sekolah secara menyeluruh.",
-        "Prioritaskan rehabilitasi ruang kelas dengan kerusakan berat.",
-        "Ajukan proposal rehab bangunan ke Dinas Pendidikan Kota/Kabupaten.",
-      ],
-      "Public Signal": [
-        "Tindaklanjuti keluhan masyarakat yang masuk melalui kanal resmi.",
-        "Adakan forum wali murid untuk mendengar aspirasi dan kekhawatiran.",
-        "Tingkatkan transparansi pengelolaan sekolah kepada komunitas.",
-      ],
-    };
-
-    const recommendations = recommendationMap[dominant.name] ?? [
-      "Lakukan evaluasi menyeluruh terhadap kondisi sekolah.",
-      "Koordinasikan dengan pemangku kepentingan terkait.",
-      "Susun rencana intervensi berbasis data SIGAPP.",
-    ];
-
-    setReportData({
-      generatedAt: new Date().toISOString(),
-      version: 1,
-      summary,
-      dominantPillar: dominant.name,
-      dominantScore: dominant.score,
-      recommendations,
-      tierLabel,
-    });
-    setStatus("ready");
   };
 
   const handleDownloadPDF = async () => {
@@ -212,12 +218,20 @@ export default function ReportAgent({
           <h3 className="font-semibold text-slate-800 text-sm">📄 Report Agent</h3>
           <span className="text-xs text-emerald-700 font-medium">🤖 Agent Aktif — Tier 1</span>
         </div>
-        {status === "idle" && (
+        {(status === "idle" || status === "generating") && (
           <button
             onClick={generateReport}
-            className="text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg font-medium transition-colors"
+            disabled={isGenerating}
+            className="text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg font-medium transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            Generate Laporan
+            {isGenerating ? (
+              <span className="flex items-center justify-center gap-2">
+                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Membuat Laporan...
+              </span>
+            ) : (
+              'Generate Laporan'
+            )}
           </button>
         )}
         {status === "ready" && (

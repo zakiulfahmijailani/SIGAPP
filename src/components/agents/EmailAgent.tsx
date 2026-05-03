@@ -38,6 +38,7 @@ export default function EmailAgent({ school, schoolIndex }: EmailAgentProps) {
   const [agentStatus, setAgentStatus] = useState<
     "idle" | "sending" | "active"
   >("idle");
+  const [isSending, setIsSending] = useState(false);
   const [loadingStep, setLoadingStep] = useState("");
   const [recipients, setRecipients] = useState<StakeholderRecipient[]>([]);
   const [selectedRecipient, setSelectedRecipient] =
@@ -50,32 +51,37 @@ export default function EmailAgent({ school, schoolIndex }: EmailAgentProps) {
   ).length;
 
   const handleSend = async () => {
-    setAgentStatus("sending");
+    setIsSending(true);
+    try {
+      setAgentStatus("sending");
 
-    const steps = [
-      "Menyiapkan daftar pemangku kepentingan...",
-      "Menyusun pesan untuk setiap penerima...",
-      "Melampirkan laporan PDF...",
-      "Mengirim email ke 5 penerima...",
-      "Memulai monitoring balasan...",
-    ];
+      const steps = [
+        "Menyiapkan daftar pemangku kepentingan...",
+        "Menyusun pesan untuk setiap penerima...",
+        "Melampirkan laporan PDF...",
+        "Mengirim email ke 5 penerima...",
+        "Memulai monitoring balasan...",
+      ];
 
-    for (const step of steps) {
-      setLoadingStep(step);
-      await new Promise((r) => setTimeout(r, 600));
-    }
+      for (const step of steps) {
+        setLoadingStep(step);
+        await new Promise((r) => setTimeout(r, 600));
+      }
 
-    // Generate data stakeholder
-    const data = generateStakeholders(school, schoolIndex);
-    setRecipients(data);
+      // Generate data stakeholder
+      const data = generateStakeholders(school, schoolIndex);
+      setRecipients(data);
 
-    // Tampilkan penerima satu per satu dengan delay
-    setVisibleCount(0);
-    setAgentStatus("active");
+      // Tampilkan penerima satu per satu dengan delay
+      setVisibleCount(0);
+      setAgentStatus("active");
 
-    for (let i = 1; i <= data.length; i++) {
-      await new Promise((r) => setTimeout(r, 300));
-      setVisibleCount(i);
+      for (let i = 1; i <= data.length; i++) {
+        await new Promise((r) => setTimeout(r, 300));
+        setVisibleCount(i);
+      }
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -92,12 +98,20 @@ export default function EmailAgent({ school, schoolIndex }: EmailAgentProps) {
               🤖 Agent Aktif — {getTierFromIndex(schoolIndex.sigapp_index)}
             </span>
           </div>
-          {agentStatus === "idle" && (
+          {(agentStatus === "idle" || agentStatus === "sending") && (
             <button
               onClick={handleSend}
-              className="text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-bold shadow-sm transition-all active:scale-95"
+              disabled={isSending}
+              className="text-xs bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-bold shadow-sm transition-all active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              Kirim Laporan
+              {isSending ? (
+                <span className="flex items-center justify-center gap-2">
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Mengirim...
+                </span>
+              ) : (
+                'Kirim Laporan'
+              )}
             </button>
           )}
           {agentStatus === "active" && (
