@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { SchoolIndex, PillarVariables } from "@/lib/types";
 import { getTierFromIndex } from "@/lib/utils";
 
@@ -39,6 +39,14 @@ export default function ReportAgent({
   const [isGenerating, setIsGenerating] = useState(false);
   const [loadingStep, setLoadingStep] = useState("");
   const [reportData, setReportData] = useState<ReportData | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
+  useEffect(() => {
+    if (toast) {
+      const t = setTimeout(() => setToast(null), 3500);
+      return () => clearTimeout(t);
+    }
+  }, [toast]);
 
   const generateReport = async () => {
     setIsGenerating(true);
@@ -119,6 +127,9 @@ export default function ReportAgent({
         tierLabel,
       });
       setStatus("ready");
+      setToast({ message: 'Laporan berhasil dibuat', type: 'success' });
+    } catch (err) {
+      setToast({ message: 'Gagal membuat laporan', type: 'error' });
     } finally {
       setIsGenerating(false);
     }
@@ -297,6 +308,11 @@ export default function ReportAgent({
           >
             📥 Unduh Laporan PDF
           </button>
+        </div>
+      )}
+      {toast && (
+        <div role="alert" className={`fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-lg px-4 py-3 text-sm font-medium shadow-lg transition-all ${toast.type === 'success' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`}>
+          {toast.type === 'success' ? '✓' : '✕'} {toast.message}
         </div>
       )}
     </div>

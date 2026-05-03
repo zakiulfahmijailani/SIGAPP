@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { School, SchoolIndex } from "@/lib/types";
 import { getTierFromIndex } from "@/lib/utils";
@@ -44,6 +44,14 @@ export default function EmailAgent({ school, schoolIndex }: EmailAgentProps) {
   const [selectedRecipient, setSelectedRecipient] =
     useState<StakeholderRecipient | null>(null);
   const [visibleCount, setVisibleCount] = useState(0);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+
+  useEffect(() => {
+    if (toast) {
+      const t = setTimeout(() => setToast(null), 3500);
+      return () => clearTimeout(t);
+    }
+  }, [toast]);
 
   const repliedCount = recipients.filter((r) => r.status === "replied").length;
   const pendingCount = recipients.filter(
@@ -80,6 +88,9 @@ export default function EmailAgent({ school, schoolIndex }: EmailAgentProps) {
         await new Promise((r) => setTimeout(r, 300));
         setVisibleCount(i);
       }
+      setToast({ message: 'Laporan berhasil dikirim', type: 'success' });
+    } catch (err) {
+      setToast({ message: 'Gagal mengirim laporan', type: 'error' });
     } finally {
       setIsSending(false);
     }
@@ -236,6 +247,11 @@ export default function EmailAgent({ school, schoolIndex }: EmailAgentProps) {
           recipient={selectedRecipient}
           onClose={() => setSelectedRecipient(null)}
         />
+      )}
+      {toast && (
+        <div role="alert" className={`fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-lg px-4 py-3 text-sm font-medium shadow-lg transition-all ${toast.type === 'success' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`}>
+          {toast.type === 'success' ? '✓' : '✕'} {toast.message}
+        </div>
       )}
     </>
   );
