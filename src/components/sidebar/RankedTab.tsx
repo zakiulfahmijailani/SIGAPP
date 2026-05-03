@@ -153,8 +153,12 @@ export function RankedTab({ selectedSchoolId, onSchoolSelect }: RankedTabProps) 
                 key={school.id}
                 ref={(el) => { itemRefs.current[school.id] = el; }}
                 className={`
-                  mb-2 overflow-hidden rounded-lg border transition-colors cursor-pointer
-                  ${isSelected ? "bg-teal-50 border-[#00B4B4]" : "bg-white border-gray-100 hover:bg-gray-50"}
+                  mb-2 overflow-hidden rounded-lg border cursor-pointer transition-all duration-150
+                  active:scale-[0.98] hover:shadow-sm
+                  ${isSelected 
+                    ? "bg-teal-50/50 border-[#00B4B4] border-l-4 shadow-sm" 
+                    : "bg-white border-gray-100 hover:bg-gray-50 hover:border-gray-200"
+                  }
                 `}
               >
                 {/* Row Header */}
