@@ -102,7 +102,7 @@ export function RankedTab({ selectedSchoolId, onSchoolSelect }: RankedTabProps) 
         )}
 
         {!loading && error && (
-          <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
+          <div role="alert" aria-live="assertive" className="flex flex-col items-center justify-center gap-3 py-12 text-center">
             <p className="text-sm text-gray-500">Gagal memuat data sekolah.</p>
             <button
               onClick={retry}
@@ -133,7 +133,7 @@ export function RankedTab({ selectedSchoolId, onSchoolSelect }: RankedTabProps) 
                     setQuery("");
                     updateSearchURL("");
                   }}
-                  className="mt-4 text-xs text-[#00B4B4] hover:underline"
+                  className="mt-4 text-xs sm:text-sm text-[#00B4B4] hover:underline min-h-[44px] px-4 flex items-center justify-center"
                 >
                   Hapus pencarian
                 </button>
@@ -182,10 +182,10 @@ export function RankedTab({ selectedSchoolId, onSchoolSelect }: RankedTabProps) 
                     {index + 1}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h4 className="text-sm font-medium text-gray-800 truncate">
+                    <h4 className="text-sm sm:text-base font-medium text-gray-800 truncate">
                       {school.school_name}
                     </h4>
-                    <p className="text-xs text-gray-400 truncate">
+                    <p className="text-xs sm:text-sm text-gray-400 truncate">
                       {school.kecamatan} · {school.jenjang}
                     </p>
                   </div>
