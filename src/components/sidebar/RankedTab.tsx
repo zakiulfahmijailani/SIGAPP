@@ -88,9 +88,39 @@ export function RankedTab({ selectedSchoolId, onSchoolSelect }: RankedTabProps) 
         )}
 
         {!loading && filteredAndSorted.length === 0 && (
-          <div className="flex flex-col items-center justify-center mt-8">
-            <SchoolIcon size={32} className="text-gray-300" />
-            <p className="text-sm text-gray-400 mt-2">Belum ada data sekolah</p>
+          <div className="flex flex-col items-center justify-center mt-12 px-4 text-center">
+            {query.trim() !== "" ? (
+              // Case 1: search query exists but no match
+              <>
+                <Search size={28} className="text-gray-200 mb-3" />
+                <p className="text-sm font-medium text-gray-500">
+                  Sekolah tidak ditemukan
+                </p>
+                <p className="text-xs text-gray-400 mt-1">
+                  Tidak ada hasil untuk{" "}
+                  <span className="font-semibold text-gray-600">
+                    &ldquo;{query}&rdquo;
+                  </span>
+                </p>
+                <button
+                  onClick={() => setQuery("")}
+                  className="mt-4 text-xs text-[#00B4B4] hover:underline"
+                >
+                  Hapus pencarian
+                </button>
+              </>
+            ) : (
+              // Case 2: no data at all
+              <>
+                <SchoolIcon size={28} className="text-gray-200 mb-3" />
+                <p className="text-sm font-medium text-gray-500">
+                  Belum ada data sekolah
+                </p>
+                <p className="text-xs text-gray-400 mt-1">
+                  Data akan muncul setelah sinkronisasi selesai.
+                </p>
+              </>
+            )}
           </div>
         )}
 
