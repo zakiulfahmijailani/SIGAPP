@@ -6,7 +6,6 @@ import { Search, ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import { getSupabase } from "@/lib/supabase";
 import { SchoolWithIndex } from "@/lib/types";
 import { IndexBadge } from "@/components/ui/IndexBadge";
-import { getTierFromIndex } from "@/lib/utils";
 import { SkeletonRow } from "@/components/ui/SkeletonRow";
 
 const PAGE_SIZE = 20;
@@ -200,21 +199,18 @@ export default function SchoolsPage() {
                 <th className="px-4 py-3 text-left font-semibold text-slate-500 text-xs uppercase tracking-wider w-[140px]">
                   SIGAPP Index
                 </th>
-                <th className="px-4 py-3 text-left font-semibold text-slate-500 text-xs uppercase tracking-wider w-[130px]">
-                  Priority Tier
-                </th>
                 <th className="px-4 py-3 w-[50px]" />
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 Array.from({ length: 10 }).map((_, i) => (
-                  <SkeletonRow key={i} columns={7} />
+                  <SkeletonRow key={i} columns={6} />
                 ))
               ) : paged.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={7}
+                    colSpan={6}
                     className="px-4 py-12 text-center text-slate-400"
                   >
                     No schools found.
@@ -254,24 +250,6 @@ export default function SchoolsPage() {
                         <IndexBadge
                           index={school.school_index.sigapp_index}
                         />
-                      ) : (
-                        <span className="text-slate-300">—</span>
-                      )}
-                    </td>
-
-                    {/* Priority Tier */}
-                    <td className="px-4 py-3 text-xs font-semibold">
-                      {school.school_index ? (
-                        <span
-                          className={`
-                            ${getTierFromIndex(school.school_index.sigapp_index) === "KRITIS" ? "text-red-600" : ""}
-                            ${getTierFromIndex(school.school_index.sigapp_index) === "TINGGI" ? "text-orange-500" : ""}
-                            ${getTierFromIndex(school.school_index.sigapp_index) === "SEDANG" ? "text-yellow-600" : ""}
-                            ${getTierFromIndex(school.school_index.sigapp_index) === "RENDAH" ? "text-green-600" : ""}
-                          `}
-                        >
-                          {getTierFromIndex(school.school_index.sigapp_index)}
-                        </span>
                       ) : (
                         <span className="text-slate-300">—</span>
                       )}
