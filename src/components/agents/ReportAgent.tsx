@@ -144,7 +144,7 @@ export default function ReportAgent({
     // Header
     doc.setFontSize(18);
     doc.setTextColor(11, 42, 74);
-    doc.text("SIGAPP — Laporan Prioritas Intervensi Sekolah", 20, 25);
+    doc.text("SIGAPP — Sistem Informasi Geospasial Berbasis AI Agentik", 20, 25);
     
     // Garis header
     doc.setDrawColor(31, 181, 168);
@@ -213,7 +213,7 @@ export default function ReportAgent({
     doc.setFontSize(8);
     doc.setTextColor(150, 150, 150);
     doc.text(
-      "Dokumen ini dibuat otomatis oleh SIGAPP — Sistem Informasi Prioritas Intervensi Sekolah Jakarta",
+      "Dokumen ini dibuat otomatis oleh SIGAPP — Sistem INformasi Geospasial berbasis AI Agentik untuk Perencanaan Pendidikan",
       20, 285
     );
     
