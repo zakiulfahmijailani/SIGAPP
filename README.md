@@ -1,5 +1,8 @@
 <p align="center">
-  <img src="public/logo-light-mode-with-texts.png" alt="SIGAPP Logo" width="300" />
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="public/logo-dark-mode-with-texts.png">
+    <img src="public/logo-light-mode-with-texts.png" alt="SIGAPP Logo" width="280" />
+  </picture>
 </p>
 
 <p align="center">
