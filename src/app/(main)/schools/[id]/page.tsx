@@ -12,6 +12,7 @@ import {
   Clock,
   Building2,
   MessageSquareWarning,
+  ChevronRight,
 } from "lucide-react";
 import {
   Radar,
@@ -205,6 +206,18 @@ export default function SchoolDetailPage() {
 
   return (
     <div className="p-6 lg:p-8 max-w-[1400px]">
+      <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-sm text-slate-500 mb-6">
+        <Link href="/" className="hover:text-[#00B4B4] transition-colors">
+          Dashboard
+        </Link>
+        <ChevronRight className="w-3.5 h-3.5 flex-shrink-0" />
+        <span>Detail Sekolah</span>
+        <ChevronRight className="w-3.5 h-3.5 flex-shrink-0" />
+        <span className="truncate max-w-[200px] text-slate-800 font-medium">
+          {school.school_name}
+        </span>
+      </nav>
+
       <Link
         href="/schools"
         id="back-to-schools"
