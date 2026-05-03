@@ -98,7 +98,7 @@ export function RankedTab({ selectedSchoolId, onSchoolSelect }: RankedTabProps) 
           filteredAndSorted.map((school, index) => {
             const isSelected = selectedSchoolId === school.id;
             const idxVal = school.school_index?.sigapp_index || 0;
-            const tier = school.school_index?.priority_tier || getTierFromIndex(idxVal);
+            const tier = getTierFromIndex(idxVal);
             const badgeColors = getTierColor(tier as PriorityTier);
 
             return (

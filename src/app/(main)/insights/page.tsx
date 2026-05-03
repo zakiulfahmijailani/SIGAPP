@@ -18,7 +18,7 @@ import {
 } from "recharts";
 import { getSupabase } from "@/lib/supabase";
 import { SchoolWithIndex } from "@/lib/types";
-import { formatIndex, getPillarName } from "@/lib/utils";
+import { formatIndex, getPillarName, getTierFromIndex } from "@/lib/utils";
 
 export default function InsightsPage() {
   const [schools, setSchools] = useState<SchoolWithIndex[]>([]);
@@ -133,8 +133,11 @@ export default function InsightsPage() {
     // Students in Kritis+Tinggi schools
     let atRiskStudents = 0;
     for (const s of schools) {
-      if (s.school_index && (s.school_index.priority_tier === "KRITIS" || s.school_index.priority_tier === "TINGGI")) {
-        atRiskStudents += s.total_students || 0;
+      if (s.school_index) {
+        const tier = getTierFromIndex(s.school_index.sigapp_index);
+        if (tier === "KRITIS" || tier === "TINGGI") {
+          atRiskStudents += s.total_students || 0;
+        }
       }
     }
 

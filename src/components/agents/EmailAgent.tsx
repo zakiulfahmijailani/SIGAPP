@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import dynamic from "next/dynamic";
 import { School, SchoolIndex } from "@/lib/types";
+import { getTierFromIndex } from "@/lib/utils";
 import {
   StakeholderRecipient,
   generateStakeholders,
@@ -88,7 +89,7 @@ export default function EmailAgent({ school, schoolIndex }: EmailAgentProps) {
               📧 Email Agent
             </h3>
             <span className="text-[10px] uppercase tracking-wider text-emerald-700 font-bold bg-emerald-100 px-2 py-0.5 rounded-full">
-              🤖 Agent Aktif — {schoolIndex.priority_tier}
+              🤖 Agent Aktif — {getTierFromIndex(schoolIndex.sigapp_index)}
             </span>
           </div>
           {agentStatus === "idle" && (

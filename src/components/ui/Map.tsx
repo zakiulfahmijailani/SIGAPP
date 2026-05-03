@@ -55,7 +55,7 @@ export default function Map({ schools }: MapProps) {
         {schools.map((s) => {
           if (!s.latitude || !s.longitude || !s.school_index) return null;
 
-          const tier = s.school_index.priority_tier ?? getTierFromIndex(s.school_index.sigapp_index);
+          const tier = getTierFromIndex(s.school_index.sigapp_index);
           const color = TIER_BG_COLORS[tier as keyof typeof TIER_BG_COLORS] || "#94A3B8";
 
           return (

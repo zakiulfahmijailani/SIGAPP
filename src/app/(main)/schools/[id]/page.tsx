@@ -152,7 +152,8 @@ export default function SchoolDetailPage() {
     const pillarLabel = highestPillar ? getPillarName(highestPillar.key) : "N/A";
     const pillarScore = highestPillar ? formatIndex(highestPillar.score) : "N/A";
 
-    return `School ${school.school_name} in ${school.kecamatan} received a SIGAPP Index of ${formatIndex(si.sigapp_index)}, placing it in the ${si.priority_tier} priority tier. The primary concern is ${pillarLabel} (score: ${pillarScore}), which indicates structural and academic vulnerabilities requiring immediate attention.`;
+    const tier = getTierFromIndex(si.sigapp_index);
+    return `School ${school.school_name} in ${school.kecamatan} received a SIGAPP Index of ${formatIndex(si.sigapp_index)}, placing it in the ${tier} priority tier. The primary concern is ${pillarLabel} (score: ${pillarScore}), which indicates structural and academic vulnerabilities requiring immediate attention.`;
   }, [school, highestPillar]);
 
   // ── Loading skeleton ──────────────────────────────────────────────
@@ -194,7 +195,7 @@ export default function SchoolDetailPage() {
 
   const si = school.school_index;
   const pv = school.pillar_variables;
-  const tier = (si?.priority_tier ?? getTierFromIndex(si?.sigapp_index ?? 0)) as PriorityTier;
+  const tier = getTierFromIndex(si?.sigapp_index ?? 0);
   const tierColor = TIER_BG_COLORS[tier] ?? "#94A3B8";
 
   return (
@@ -233,7 +234,7 @@ export default function SchoolDetailPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <AgentStatusPanel
               agentType="report"
-              priorityTier={si.priority_tier}
+              priorityTier={tier}
               sigappIndex={si.sigapp_index}
               schoolName={school.school_name}
               school={{
@@ -253,7 +254,7 @@ export default function SchoolDetailPage() {
             />
             <AgentStatusPanel
               agentType="email"
-              priorityTier={si.priority_tier}
+              priorityTier={tier}
               sigappIndex={si.sigapp_index}
               schoolName={school.school_name}
               school={{

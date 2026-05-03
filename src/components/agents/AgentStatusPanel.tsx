@@ -4,6 +4,7 @@ import React from "react";
 import { CheckCircle2, AlertCircle, Slash, Lock, FileText, Mail } from "lucide-react";
 import dynamic from "next/dynamic";
 import { SchoolIndex, PillarVariables, School } from "@/lib/types";
+import { PriorityTier } from "@/lib/utils";
 
 const ReportAgent = dynamic(
   () => import("./ReportAgent"),
@@ -17,7 +18,7 @@ const EmailAgent = dynamic(
 
 interface AgentStatusPanelProps {
   agentType: "report" | "email";
-  priorityTier: SchoolIndex['priority_tier'];
+  priorityTier: PriorityTier;
   sigappIndex: number;
   schoolName: string;
   school?: {

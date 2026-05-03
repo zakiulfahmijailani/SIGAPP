@@ -6,6 +6,7 @@ import { Search, ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import { getSupabase } from "@/lib/supabase";
 import { SchoolWithIndex } from "@/lib/types";
 import { IndexBadge } from "@/components/ui/IndexBadge";
+import { getTierFromIndex } from "@/lib/utils";
 import { SkeletonRow } from "@/components/ui/SkeletonRow";
 
 const PAGE_SIZE = 20;
@@ -263,13 +264,13 @@ export default function SchoolsPage() {
                       {school.school_index ? (
                         <span
                           className={`
-                            ${school.school_index.priority_tier === "KRITIS" ? "text-red-600" : ""}
-                            ${school.school_index.priority_tier === "TINGGI" ? "text-orange-500" : ""}
-                            ${school.school_index.priority_tier === "SEDANG" ? "text-yellow-600" : ""}
-                            ${school.school_index.priority_tier === "RENDAH" ? "text-green-600" : ""}
+                            ${getTierFromIndex(school.school_index.sigapp_index) === "KRITIS" ? "text-red-600" : ""}
+                            ${getTierFromIndex(school.school_index.sigapp_index) === "TINGGI" ? "text-orange-500" : ""}
+                            ${getTierFromIndex(school.school_index.sigapp_index) === "SEDANG" ? "text-yellow-600" : ""}
+                            ${getTierFromIndex(school.school_index.sigapp_index) === "RENDAH" ? "text-green-600" : ""}
                           `}
                         >
-                          {school.school_index.priority_tier}
+                          {getTierFromIndex(school.school_index.sigapp_index)}
                         </span>
                       ) : (
                         <span className="text-slate-300">—</span>

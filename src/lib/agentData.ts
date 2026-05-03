@@ -1,4 +1,5 @@
 import { School, SchoolIndex } from "./types";
+import { getTierFromIndex } from "./utils";
 
 // Tipe status per penerima
 export type RecipientStatus =
@@ -40,10 +41,11 @@ export function generateStakeholders(
   const kota = school.kota ?? "Jakarta";
 
   // Ringkasan untuk isi email
+  const tier = getTierFromIndex(schoolIndex.sigapp_index);
   const tierLabel =
-    schoolIndex.priority_tier === 'KRITIS' ? "Prioritas Kritis" :
-    schoolIndex.priority_tier === 'TINGGI'  ? "Prioritas Tinggi" :
-    schoolIndex.priority_tier === 'SEDANG'  ? "Prioritas Sedang" : "Prioritas Rendah";
+    tier === 'KRITIS' ? "Prioritas Kritis" :
+    tier === 'TINGGI' ? "Prioritas Tinggi" :
+    tier === 'SEDANG' ? "Prioritas Sedang" : "Prioritas Rendah";
 
   const emailBody = (recipientRole: string) =>
     `Yth. ${recipientRole},\n\nBersama ini kami sampaikan laporan kondisi ${schoolName} ` +

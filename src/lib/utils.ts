@@ -35,12 +35,11 @@ export function getTierColor(tier: PriorityTier): string {
 /**
  * Determines the priority tier from a SIGAPP composite index value (0–1).
  * Higher index = higher urgency.
- * NOTE: These are fallback thresholds. Prefer using priority_tier from Supabase directly.
  */
 export function getTierFromIndex(index: number): PriorityTier {
-  if (index >= 0.75) return 'KRITIS'
+  if (index >= 0.65) return 'KRITIS'
   if (index >= 0.50) return 'TINGGI'
-  if (index >= 0.25) return 'SEDANG'
+  if (index >= 0.35) return 'SEDANG'
   return 'RENDAH'
 }
 

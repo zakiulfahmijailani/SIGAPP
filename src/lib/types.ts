@@ -22,7 +22,6 @@ export interface SchoolIndex {
   p2_spatial_inequity: number
   p3_structural_risk: number
   p4_public_signal: number
-  priority_tier: 'KRITIS' | 'TINGGI' | 'SEDANG' | 'RENDAH'
   notes: string | null
   computed_at: string
 }

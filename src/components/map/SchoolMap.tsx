@@ -161,7 +161,7 @@ export default function SchoolMap({ schools, onSchoolClick, selectedSchoolId, lo
           if (!school.latitude || !school.longitude || !school.school_index) return null;
 
           const isSelected = selectedSchoolId === school.id;
-          const tier = (school.school_index.priority_tier || getTierFromIndex(school.school_index.sigapp_index)) as PriorityTier;
+          const tier = getTierFromIndex(school.school_index.sigapp_index);
           const color = TIER_BG_COLORS[tier] || "#94A3B8";
 
           return (

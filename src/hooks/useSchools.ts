@@ -3,7 +3,7 @@ import { getSupabase } from "@/lib/supabase";
 import { SchoolWithIndex } from "@/lib/types";
 import { PriorityTier } from "@/lib/utils";
 
-// Map Supabase priority_tier (KRITIS/TINGGI/SEDANG/RENDAH) to CSS key
+// Map priority_tier (KRITIS/TINGGI/SEDANG/RENDAH) to CSS key
 export function getPriorityClassFromTier(tier: PriorityTier): string {
   switch (tier) {
     case 'KRITIS': return 'sangat_prioritas';

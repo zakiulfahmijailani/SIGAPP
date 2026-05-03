@@ -57,7 +57,7 @@ export default function DashboardRoot() {
       return (
         (kotaFilter === 'all' || sKota === kotaFilter) &&
         (jenjangFilter === 'all' || s.jenjang === jenjangFilter) &&
-        (prioritasFilter === 'all' || (s.school_index?.priority_tier || getTierFromIndex(s.school_index?.sigapp_index || 0)) === prioritasFilter)
+        (prioritasFilter === 'all' || getTierFromIndex(s.school_index?.sigapp_index || 0) === prioritasFilter)
       );
     }),
     [schools, kotaFilter, jenjangFilter, prioritasFilter]

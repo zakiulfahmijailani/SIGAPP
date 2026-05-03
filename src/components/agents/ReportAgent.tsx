@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { SchoolIndex, PillarVariables } from "@/lib/types";
+import { getTierFromIndex } from "@/lib/utils";
 
 interface ReportData {
   generatedAt: string;       // ISO datetime
@@ -63,11 +64,12 @@ export default function ReportAgent({
     const dominant = pillars.reduce((a, b) => a.score > b.score ? a : b);
 
     // Tier label
+    const tier = getTierFromIndex(schoolIndex.sigapp_index);
     const tierLabel =
-      schoolIndex.priority_tier === 'KRITIS' ? "Prioritas Kritis" :
-      schoolIndex.priority_tier === 'TINGGI'  ? "Prioritas Tinggi" :
-      schoolIndex.priority_tier === 'SEDANG'  ? "Prioritas Sedang" :
-                                                "Prioritas Rendah";
+      tier === 'KRITIS' ? "Prioritas Kritis" :
+      tier === 'TINGGI' ? "Prioritas Tinggi" :
+      tier === 'SEDANG' ? "Prioritas Sedang" :
+                          "Prioritas Rendah";
 
     // Narasi summary otomatis
     const summary = `${school.school_name} masuk dalam ${tierLabel} dengan SIGAPP Index ${schoolIndex.sigapp_index.toFixed(3)}. ` +
