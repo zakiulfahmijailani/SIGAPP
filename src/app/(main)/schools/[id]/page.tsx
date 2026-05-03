@@ -158,19 +158,25 @@ export default function SchoolDetailPage() {
   // ── Loading skeleton ──────────────────────────────────────────────
   if (loading) {
     return (
-      <div className="p-6 lg:p-8 max-w-[1400px]">
-        <div className="skeleton-shimmer h-4 w-28 rounded mb-6" />
-        <div className="skeleton-shimmer h-8 w-72 rounded mb-2" />
-        <div className="skeleton-shimmer h-4 w-48 rounded mb-8" />
-        <div className="grid grid-cols-2 gap-4 mb-8">
-          {[1, 2].map((i) => (
-            <div key={i} className="skeleton-shimmer h-28 rounded-xl" />
+      <div className="animate-pulse space-y-6 p-6">
+        {/* Header */}
+        <div className="space-y-2">
+          <div className="h-6 w-2/3 rounded bg-muted" />
+          <div className="h-4 w-1/3 rounded bg-muted" />
+        </div>
+
+        {/* Index badge area */}
+        <div className="h-16 w-40 rounded-lg bg-muted" />
+
+        {/* Cards grid */}
+        <div className="grid grid-cols-2 gap-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="h-24 rounded-lg bg-muted" />
           ))}
         </div>
-        <div className="grid grid-cols-2 gap-6">
-          <div className="skeleton-shimmer h-80 rounded-xl" />
-          <div className="skeleton-shimmer h-80 rounded-xl" />
-        </div>
+
+        {/* Chart area */}
+        <div className="h-64 rounded-xl bg-muted" />
       </div>
     );
   }
