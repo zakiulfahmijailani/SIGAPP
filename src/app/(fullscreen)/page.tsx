@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef, useMemo, Suspense } from "react";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { Sidebar } from "@/components/sidebar/Sidebar";
@@ -28,7 +28,7 @@ const SchoolMap = dynamic(
   }
 );
 
-export default function DashboardRoot() {
+function DashboardInner() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -243,5 +243,13 @@ export default function DashboardRoot() {
         setShowChips={setShowChips}
       />
     </>
+  );
+}
+
+export default function DashboardRoot() {
+  return (
+    <Suspense fallback={null}>
+      <DashboardInner />
+    </Suspense>
   );
 }
