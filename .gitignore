@@ -26,15 +26,24 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# Environment Variables
+# Environment variables — NEVER commit real values
 .env
 .env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*.local
+.env.development
+.env.production
 
 # Keep .env.local.example
 !.env.local.example
+
+# Sensitive folders
+scratch/
+.claude/
+
+# OS & Editor
+.DS_Store
+.vscode/
+*.log
 
 # Vercel
 .vercel
