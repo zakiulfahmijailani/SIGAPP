@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Search, School as SchoolIcon } from "lucide-react";
+import { useSearchParams, useRouter } from 'next/navigation';
 import { useSchools } from "@/hooks/useSchools";
 import { SchoolWithIndex } from "@/lib/types";
 import { getTierFromIndex, getTierColor, PriorityTier } from "@/lib/utils";
@@ -13,7 +14,9 @@ export interface RankedTabProps {
 
 export function RankedTab({ selectedSchoolId, onSchoolSelect }: RankedTabProps) {
   const { schools, loading } = useSchools();
-  const [query, setQuery] = useState("");
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const [query, setQuery] = useState(searchParams.get('q') || "");
   const itemRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   // Filter and sort schools
@@ -25,12 +28,20 @@ export function RankedTab({ selectedSchoolId, onSchoolSelect }: RankedTabProps) 
       return indexB - indexA;
     });
 
+  function updateSearchURL(val: string) {
+    const params = new URLSearchParams(window.location.search);
+    if (val) params.set('q', val);
+    else params.delete('q');
+    router.replace(`?${params.toString()}`, { scroll: false });
+  }
+
   useEffect(() => {
     if (selectedSchoolId) {
       // If the selected school is not in the current filtered list, clear the query
       const isVisible = filteredAndSorted.some(s => s.id === selectedSchoolId);
       if (!isVisible) {
         setQuery("");
+        updateSearchURL("");
       }
 
       // Scroll to the item
@@ -54,7 +65,10 @@ export function RankedTab({ selectedSchoolId, onSchoolSelect }: RankedTabProps) 
             placeholder="Cari nama sekolah..."
             className="border border-gray-200 rounded-lg pl-9 pr-3 py-2 text-sm w-full outline-none focus:ring-1 focus:ring-[#00B4B4]"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              updateSearchURL(e.target.value);
+            }}
           />
         </div>
       </div>
@@ -103,7 +117,10 @@ export function RankedTab({ selectedSchoolId, onSchoolSelect }: RankedTabProps) 
                   </span>
                 </p>
                 <button
-                  onClick={() => setQuery("")}
+                  onClick={() => {
+                    setQuery("");
+                    updateSearchURL("");
+                  }}
                   className="mt-4 text-xs text-[#00B4B4] hover:underline"
                 >
                   Hapus pencarian

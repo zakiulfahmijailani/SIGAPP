@@ -10,6 +10,7 @@ import { useSchools } from "@/hooks/useSchools";
 import { getTierFromIndex } from "@/lib/utils";
 import dynamic from 'next/dynamic';
 import type { Map as LeafletMap } from 'leaflet';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { SchoolWithIndex } from "@/lib/types";
 
 const SchoolMap = dynamic(
@@ -28,9 +29,16 @@ const SchoolMap = dynamic(
 );
 
 export default function DashboardRoot() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [activeTab, setActiveTab] = useState<'stats'|'list'|'chat'>('stats');
-  const [selectedSchoolId, setSelectedSchoolId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'stats'|'list'|'chat'>(
+    (searchParams.get('tab') as 'stats'|'list'|'chat') || 'stats'
+  );
+  const [selectedSchoolId, setSelectedSchoolId] = useState<string | null>(
+    searchParams.get('school')
+  );
   const [chatState, setChatState] = useState<ChatState>('bubble');
 
   // Chat State
@@ -43,9 +51,9 @@ export default function DashboardRoot() {
   const [showChips, setShowChips] = useState(true);
 
   // Filters
-  const [kotaFilter, setKotaFilter] = useState('all');
-  const [jenjangFilter, setJenjangFilter] = useState('all');
-  const [prioritasFilter, setPrioritasFilter] = useState('all');
+  const [kotaFilter, setKotaFilter] = useState(searchParams.get('kota') || 'all');
+  const [jenjangFilter, setJenjangFilter] = useState(searchParams.get('jenjang') || 'all');
+  const [prioritasFilter, setPrioritasFilter] = useState(searchParams.get('prioritas') || 'all');
 
   const { schools } = useSchools();
   const mapRef = useRef<LeafletMap | null>(null);
@@ -63,11 +71,47 @@ export default function DashboardRoot() {
     [schools, kotaFilter, jenjangFilter, prioritasFilter]
   );
 
+  function updateURL(overrides: {
+    school?: string | null;
+    q?: string;
+    kota?: string;
+    jenjang?: string;
+    prioritas?: string;
+    tab?: string;
+  }) {
+    const params = new URLSearchParams(window.location.search);
+    const school = 'school' in overrides ? overrides.school : selectedSchoolId;
+    const kota = overrides.kota ?? kotaFilter;
+    const jenjang = overrides.jenjang ?? jenjangFilter;
+    const prioritas = overrides.prioritas ?? prioritasFilter;
+    const tab = overrides.tab ?? activeTab;
+
+    if (school) params.set('school', school);
+    else params.delete('school');
+
+    if (kota !== 'all') params.set('kota', kota);
+    else params.delete('kota');
+
+    if (jenjang !== 'all') params.set('jenjang', jenjang);
+    else params.delete('jenjang');
+
+    if (prioritas !== 'all') params.set('prioritas', prioritas);
+    else params.delete('prioritas');
+
+    if (tab !== 'stats') params.set('tab', tab);
+    else params.delete('tab');
+
+    const qs = params.toString();
+    router.replace(qs ? `?${qs}` : '/', { scroll: false });
+  }
+
   const handleSchoolSelect = (school: SchoolWithIndex | null) => {
-    setSelectedSchoolId(school?.id || null);
+    const newId = school?.id || null;
+    setSelectedSchoolId(newId);
     if (school) {
       setActiveTab('list');
       setSidebarOpen(true);
+      updateURL({ school: newId, tab: 'list' });
       
       // Fly map to selected school
       if (mapRef.current && school.latitude && school.longitude) {
@@ -77,6 +121,8 @@ export default function DashboardRoot() {
           { duration: 1.2, easeLinearity: 0.25 }
         );
       }
+    } else {
+      updateURL({ school: null });
     }
   };
 
@@ -84,14 +130,19 @@ export default function DashboardRoot() {
     handleSchoolSelect(school);
   };
 
+  function changeTab(tab: 'stats'|'list'|'chat') {
+    setActiveTab(tab);
+    updateURL({ tab });
+  }
+
   const handleChatStateChange = (state: ChatState) => {
     setChatState(state);
     if (state === 'docked') {
-      setActiveTab('chat');
+      changeTab('chat');
       setSidebarOpen(true);
     }
     if (state === 'expanded' && chatState === 'docked') {
-      setActiveTab('stats');
+      changeTab('stats');
     }
   };
 
@@ -130,9 +181,9 @@ export default function DashboardRoot() {
             kotaFilter={kotaFilter}
             jenjangFilter={jenjangFilter}
             prioritasFilter={prioritasFilter}
-            onKotaChange={setKotaFilter}
-            onJenjangChange={setJenjangFilter}
-            onPrioritasChange={setPrioritasFilter}
+            onKotaChange={(val) => { setKotaFilter(val); updateURL({ kota: val }); }}
+            onJenjangChange={(val) => { setJenjangFilter(val); updateURL({ jenjang: val }); }}
+            onPrioritasChange={(val) => { setPrioritasFilter(val); updateURL({ prioritas: val }); }}
             totalVisible={filteredSchools.length}
             totalAll={schools.length}
           />
@@ -155,7 +206,7 @@ export default function DashboardRoot() {
         >
           <Sidebar
             activeTab={activeTab}
-            onTabChange={setActiveTab}
+            onTabChange={changeTab}
             onClose={() => setSidebarOpen(false)}
             selectedSchoolId={selectedSchoolId}
             onSchoolSelect={handleSchoolSelect}
