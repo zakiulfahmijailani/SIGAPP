@@ -13,7 +13,7 @@ export interface RankedTabProps {
 }
 
 export function RankedTab({ selectedSchoolId, onSchoolSelect }: RankedTabProps) {
-  const { schools, loading } = useSchools();
+  const { schools, loading, error, retry } = useSchools();
   const searchParams = useSearchParams();
   const router = useRouter();
   const [query, setQuery] = useState(searchParams.get('q') || "");
@@ -101,7 +101,19 @@ export function RankedTab({ selectedSchoolId, onSchoolSelect }: RankedTabProps) 
           </div>
         )}
 
-        {!loading && filteredAndSorted.length === 0 && (
+        {!loading && error && (
+          <div className="flex flex-col items-center justify-center gap-3 py-12 text-center">
+            <p className="text-sm text-gray-500">Gagal memuat data sekolah.</p>
+            <button
+              onClick={retry}
+              className="text-sm px-3 py-1.5 rounded-md border border-gray-200 hover:bg-gray-50 transition-colors"
+            >
+              Coba lagi
+            </button>
+          </div>
+        )}
+
+        {!loading && !error && filteredAndSorted.length === 0 && (
           <div className="flex flex-col items-center justify-center mt-12 px-4 text-center">
             {query.trim() !== "" ? (
               // Case 1: search query exists but no match

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { getSupabase } from "@/lib/supabase";
 import { SchoolWithIndex } from "@/lib/types";
 import { PriorityTier } from "@/lib/utils";
@@ -26,40 +26,45 @@ export function getPriorityClass(index: number): string {
 export function useSchools() {
   const [schools, setSchools] = useState<SchoolWithIndex[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<Error | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function fetchSchools() {
-      try {
-        setLoading(true);
-        setError(null);
+  const fetchSchools = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-        const { data, error: fetchErr } = await getSupabase()
-          .from("schools")
-          .select("*, school_index(*)");
+      const { data, error: fetchErr } = await getSupabase()
+        .from("schools")
+        .select("*, school_index(*)");
 
-        if (fetchErr) throw new Error(fetchErr.message);
+      if (fetchErr) throw new Error(fetchErr.message);
 
-        // Normalize the data (Supabase joins return arrays or single objects depending on relationship)
-        const normalized = (data ?? []).map((s: Record<string, unknown>) => ({
-          ...s,
-          school_index: Array.isArray(s.school_index)
-            ? s.school_index[0]
-            : s.school_index,
-        })) as SchoolWithIndex[];
+      // Normalize the data
+      const normalized = (data ?? []).map((s: Record<string, unknown>) => ({
+        ...s,
+        school_index: Array.isArray(s.school_index)
+          ? s.school_index[0]
+          : s.school_index,
+      })) as SchoolWithIndex[];
 
-        setSchools(normalized);
-      } catch (err: unknown) {
-        console.error("Failed to fetch schools:", err);
-        setError(err instanceof Error ? err : new Error(String(err)));
-        setSchools([]);
-      } finally {
-        setLoading(false);
-      }
+      setSchools(normalized);
+    } catch (err: unknown) {
+      console.error("Failed to fetch schools:", err);
+      setError("Gagal memuat data sekolah");
+      setSchools([]);
+    } finally {
+      setLoading(false);
     }
-
-    fetchSchools();
   }, []);
 
-  return { schools, loading, error };
+  useEffect(() => {
+    fetchSchools();
+  }, [fetchSchools]);
+
+  const retry = () => {
+    setError(null);
+    fetchSchools();
+  };
+
+  return { schools, loading, error, retry };
 }
