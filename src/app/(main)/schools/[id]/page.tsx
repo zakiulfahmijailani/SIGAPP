@@ -163,8 +163,8 @@ export default function SchoolDetailPage() {
         <div className="skeleton-shimmer h-4 w-28 rounded mb-6" />
         <div className="skeleton-shimmer h-8 w-72 rounded mb-2" />
         <div className="skeleton-shimmer h-4 w-48 rounded mb-8" />
-        <div className="grid grid-cols-3 gap-4 mb-8">
-          {[1, 2, 3].map((i) => (
+        <div className="grid grid-cols-2 gap-4 mb-8">
+          {[1, 2].map((i) => (
             <div key={i} className="skeleton-shimmer h-28 rounded-xl" />
           ))}
         </div>
@@ -276,7 +276,7 @@ export default function SchoolDetailPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
         <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
           <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
             SIGAPP Index
@@ -290,16 +290,6 @@ export default function SchoolDetailPage() {
           )}
         </div>
 
-        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
-          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
-            Priority Tier
-          </p>
-          {si ? (
-            <IndexBadge index={si.sigapp_index} tier={tier} />
-          ) : (
-            <p className="text-slate-300">—</p>
-          )}
-        </div>
 
         <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
           <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
