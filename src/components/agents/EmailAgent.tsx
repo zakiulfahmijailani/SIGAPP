@@ -89,7 +89,7 @@ export default function EmailAgent({ school, schoolIndex }: EmailAgentProps) {
         setVisibleCount(i);
       }
       setToast({ message: 'Laporan berhasil dikirim', type: 'success' });
-    } catch (err) {
+    } catch {
       setToast({ message: 'Gagal mengirim laporan', type: 'error' });
     } finally {
       setIsSending(false);

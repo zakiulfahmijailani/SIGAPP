@@ -128,7 +128,7 @@ export default function ReportAgent({
       });
       setStatus("ready");
       setToast({ message: 'Laporan berhasil dibuat', type: 'success' });
-    } catch (err) {
+    } catch {
       setToast({ message: 'Gagal membuat laporan', type: 'error' });
     } finally {
       setIsGenerating(false);
