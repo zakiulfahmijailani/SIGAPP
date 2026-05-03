@@ -62,9 +62,27 @@ export function RankedTab({ selectedSchoolId, onSchoolSelect }: RankedTabProps) 
       {/* SECTION 2: SCHOOL LIST */}
       <div className="flex-1 overflow-y-auto">
         {loading && (
-          <div>
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-16 rounded-lg bg-gray-100 animate-pulse mb-2" />
+          <div className="space-y-2">
+            {[...Array(7)].map((_, i) => (
+              <div
+                key={i}
+                className="rounded-lg border border-gray-100 bg-white p-3 animate-pulse"
+              >
+                <div className="flex items-center gap-3">
+                  {/* Rank number */}
+                  <div className="w-6 h-4 rounded bg-gray-100 shrink-0" />
+                  {/* Name + subtitle */}
+                  <div className="flex-1 min-w-0 space-y-2">
+                    <div className="h-3.5 rounded bg-gray-200 w-3/4" />
+                    <div className="h-3 rounded bg-gray-100 w-1/2" />
+                  </div>
+                  {/* Score badge + agent badge */}
+                  <div className="flex flex-col items-end gap-1.5 shrink-0">
+                    <div className="h-5 w-12 rounded-full bg-gray-200" />
+                    <div className="h-4 w-16 rounded-full bg-gray-100" />
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         )}
