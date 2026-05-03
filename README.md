@@ -42,6 +42,16 @@ The dominant pillar — whichever weighs heaviest for a given school — determi
 
 ---
 
+## Data Architecture
+
+<p align="center">
+  <img src="public/sigapp-data-flow.png" alt="SIGAPP Data Flow Architecture" width="800" />
+</p>
+
+The SIGAPP Index is powered by a multi-source data pipeline designed for high-fidelity school analysis. Information flows from national educational databases (Dapodik, Rapor Pendidikan), statistical bureaus (BPS), and geospatial providers (OpenStreetMap, Google Earth Engine) into a granular set of variables. These variables are then aggregated into the four strategic pillars, which finally merge to form the composite SIGAPP Index.
+
+---
+
 ## Priority Tiers
 
 | Tier | Label | AI Agents |
