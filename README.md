@@ -1,67 +1,113 @@
-# SIGAPP — School Intervention Gap Prioritization Platform
+<p align="center">
+  <img src="public/logo-light-mode-with-texts.png" alt="SIGAPP Logo" width="300" />
+</p>
 
-SIGAPP adalah platform dashboard pemerintah yang dirancang untuk membantu pengambil kebijakan pendidikan dalam memprioritaskan intervensi sekolah di Jakarta. Dengan menggabungkan berbagai aliran data menjadi satu indeks komposit, SIGAPP memberikan kerangka kerja yang objektif, berbasis spasial, dan berorientasi pada kebutuhan untuk alokasi sumber daya.
+<p align="center">
+  <img src="https://img.shields.io/badge/Next.js-14-black?logo=next.js" alt="Next.js" />
+  <img src="https://img.shields.io/badge/TypeScript-5-blue?logo=typescript" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Tailwind--CSS-3.4-38bdf8?logo=tailwind-css" alt="Tailwind CSS" />
+  <img src="https://img.shields.io/badge/Supabase-Database-3ecf8e?logo=supabase" alt="Supabase" />
+  <img src="https://img.shields.io/badge/Leaflet-GIS-199900?logo=leaflet" alt="Leaflet" />
+</p>
 
-## 🚀 Fitur Utama
+---
 
-- **Dashboard Utama**: Ringkasan indikator kinerja utama (KPI), distribusi tingkat prioritas, dan daftar 10 sekolah dengan indeks tertinggi.
-- **Daftar Sekolah**: Tabel komprehensif seluruh sekolah di Jakarta dengan fitur filter berdasarkan Kecamatan dan Jenjang (SD, SMP, SMA, SMK).
-- **Detail Sekolah**: Analisis mendalam per sekolah, termasuk breakdown skor pilar, grafik radar interaktif, dan narasi ringkasan analisis.
-- **Insights & Analitik**: Visualisasi data makro untuk melihat performa antar kecamatan dan perbandingan pilar antar jenjang sekolah.
-- **Sistem Indeks Komposit**: Perhitungan otomatis berdasarkan 4 pilar utama untuk menentukan tingkat prioritas (CRITICAL, HIGH, MEDIUM, LOW).
+## Overview
 
-## 📊 4 Pilar Utama SIGAPP
+**SIGAPP** (Sistem Informasi Prioritas Intervensi Sekolah) is an advanced WebGIS decision-support system designed to identify and prioritize schools requiring immediate intervention within Jakarta. By aggregating multi-dimensional data into a single, actionable index, SIGAPP empowers government stakeholders, educators, and community partners to allocate resources effectively where they are most needed.
 
-Indeks SIGAPP dihitung berdasarkan pembobotan berikut:
+The platform utilizes a data-driven approach to rank schools based on structural, academic, and social vulnerabilities, providing automated analysis and communication tools through specialized AI Agents.
 
-1.  **P1: Quality Gap (35%)**: Mengukur kekurangan akademik dan kerentanan sosio-ekonomi (Skor Literasi, Numerasi, Kualitas Guru).
-2.  **P2: Spatial Inequity (25%)**: Menilai isolasi geografis dan beban perjalanan siswa (Waktu tempuh, aksesibilitas).
-3.  **P3: Structural Risk (25%)**: Menguantifikasi kerusakan infrastruktur fisik dan tren penurunan jumlah siswa.
-4.  **P4: Public Signal (15%)**: Menggabungkan keluhan masyarakat dan sentimen publik terhadap fasilitas sekolah.
+---
 
-## 🛠️ Teknologi
+## The SIGAPP Index
 
-- **Framework**: [Next.js 14](https://nextjs.org/) (App Router)
-- **Bahasa**: [TypeScript](https://www.typescriptlang.org/)
-- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
-- **Database & Auth**: [Supabase](https://supabase.com/)
-- **Icons**: [Lucide React](https://lucide.dev/)
-- **Charts**: [Recharts](https://recharts.org/)
-- **Font**: Inter (Google Fonts)
+The core of the platform is the **SIGAPP Index**, a composite metric calculated through four critical pillars of school performance and environment:
 
-## 📦 Instalasi & Penggunaan
+| Pillar | Focus Area | Weight | Description |
+| :--- | :--- | :--- | :--- |
+| **P1** | Quality Gap | 35% | Academic disparities, literacy, and numeracy performance. |
+| **P2** | Spatial Inequity | 25% | Accessibility, travel time, and geographical isolation. |
+| **P3** | Structural Risk | 25% | Physical building condition and infrastructure safety. |
+| **P4** | Public Signal | 15% | Frequency of community complaints and public feedback. |
 
-1. **Clone repository:**
+---
+
+## Core Features
+
+### 1. Interactive WebGIS Dashboard
+A high-performance map interface powered by Leaflet.js that visualizes school locations with dynamic color-coding based on their priority tier (Critical, High, Medium, Low). Users can filter by city, education level, and priority status in real-time.
+
+### 2. Deep Linking & State Persistence
+The dashboard state is synchronized with URL query parameters. This allows users to share specific filtered views, selected schools, or active tabs via simple URLs, ensuring consistent state across sessions and browser refreshes.
+
+### 3. Intelligent AI Agents
+*   **Report Agent**: Automatically generates comprehensive intervention reports in PDF format, analyzing dominant vulnerability pillars and providing tailored recommendations.
+*   **Email Agent**: Streamlines stakeholder coordination by automating outreach to schools, local authorities, and provincial departments, including response monitoring and automated escalation.
+
+### 4. Advanced Analytics & Insights
+Visual breakdown of school metrics using Radar charts, Sankey diagrams, and trend analysis. The system provides automated narrative summaries of school conditions based on the underlying multi-pillar data.
+
+---
+
+## Technology Stack
+
+*   **Framework**: Next.js 14 (App Router)
+*   **Language**: TypeScript
+*   **Styling**: Tailwind CSS
+*   **Database & Auth**: Supabase (PostgreSQL)
+*   **Mapping**: Leaflet.js & OpenStreetMap
+*   **Charts**: Recharts
+*   **PDF Generation**: jsPDF
+*   **Icons**: Lucide React
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+*   Node.js 18.x or later
+*   npm or yarn
+*   A Supabase project (for database access)
+
+### Installation
+
+1. Clone the repository:
    ```bash
    git clone https://github.com/zakiulfahmijailani/SIGAPP.git
    cd SIGAPP
    ```
 
-2. **Instal dependensi:**
+2. Install dependencies:
    ```bash
    npm install
    ```
 
-3. **Konfigurasi Environment Variables:**
-   Buat file `.env.local` di direktori root dan masukkan kredensial Supabase Anda:
+3. Configure environment variables:
+   Create a `.env.local` file in the root directory and add your Supabase credentials:
    ```env
-   NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
    ```
 
-4. **Jalankan server pengembangan:**
+4. Run the development server:
    ```bash
    npm run dev
    ```
-   Buka [http://localhost:3000](http://localhost:3000) di browser Anda.
-
-## 📂 Struktur Folder
-
-- `src/app/`: Routing dan halaman aplikasi.
-- `src/components/`: Komponen UI yang reusable (Badge, Sidebar, Skeleton, dll).
-- `src/lib/`: Konfigurasi Supabase, definisi tipe TypeScript, dan fungsi utilitas.
-- `public/`: Aset statis.
 
 ---
-**SIGAPP MVP v0.1** · Jakarta · 2025
-*Dikembangkan untuk efisiensi alokasi intervensi pendidikan yang lebih tepat sasaran.*
+
+## Database Schema
+
+The application relies on a structured PostgreSQL schema optimized for GIS and analytical queries:
+
+*   `schools`: Primary school data (NPSN, coordinates, level, address).
+*   `school_index`: Real-time calculation of SIGAPP pillars and the final composite index.
+*   `pillar_variables`: Raw data metrics used for pillar calculations (e.g., test scores, building damage weights).
+
+---
+
+## License
+
+This project is developed for Jakarta's educational infrastructure improvement. All rights reserved.
