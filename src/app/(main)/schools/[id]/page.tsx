@@ -25,7 +25,6 @@ import {
 import { getSupabase } from "@/lib/supabase";
 import { SchoolDetail } from "@/lib/types";
 import { formatIndex, getTierFromIndex, getPillarName, TIER_BG_COLORS } from "@/lib/utils";
-import { IndexBadge } from "@/components/ui/IndexBadge";
 import dynamic from 'next/dynamic';
 
 const SchoolSankeyChart = dynamic(
