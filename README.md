@@ -1,116 +1,104 @@
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="public/logo-dark-mode-with-texts.png">
-    <img src="public/logo-light-mode-with-texts.png" alt="SIGAPP Logo" width="280" />
+    <img src="public/logo-light-mode-with-texts.png" alt="SIGAPP" width="520" />
   </picture>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Next.js-14-black?logo=next.js" alt="Next.js" />
-  <img src="https://img.shields.io/badge/TypeScript-5-blue?logo=typescript" alt="TypeScript" />
-  <img src="https://img.shields.io/badge/Tailwind--CSS-3.4-38bdf8?logo=tailwind-css" alt="Tailwind CSS" />
-  <img src="https://img.shields.io/badge/Supabase-Database-3ecf8e?logo=supabase" alt="Supabase" />
-  <img src="https://img.shields.io/badge/Leaflet-GIS-199900?logo=leaflet" alt="Leaflet" />
+  <strong>Sistem Informasi Prioritas Intervensi Sekolah</strong><br/>
+  <em>Geospatial intelligence for school intervention in Jakarta</em>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Next.js-14-black?style=flat-square&logo=next.js" />
+  <img src="https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript&logoColor=white" />
+  <img src="https://img.shields.io/badge/Tailwind-CSS-38bdf8?style=flat-square&logo=tailwindcss&logoColor=white" />
+  <img src="https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?style=flat-square&logo=supabase&logoColor=white" />
+  <img src="https://img.shields.io/badge/Leaflet-Maps-199900?style=flat-square&logo=leaflet&logoColor=white" />
+  <img src="https://img.shields.io/badge/Deployed-Vercel-black?style=flat-square&logo=vercel" />
 </p>
 
 ---
 
-## Overview
+## What Is SIGAPP?
 
-**SIGAPP** (Sistem Informasi Prioritas Intervensi Sekolah) is an advanced WebGIS decision-support system designed to identify and prioritize schools requiring immediate intervention within Jakarta. By aggregating multi-dimensional data into a single, actionable index, SIGAPP empowers government stakeholders, educators, and community partners to allocate resources effectively where they are most needed.
-
-The platform utilizes a data-driven approach to rank schools based on structural, academic, and social vulnerabilities, providing automated analysis and communication tools through specialized AI Agents.
+SIGAPP is a WebGIS decision-support system that identifies and prioritizes schools in Jakarta needing immediate intervention. It aggregates structural, academic, spatial, and social data into a composite score — the SIGAPP Index — and surfaces which schools need attention, and why. Built for education planners, government stakeholders, and community partners, SIGAPP moves beyond raw data into targeted, evidence-based action.
 
 ---
 
 ## The SIGAPP Index
 
-The core of the platform is the **SIGAPP Index**, a composite metric calculated through four critical pillars of school performance and environment:
+Explain the composite scoring system. Use this exact table:
 
-| Pillar | Focus Area | Weight | Description |
-| :--- | :--- | :--- | :--- |
-| **P1** | Quality Gap | 35% | Academic disparities, literacy, and numeracy performance. |
-| **P2** | Spatial Inequity | 25% | Accessibility, travel time, and geographical isolation. |
-| **P3** | Structural Risk | 25% | Physical building condition and infrastructure safety. |
-| **P4** | Public Signal | 15% | Frequency of community complaints and public feedback. |
+| Pillar | Focus | Weight |
+|:---|:---|:---:|
+| **P1 — Quality Gap** | Academic disparities: literacy, numeracy, teacher-student ratios | 35% |
+| **P2 — Spatial Inequity** | Geographic access barriers: distance, travel time, isolation | 25% |
+| **P3 — Structural Risk** | Physical building condition and infrastructure safety | 25% |
+| **P4 — Public Signal** | Community complaints, trust deficit, public feedback frequency | 15% |
+
+The dominant pillar — whichever weighs heaviest for a given school — determines the nature of the intervention recommended.
+
+---
+
+## Priority Tiers
+
+| Tier | Label | AI Agents |
+|:---|:---|:---:|
+| 🔴 **KRITIS** | Critical — highest urgency | ✅ Active |
+| 🟠 **TINGGI** | High — approaching critical threshold | ⏳ Standby |
+| 🟡 **SEDANG** | Medium — monitored, not urgent | 🔒 Locked |
+| 🟢 **NORMAL** | Low — within acceptable range | 🔒 Locked |
+
+Only KRITIS schools activate the full agent layer.
 
 ---
 
 ## Core Features
 
-### 1. Interactive WebGIS Dashboard
-A high-performance map interface powered by Leaflet.js that visualizes school locations with dynamic color-coding based on their priority tier (Critical, High, Medium, Low). Users can filter by city, education level, and priority status in real-time.
+**Interactive WebGIS Map** — School locations across Jakarta color-coded by priority tier. Filter by city, education level, and priority status in real time.
 
-### 2. Deep Linking & State Persistence
-The dashboard state is synchronized with URL query parameters. This allows users to share specific filtered views, selected schools, or active tabs via simple URLs, ensuring consistent state across sessions and browser refreshes.
+**Ranked School List** — Sidebar ranking by SIGAPP Index with smart filtering, skeleton loaders, and search-aware empty states. All active filters sync to URL query params for shareable deep links.
 
-### 3. Intelligent AI Agents
-*   **Report Agent**: Automatically generates comprehensive intervention reports in PDF format, analyzing dominant vulnerability pillars and providing tailored recommendations.
-*   **Email Agent**: Streamlines stakeholder coordination by automating outreach to schools, local authorities, and provincial departments, including response monitoring and automated escalation.
+**School Detail Page** — Full pillar breakdown: Sankey diagram, radar chart, narrative summary, and intervention tier badge.
 
-### 4. Advanced Analytics & Insights
-Visual breakdown of school metrics using Radar charts, Sankey diagrams, and trend analysis. The system provides automated narrative summaries of school conditions based on the underlying multi-pillar data.
+**AI Agent Panel** — For KRITIS-tier schools only:
+- ReportAgent: analyzes dominant pillar, writes narrative summary, generates 3 recommendations, exports PDF
+- EmailAgent: dispatches report to 5 administrative levels (school → kelurahan → kecamatan → kota → provinsi), tracks reply status, auto-escalates after 48 hours of silence
 
 ---
 
-## Technology Stack
+## The Intelligence Layer
 
-*   **Framework**: Next.js 14 (App Router)
-*   **Language**: TypeScript
-*   **Styling**: Tailwind CSS
-*   **Database & Auth**: Supabase (PostgreSQL)
-*   **Mapping**: Leaflet.js & OpenStreetMap
-*   **Charts**: Recharts
-*   **PDF Generation**: jsPDF
-*   **Icons**: Lucide React
+When a school crosses into KRITIS, passive monitoring becomes active coordination. The AI agents are the mechanism through which analysis becomes institutional response.
+
+EmailAgent dispatches across the full administrative chain simultaneously and tracks each recipient independently. Every stakeholder's response — or silence — is visible. Accountability is built into the architecture.
 
 ---
 
-## Getting Started
+## Built With
 
-### Prerequisites
-
-*   Node.js 18.x or later
-*   npm or yarn
-*   A Supabase project (for database access)
-
-### Installation
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/zakiulfahmijailani/SIGAPP.git
-   cd SIGAPP
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Configure environment variables:
-   Create a `.env.local` file in the root directory and add your Supabase credentials:
-   ```env
-   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-   ```
-
-4. Run the development server:
-   ```bash
-   npm run dev
-   ```
+| Layer | Technology |
+|:---|:---|
+| Framework | Next.js 14 (App Router) |
+| Language | TypeScript 5 |
+| Styling | Tailwind CSS |
+| Database & Auth | Supabase (PostgreSQL) |
+| Mapping | Leaflet.js + OpenStreetMap |
+| Charts | Nivo (Sankey), Recharts |
+| PDF Export | jsPDF |
+| Icons | Lucide React |
+| Deployment | Vercel |
 
 ---
 
-## Database Schema
+## Status
 
-The application relies on a structured PostgreSQL schema optimized for GIS and analytical queries:
-
-*   `schools`: Primary school data (NPSN, coordinates, level, address).
-*   `school_index`: Real-time calculation of SIGAPP pillars and the final composite index.
-*   `pillar_variables`: Raw data metrics used for pillar calculations (e.g., test scores, building damage weights).
+SIGAPP is an active research and development project. The SIGAPP Index formula, pillar weights, and agent behavior are under continuous refinement as new school data is integrated and validated.
 
 ---
 
-## License
-
-This project is developed for Jakarta's educational infrastructure improvement. All rights reserved.
+<p align="center">
+  <sub>Built for Jakarta's schools. Grounded in data. Oriented toward equity.</sub>
+</p>
