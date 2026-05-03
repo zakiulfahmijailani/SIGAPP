@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <strong>Sistem INformasi Geospasial berbasis AI Agentik untuk Perencanaan Pendidikan</strong><br/>
+  <strong>Sistem Informasi Geospasial berbasis AI Agentik untuk Perencanaan Pendidikan</strong><br/>
   <em>Geospatial intelligence for school intervention in Jakarta</em>
 </p>
 
