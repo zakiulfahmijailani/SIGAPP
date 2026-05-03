@@ -144,7 +144,7 @@ export default function ReportAgent({
     // Header
     doc.setFontSize(18);
     doc.setTextColor(11, 42, 74);
-    doc.text("SIGAPP — Sistem Informasi Geospasial Berbasis AI Agentik", 20, 25);
+    doc.text("SIGAPP — Sistem INformasi Geospasial Berbasis AI Agentik", 20, 25);
     
     // Garis header
     doc.setDrawColor(31, 181, 168);
