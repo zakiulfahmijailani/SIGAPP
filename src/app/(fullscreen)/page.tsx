@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Sidebar } from "@/components/sidebar/Sidebar";
 import { FilterBar } from "@/components/ui/FilterBar";
 import { AgentStatusBar } from "@/components/ui/AgentStatusBar";
-import type { ChatState, Message } from "@/components/chat/ChatWidget";
+import type { Message } from "@/components/chat/ChatWidget";
 import { useSchools } from "@/hooks/useSchools";
 import { getTierFromIndex } from "@/lib/utils";
 import dynamic from 'next/dynamic';
@@ -40,7 +40,6 @@ function DashboardInner() {
   const [selectedSchoolId, setSelectedSchoolId] = useState<string | null>(
     searchParams.get('school')
   );
-  const [chatState, setChatState] = useState<ChatState>('bubble');
 
   // Chat State
   const [messages, setMessages] = useState<Message[]>([
@@ -136,16 +135,6 @@ function DashboardInner() {
     updateURL({ tab });
   }
 
-  const handleChatStateChange = (state: ChatState) => {
-    setChatState(state);
-    if (state === 'docked') {
-      changeTab('chat');
-      setSidebarOpen(true);
-    }
-    if (state === 'expanded' && chatState === 'docked') {
-      changeTab('stats');
-    }
-  };
 
   const today = new Date().toLocaleDateString('id-ID', { dateStyle: 'long' });
 
@@ -212,7 +201,6 @@ function DashboardInner() {
             onClose={() => setSidebarOpen(false)}
             selectedSchoolId={selectedSchoolId}
             onSchoolSelect={handleSchoolSelect}
-            chatState={chatState}
             messages={messages}
             setMessages={setMessages}
             showChips={showChips}

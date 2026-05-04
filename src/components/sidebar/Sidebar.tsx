@@ -4,7 +4,7 @@ import { ChevronRight, BarChart2, List, MessageCircle } from "lucide-react";
 import { StatsTab } from "./StatsTab";
 import { RankedTab } from "./RankedTab";
 import { SchoolWithIndex } from "@/lib/types";
-import type { ChatState, Message } from "@/components/chat/ChatWidget";
+import type { Message } from "@/components/chat/ChatWidget";
 import { AgentTab } from "./AgentTab";
 import { ChatUI } from "@/components/chat/ChatUI";
 import { Bot } from "lucide-react";
@@ -15,7 +15,6 @@ export interface SidebarProps {
   onClose: () => void;
   selectedSchoolId?: string | null;
   onSchoolSelect?: (school: SchoolWithIndex | null) => void;
-  chatState: ChatState;
   messages: Message[];
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
   showChips: boolean;
@@ -29,7 +28,6 @@ export function Sidebar({
   onClose, 
   selectedSchoolId = null, 
   onSchoolSelect = () => {},
-  chatState,
   messages,
   setMessages,
   showChips,
@@ -65,14 +63,7 @@ export function Sidebar({
           onClick={() => onTabChange('list')}
         />
         <TabButton
-          icon={
-            <div className="relative">
-              <MessageCircle size={16} />
-              {chatState === 'docked' && (
-                <span className="absolute -top-1 -right-1 w-2 h-2 bg-[#00B4B4] rounded-full" />
-              )}
-            </div>
-          }
+          icon={<MessageCircle size={16} />}
           label="Chat"
           isActive={activeTab === 'chat'}
           onClick={() => onTabChange('chat')}
