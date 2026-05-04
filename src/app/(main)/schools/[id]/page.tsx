@@ -38,6 +38,11 @@ const AgentStatusPanel = dynamic(
   { ssr: false, loading: () => <div className="h-[200px] skeleton-shimmer rounded-xl" /> }
 )
 
+const AgentDecisionPanel = dynamic(
+  () => import('@/components/agents/AgentDecisionPanel'),
+  { ssr: false, loading: () => <div className="h-[160px] skeleton-shimmer rounded-xl mb-6" /> }
+)
+
 // ── Pillar config ────────────────────────────────────────────────
 const PILLARS = [
   { key: "p1_quality_gap", weight: 35 },
@@ -225,6 +230,17 @@ export default function SchoolDetailPage() {
       >
         <ArrowLeft size={15} /> All Schools
       </Link>
+
+      <AgentDecisionPanel
+        dominantPillar="P3 — Structural Risk"
+        dominantScore={0.821}
+        previousTier="SEDANG"
+        currentTier="KRITIS"
+        tierChanged={true}
+        analysisDate="Monday, 5 May 2026 · 12:04 WIB"
+        reportGenerated={true}
+        emailDispatched={true}
+      />
 
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-slate-800 mb-2">
