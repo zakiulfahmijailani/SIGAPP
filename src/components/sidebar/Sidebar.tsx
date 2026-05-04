@@ -6,6 +6,7 @@ import { RankedTab } from "./RankedTab";
 import { SchoolWithIndex } from "@/lib/types";
 import { ChatTab } from "./ChatTab";
 import type { ChatState, Message } from "@/components/chat/ChatWidget";
+import { AgentActivityFeed } from "./AgentActivityFeed";
 
 export interface SidebarProps {
   activeTab: 'stats' | 'list' | 'chat';
@@ -105,6 +106,11 @@ export function Sidebar({
                 </p>
               </div>
         )}
+      </div>
+
+      {/* 4. AGENT ACTIVITY FEED */}
+      <div className="px-4 pb-4">
+        <AgentActivityFeed />
       </div>
     </div>
   );
