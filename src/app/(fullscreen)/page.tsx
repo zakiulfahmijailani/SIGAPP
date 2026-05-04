@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Sidebar } from "@/components/sidebar/Sidebar";
 import { FilterBar } from "@/components/ui/FilterBar";
 import { AgentStatusBar } from "@/components/ui/AgentStatusBar";
-import ChatWidget, { ChatState, Message } from "@/components/chat/ChatWidget";
+import type { ChatState, Message } from "@/components/chat/ChatWidget";
 import { useSchools } from "@/hooks/useSchools";
 import { getTierFromIndex } from "@/lib/utils";
 import dynamic from 'next/dynamic';
@@ -217,7 +217,6 @@ function DashboardInner() {
             setMessages={setMessages}
             showChips={showChips}
             setShowChips={setShowChips}
-            onUndock={() => handleChatStateChange('expanded')}
             schools={schools}
           />
         </aside>

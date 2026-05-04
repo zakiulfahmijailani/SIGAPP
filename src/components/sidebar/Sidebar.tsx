@@ -4,9 +4,7 @@ import { ChevronRight, BarChart2, List, MessageCircle } from "lucide-react";
 import { StatsTab } from "./StatsTab";
 import { RankedTab } from "./RankedTab";
 import { SchoolWithIndex } from "@/lib/types";
-import { ChatTab } from "./ChatTab";
 import type { ChatState, Message } from "@/components/chat/ChatWidget";
-import { AgentActivityFeed } from "./AgentActivityFeed";
 import { AgentTab } from "./AgentTab";
 import { ChatUI } from "@/components/chat/ChatUI";
 import { Bot } from "lucide-react";
@@ -22,7 +20,6 @@ export interface SidebarProps {
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
   showChips: boolean;
   setShowChips: React.Dispatch<React.SetStateAction<boolean>>;
-  onUndock: () => void;
   schools: SchoolWithIndex[];
 }
 
@@ -37,7 +34,6 @@ export function Sidebar({
   setMessages,
   showChips,
   setShowChips,
-  onUndock,
   schools
 }: SidebarProps) {
   return (
