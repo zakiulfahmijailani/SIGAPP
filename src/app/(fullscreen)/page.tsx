@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Sidebar } from "@/components/sidebar/Sidebar";
 import { FilterBar } from "@/components/ui/FilterBar";
 import { AgentStatusBar } from "@/components/ui/AgentStatusBar";
+import { AgentBrainWidget } from "@/components/ui/AgentBrainWidget";
 import ChatWidget, { ChatState, Message } from "@/components/chat/ChatWidget";
 import { useSchools } from "@/hooks/useSchools";
 import { getTierFromIndex } from "@/lib/utils";
@@ -244,6 +245,8 @@ function DashboardInner() {
         showChips={showChips}
         setShowChips={setShowChips}
       />
+
+      <AgentBrainWidget />
     </>
   );
 }
