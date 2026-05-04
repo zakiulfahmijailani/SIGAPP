@@ -17,7 +17,7 @@ export function AgentBrainWidget() {
     <>
       {/* Expanded Panel */}
       <div
-        className={`fixed bottom-20 right-6 z-50 w-64 bg-slate-900 border border-slate-700 rounded-2xl shadow-xl shadow-black/40 p-4 transition-all duration-200 ease-out ${
+        className={`fixed bottom-20 right-4 z-[9999] w-64 bg-slate-900 border border-slate-700 rounded-2xl shadow-xl shadow-black/40 p-4 transition-all duration-200 ease-out ${
           isOpen
             ? "opacity-100 scale-100 translate-y-0"
             : "opacity-0 scale-95 translate-y-2 pointer-events-none"
@@ -87,7 +87,7 @@ export function AgentBrainWidget() {
       {/* Floating Button */}
       <button
         onClick={() => setIsOpen((prev) => !prev)}
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-slate-900 border-2 border-green-500 shadow-lg shadow-green-500/20 flex items-center justify-center text-2xl hover:scale-105 transition-transform group"
+        className="fixed bottom-6 right-4 z-[9999] w-14 h-14 rounded-full bg-slate-900 border-2 border-green-500 shadow-lg shadow-green-500/20 flex items-center justify-center text-2xl hover:scale-105 transition-transform group"
         aria-label="SIGAPP Agent"
       >
         🧠

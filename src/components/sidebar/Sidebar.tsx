@@ -81,7 +81,7 @@ export function Sidebar({
       </div>
 
       {/* 3. TAB CONTENT AREA */}
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 pb-24">
         {activeTab === 'stats' && <StatsTab schools={schools} />}
         {activeTab === 'list' && (
           <RankedTab
@@ -98,20 +98,19 @@ export function Sidebar({
                 setShowChips={setShowChips}
                 onUndock={onUndock}
               />
-            : <div className="flex flex-col items-center justify-center h-full text-center p-8 gap-3">
-                <MessageCircle size={32} className="text-[#00B4B4] opacity-50" />
+            : <div className="mt-8 flex flex-col items-center text-center p-4 gap-2">
+                <MessageCircle size={24} className="text-[#00B4B4] opacity-50" />
                 <p className="text-sm font-medium text-gray-600">AI Chat tersedia</p>
                 <p className="text-xs text-gray-400 max-w-[180px]">
                   Gunakan tombol chat di pojok kanan bawah untuk mulai bertanya.
                 </p>
               </div>
         )}
-      </div>
 
-      {/* 4. AGENT ACTIVITY FEED */}
-      <div className="px-4 pb-4">
+        {/* 4. AGENT ACTIVITY FEED - Moved inside scroll container */}
         <AgentActivityFeed />
       </div>
+
     </div>
   );
 }

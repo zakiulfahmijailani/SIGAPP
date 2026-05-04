@@ -48,10 +48,10 @@ const TYPE_CONFIG: Record<string, { icon: string; color: string }> = {
 
 export function AgentActivityFeed() {
   return (
-    <div className="bg-slate-900/60 rounded-xl p-3 border border-slate-800">
+    <div className="w-full bg-slate-900/60 rounded-xl p-3 border border-slate-800 overflow-hidden my-2">
       {/* Header */}
       <div className="flex items-center justify-between mb-2">
-        <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+        <span className="text-xs font-medium text-slate-400">
           🤖 Agent Activity
         </span>
         <div className="flex items-center gap-1.5">
@@ -61,7 +61,7 @@ export function AgentActivityFeed() {
       </div>
 
       {/* Scrollable log */}
-      <div className="max-h-48 overflow-y-auto">
+      <div className="max-h-36 overflow-y-auto">
         {agentLog.map((entry, i) => {
           const config = TYPE_CONFIG[entry.type] || { icon: "•", color: "text-slate-400" };
           const isLast = i === agentLog.length - 1;
