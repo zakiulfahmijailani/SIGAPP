@@ -7,10 +7,13 @@ import { SchoolWithIndex } from "@/lib/types";
 import { ChatTab } from "./ChatTab";
 import type { ChatState, Message } from "@/components/chat/ChatWidget";
 import { AgentActivityFeed } from "./AgentActivityFeed";
+import { AgentTab } from "./AgentTab";
+import { ChatUI } from "@/components/chat/ChatUI";
+import { Bot } from "lucide-react";
 
 export interface SidebarProps {
-  activeTab: 'stats' | 'list' | 'chat';
-  onTabChange: (tab: 'stats' | 'list' | 'chat') => void;
+  activeTab: 'stats' | 'list' | 'chat' | 'agent';
+  onTabChange: (tab: 'stats' | 'list' | 'chat' | 'agent') => void;
   onClose: () => void;
   selectedSchoolId?: string | null;
   onSchoolSelect?: (school: SchoolWithIndex | null) => void;
@@ -78,6 +81,12 @@ export function Sidebar({
           isActive={activeTab === 'chat'}
           onClick={() => onTabChange('chat')}
         />
+        <TabButton
+          icon={<Bot size={16} />}
+          label="Agent"
+          isActive={activeTab === 'agent'}
+          onClick={() => onTabChange('agent')}
+        />
       </div>
 
       {/* 3. TAB CONTENT AREA */}
@@ -90,25 +99,14 @@ export function Sidebar({
           />
         )}
         {activeTab === 'chat' && (
-          chatState === 'docked'
-            ? <ChatTab
-                messages={messages}
-                setMessages={setMessages}
-                showChips={showChips}
-                setShowChips={setShowChips}
-                onUndock={onUndock}
-              />
-            : <div className="mt-8 flex flex-col items-center text-center p-4 gap-2">
-                <MessageCircle size={24} className="text-[#00B4B4] opacity-50" />
-                <p className="text-sm font-medium text-gray-600">AI Chat tersedia</p>
-                <p className="text-xs text-gray-400 max-w-[180px]">
-                  Gunakan tombol chat di pojok kanan bawah untuk mulai bertanya.
-                </p>
-              </div>
+          <ChatUI
+            messages={messages}
+            setMessages={setMessages}
+            showChips={showChips}
+            setShowChips={setShowChips}
+          />
         )}
-
-        {/* 4. AGENT ACTIVITY FEED - Moved inside scroll container */}
-        <AgentActivityFeed />
+        {activeTab === 'agent' && <AgentTab />}
       </div>
 
     </div>

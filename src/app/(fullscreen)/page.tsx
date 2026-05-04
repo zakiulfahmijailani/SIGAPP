@@ -6,7 +6,6 @@ import Link from "next/link";
 import { Sidebar } from "@/components/sidebar/Sidebar";
 import { FilterBar } from "@/components/ui/FilterBar";
 import { AgentStatusBar } from "@/components/ui/AgentStatusBar";
-import { AgentBrainWidget } from "@/components/ui/AgentBrainWidget";
 import ChatWidget, { ChatState, Message } from "@/components/chat/ChatWidget";
 import { useSchools } from "@/hooks/useSchools";
 import { getTierFromIndex } from "@/lib/utils";
@@ -35,8 +34,8 @@ function DashboardInner() {
   const router = useRouter();
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [activeTab, setActiveTab] = useState<'stats'|'list'|'chat'>(
-    (searchParams.get('tab') as 'stats'|'list'|'chat') || 'stats'
+  const [activeTab, setActiveTab] = useState<'stats'|'list'|'chat'|'agent'>(
+    (searchParams.get('tab') as 'stats'|'list'|'chat'|'agent') || 'stats'
   );
   const [selectedSchoolId, setSelectedSchoolId] = useState<string | null>(
     searchParams.get('school')
@@ -132,7 +131,7 @@ function DashboardInner() {
     handleSchoolSelect(school);
   };
 
-  function changeTab(tab: 'stats'|'list'|'chat') {
+  function changeTab(tab: 'stats'|'list'|'chat'|'agent') {
     setActiveTab(tab);
     updateURL({ tab });
   }
@@ -237,16 +236,6 @@ function DashboardInner() {
       </main>
       </div>
 
-      <ChatWidget 
-        chatState={chatState} 
-        onChatStateChange={handleChatStateChange}
-        messages={messages}
-        setMessages={setMessages}
-        showChips={showChips}
-        setShowChips={setShowChips}
-      />
-
-      <AgentBrainWidget />
     </>
   );
 }
