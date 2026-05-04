@@ -5,6 +5,7 @@ import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { Sidebar } from "@/components/sidebar/Sidebar";
 import { FilterBar } from "@/components/ui/FilterBar";
+import { AgentStatusBar } from "@/components/ui/AgentStatusBar";
 import ChatWidget, { ChatState, Message } from "@/components/chat/ChatWidget";
 import { useSchools } from "@/hooks/useSchools";
 import { getTierFromIndex } from "@/lib/utils";
@@ -151,6 +152,7 @@ function DashboardInner() {
   return (
     <>
       <div className="flex flex-col h-screen w-full overflow-hidden bg-slate-50">
+      <AgentStatusBar />
       {/* 1. NAVBAR */}
       <nav className="h-16 bg-white flex-shrink-0 flex items-center justify-between px-6 z-50 shadow-sm border-b border-gray-100">
         <div className="flex items-center gap-10">
