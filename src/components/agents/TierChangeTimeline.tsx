@@ -32,9 +32,12 @@ export default function TierChangeTimeline({ entries, schoolName }: TierChangeTi
     <div className="rounded-2xl border border-slate-700 bg-slate-900/80 backdrop-blur-sm p-4 mb-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
-          📈 Index History
-        </span>
+        <div className="flex flex-col">
+          <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">
+            📈 Index History
+          </span>
+          <span className="text-[10px] text-slate-500 font-medium">{schoolName}</span>
+        </div>
         <span className="text-[10px] text-slate-500 italic">
           Tracked by SIGAPP Agent
         </span>
