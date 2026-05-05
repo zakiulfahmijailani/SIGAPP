@@ -4,14 +4,14 @@ import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { Search, ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import { getSupabase } from "@/lib/supabase";
-import { SchoolWithIndex } from "@/lib/types";
+import { SekolahNTTFull } from "@/lib/types";
 import { IndexBadge } from "@/components/ui/IndexBadge";
 import { SkeletonRow } from "@/components/ui/SkeletonRow";
 
 const PAGE_SIZE = 20;
 
 export default function SchoolsPage() {
-  const [schools, setSchools] = useState<SchoolWithIndex[]>([]);
+  const [schools, setSchools] = useState<SekolahNTTFull[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -30,12 +30,9 @@ export default function SchoolsPage() {
       setError(null);
 
       const { data, error: fetchError } = await getSupabase()
-        .from("schools")
-        .select("*, school_index(*)")
-        .order("sigapp_index", {
-          foreignTable: "school_index",
-          ascending: false,
-        });
+        .from("sekolah_ntt_full")
+        .select("*")
+        .order("sigapp_index", { ascending: false });
 
       if (fetchError) {
         setError(fetchError.message);
@@ -43,15 +40,7 @@ export default function SchoolsPage() {
         return;
       }
 
-      // Normalize: Supabase returns school_index as array or object
-      const normalized = (data ?? []).map((s: Record<string, unknown>) => ({
-        ...s,
-        school_index: Array.isArray(s.school_index)
-          ? s.school_index[0]
-          : s.school_index,
-      })) as SchoolWithIndex[];
-
-      setSchools(normalized);
+      setSchools((data ?? []) as SekolahNTTFull[]);
       setLoading(false);
     }
 
@@ -111,7 +100,7 @@ export default function SchoolsPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-slate-800">All Schools</h1>
         <p className="mt-1 text-sm text-slate-500">
-          Jakarta · {loading ? "…" : `${filtered.length} schools`}
+          NTT · {loading ? "…" : `${filtered.length} schools`}
         </p>
       </div>
 
@@ -246,13 +235,7 @@ export default function SchoolsPage() {
 
                     {/* SIGAPP Index */}
                     <td className="px-4 py-3">
-                      {school.school_index ? (
-                        <IndexBadge
-                          index={school.school_index.sigapp_index}
-                        />
-                      ) : (
-                        <span className="text-slate-300">—</span>
-                      )}
+                      <IndexBadge index={school.sigapp_index} />
                     </td>
 
                     {/* Link */}
