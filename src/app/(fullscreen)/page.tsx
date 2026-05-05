@@ -5,17 +5,16 @@ import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 import { Sidebar } from "@/components/sidebar/Sidebar";
 import { FilterBar } from "@/components/ui/FilterBar";
-import { AgentStatusBar } from "@/components/ui/AgentStatusBar";
-import type { Message } from "@/components/chat/ChatWidget";
-import { useSekolahNTT } from "@/hooks/useSekolahNTT";
+import ChatWidget, { ChatState, Message } from "@/components/chat/ChatWidget";
+import { useSchools } from "@/hooks/useSchools";
 import { getTierFromIndex } from "@/lib/utils";
 import dynamic from 'next/dynamic';
 import type { Map as LeafletMap } from 'leaflet';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { SekolahNTTFull } from "@/lib/types-ntt";
+import { SchoolWithIndex } from "@/lib/types";
 
-const SchoolMapNTT = dynamic(
-  () => import('@/components/map/SchoolMapNTT'),
+const SchoolMap = dynamic(
+  () => import('@/components/map/SchoolMap'),
   { 
     ssr: false,
     loading: () => (
@@ -34,12 +33,13 @@ function DashboardInner() {
   const router = useRouter();
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [activeTab, setActiveTab] = useState<'stats'|'list'|'chat'|'agent'>(
-    (searchParams.get('tab') as 'stats'|'list'|'chat'|'agent') || 'stats'
+  const [activeTab, setActiveTab] = useState<'stats'|'list'|'chat'>(
+    (searchParams.get('tab') as 'stats'|'list'|'chat') || 'stats'
   );
   const [selectedSchoolId, setSelectedSchoolId] = useState<string | null>(
     searchParams.get('school')
   );
+  const [chatState, setChatState] = useState<ChatState>('bubble');
 
   // Chat State
   const [messages, setMessages] = useState<Message[]>([
@@ -51,37 +51,37 @@ function DashboardInner() {
   const [showChips, setShowChips] = useState(true);
 
   // Filters
-  const [kabupatenFilter, setKabupatenFilter] = useState(searchParams.get('kabupaten') || 'all');
+  const [kotaFilter, setKotaFilter] = useState(searchParams.get('kota') || 'all');
   const [jenjangFilter, setJenjangFilter] = useState(searchParams.get('jenjang') || 'all');
   const [prioritasFilter, setPrioritasFilter] = useState(searchParams.get('prioritas') || 'all');
 
-  const { data: schools } = useSekolahNTT();
+  const { schools } = useSchools();
   const mapRef = useRef<LeafletMap | null>(null);
 
   const filteredSchools = useMemo(() => 
     schools.filter(s => {
-      const sKabupaten = s.kabupaten;
+      const sKota = s.kota;
       
       return (
-        (kabupatenFilter === 'all' || sKabupaten === kabupatenFilter) &&
+        (kotaFilter === 'all' || sKota === kotaFilter) &&
         (jenjangFilter === 'all' || s.jenjang === jenjangFilter) &&
-        (prioritasFilter === 'all' || getTierFromIndex(s.sigapp_index || 0) === prioritasFilter)
+        (prioritasFilter === 'all' || getTierFromIndex(s.school_index?.sigapp_index || 0) === prioritasFilter)
       );
     }),
-    [schools, kabupatenFilter, jenjangFilter, prioritasFilter]
+    [schools, kotaFilter, jenjangFilter, prioritasFilter]
   );
 
   function updateURL(overrides: {
     school?: string | null;
     q?: string;
-    kabupaten?: string;
+    kota?: string;
     jenjang?: string;
     prioritas?: string;
     tab?: string;
   }) {
     const params = new URLSearchParams(window.location.search);
     const school = 'school' in overrides ? overrides.school : selectedSchoolId;
-    const kabupaten = overrides.kabupaten ?? kabupatenFilter;
+    const kota = overrides.kota ?? kotaFilter;
     const jenjang = overrides.jenjang ?? jenjangFilter;
     const prioritas = overrides.prioritas ?? prioritasFilter;
     const tab = overrides.tab ?? activeTab;
@@ -89,8 +89,8 @@ function DashboardInner() {
     if (school) params.set('school', school);
     else params.delete('school');
 
-    if (kabupaten !== 'all') params.set('kabupaten', kabupaten);
-    else params.delete('kabupaten');
+    if (kota !== 'all') params.set('kota', kota);
+    else params.delete('kota');
 
     if (jenjang !== 'all') params.set('jenjang', jenjang);
     else params.delete('jenjang');
@@ -105,8 +105,8 @@ function DashboardInner() {
     router.replace(qs ? `?${qs}` : '/', { scroll: false });
   }
 
-  const handleSchoolSelect = (school: SekolahNTTFull | null) => {
-    const newId = school?.id ? String(school.id) : null;
+  const handleSchoolSelect = (school: SchoolWithIndex | null) => {
+    const newId = school?.id || null;
     setSelectedSchoolId(newId);
     if (school) {
       setActiveTab('list');
@@ -114,9 +114,9 @@ function DashboardInner() {
       updateURL({ school: newId, tab: 'list' });
       
       // Fly map to selected school
-      if (mapRef.current && school.lat && school.lon) {
+      if (mapRef.current && school.latitude && school.longitude) {
         mapRef.current.flyTo(
-          [school.lat, school.lon],
+          [school.latitude, school.longitude],
           15,
           { duration: 1.2, easeLinearity: 0.25 }
         );
@@ -126,29 +126,38 @@ function DashboardInner() {
     }
   };
 
-  const handleMapDotClick = (school: SekolahNTTFull) => {
+  const handleMapDotClick = (school: SchoolWithIndex) => {
     handleSchoolSelect(school);
   };
 
-  function changeTab(tab: 'stats'|'list'|'chat'|'agent') {
+  function changeTab(tab: 'stats'|'list'|'chat') {
     setActiveTab(tab);
     updateURL({ tab });
   }
 
+  const handleChatStateChange = (state: ChatState) => {
+    setChatState(state);
+    if (state === 'docked') {
+      changeTab('chat');
+      setSidebarOpen(true);
+    }
+    if (state === 'expanded' && chatState === 'docked') {
+      changeTab('stats');
+    }
+  };
 
   const today = new Date().toLocaleDateString('id-ID', { dateStyle: 'long' });
 
   return (
     <>
       <div className="flex flex-col h-screen w-full overflow-hidden bg-slate-50">
-      <AgentStatusBar />
       {/* 1. NAVBAR */}
       <nav className="h-16 bg-white flex-shrink-0 flex items-center justify-between px-6 z-50 shadow-sm border-b border-gray-100">
         <div className="flex items-center gap-10">
           <div className="flex items-center gap-4">
             <img src="/logo-light-mode-with-texts.png" alt="SIGAPP Logo" className="h-12 w-auto object-contain" />
             <div className="h-10 w-px bg-gray-200 ml-1 hidden sm:block"></div>
-            <span className="text-[#0D2137]/40 text-[10px] uppercase tracking-widest font-bold hidden sm:block">NTT Dashboard</span>
+            <span className="text-[#0D2137]/40 text-[10px] uppercase tracking-widest font-bold hidden sm:block">Jakarta Dashboard</span>
           </div>
 
           <div className="flex items-center gap-8">
@@ -169,18 +178,18 @@ function DashboardInner() {
         {/* 2a. MAP AREA */}
         <div className="flex-1 bg-gray-100 flex items-center justify-center relative z-0">
           <FilterBar
-            kabupatenFilter={kabupatenFilter}
+            kotaFilter={kotaFilter}
             jenjangFilter={jenjangFilter}
             prioritasFilter={prioritasFilter}
-            onKabupatenChange={(val) => { setKabupatenFilter(val); updateURL({ kabupaten: val }); }}
+            onKotaChange={(val) => { setKotaFilter(val); updateURL({ kota: val }); }}
             onJenjangChange={(val) => { setJenjangFilter(val); updateURL({ jenjang: val }); }}
             onPrioritasChange={(val) => { setPrioritasFilter(val); updateURL({ prioritas: val }); }}
             totalVisible={filteredSchools.length}
             totalAll={schools.length}
           />
-          <SchoolMapNTT
+          <SchoolMap
             schools={filteredSchools}
-            selectedId={selectedSchoolId ? Number(selectedSchoolId) : null}
+            selectedSchoolId={selectedSchoolId}
             onSchoolClick={handleMapDotClick}
             onMapReady={(map) => { mapRef.current = map; }}
           />
@@ -201,10 +210,12 @@ function DashboardInner() {
             onClose={() => setSidebarOpen(false)}
             selectedSchoolId={selectedSchoolId}
             onSchoolSelect={handleSchoolSelect}
+            chatState={chatState}
             messages={messages}
             setMessages={setMessages}
             showChips={showChips}
             setShowChips={setShowChips}
+            onUndock={() => handleChatStateChange('expanded')}
             schools={schools}
           />
         </aside>
@@ -223,6 +234,14 @@ function DashboardInner() {
       </main>
       </div>
 
+      <ChatWidget 
+        chatState={chatState} 
+        onChatStateChange={handleChatStateChange}
+        messages={messages}
+        setMessages={setMessages}
+        showChips={showChips}
+        setShowChips={setShowChips}
+      />
     </>
   );
 }

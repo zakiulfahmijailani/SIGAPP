@@ -38,16 +38,6 @@ const AgentStatusPanel = dynamic(
   { ssr: false, loading: () => <div className="h-[200px] skeleton-shimmer rounded-xl" /> }
 )
 
-const AgentDecisionPanel = dynamic(
-  () => import('@/components/agents/AgentDecisionPanel'),
-  { ssr: false, loading: () => <div className="h-[160px] skeleton-shimmer rounded-xl mb-6" /> }
-)
-
-const TierChangeTimeline = dynamic(
-  () => import('@/components/agents/TierChangeTimeline'),
-  { ssr: false, loading: () => <div className="h-[200px] skeleton-shimmer rounded-xl mb-6" /> }
-)
-
 // ── Pillar config ────────────────────────────────────────────────
 const PILLARS = [
   { key: "p1_quality_gap", weight: 35 },
@@ -235,28 +225,6 @@ export default function SchoolDetailPage() {
       >
         <ArrowLeft size={15} /> All Schools
       </Link>
-
-      <AgentDecisionPanel
-        dominantPillar="P3 — Structural Risk"
-        dominantScore={0.821}
-        previousTier="SEDANG"
-        currentTier="KRITIS"
-        tierChanged={true}
-        analysisDate="Monday, 5 May 2026 · 12:04 WIB"
-        reportGenerated={true}
-        emailDispatched={true}
-      />
-
-      <TierChangeTimeline
-        schoolName={school.school_name}
-        entries={[
-          { month: "January 2026", tier: "NORMAL", index: 0.412, note: "Within acceptable range" },
-          { month: "February 2026", tier: "NORMAL", index: 0.438, note: "Slight P3 increase detected" },
-          { month: "March 2026", tier: "SEDANG", index: 0.571, note: "P3 structural variance flagged", agentDetected: true },
-          { month: "April 2026", tier: "SEDANG", index: 0.614, note: "Monitoring continued" },
-          { month: "May 2026", tier: "KRITIS", index: 0.724, note: "P3 exceeded critical threshold \u2014 agent activated", agentDetected: true },
-        ]}
-      />
 
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-slate-800 mb-2">

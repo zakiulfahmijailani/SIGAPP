@@ -1,16 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { SekolahNTTFull, PriorityTierNTT, TIER_BG_COLORS_NTT } from "@/lib/types-ntt";
-import { getTierNTT } from "@/lib/utils-ntt";
+import { SchoolWithIndex } from "@/lib/types";
+import { PriorityTier, TIER_BG_COLORS, getTierFromIndex } from "@/lib/utils";
 
 interface StatsTabProps {
-  schools: SekolahNTTFull[];
+  schools: SchoolWithIndex[];
 }
 
 interface DistributionItem {
   label: string;
-  tier: PriorityTierNTT;
+  tier: PriorityTier;
   color: string;
   count: number;
   total: number;
@@ -18,32 +18,32 @@ interface DistributionItem {
 
 export function StatsTab({ schools }: StatsTabProps) {
   const totalSchools = schools.length;
-  const withIndex = schools.filter(s => s.sigapp_index !== null);
+  const withIndex = schools.filter(s => s.school_index);
 
-  const kritisCount = withIndex.filter(s => getTierNTT(s.sigapp_index) === 'KRITIS').length;
-  const tinggiCount = withIndex.filter(s => getTierNTT(s.sigapp_index) === 'TINGGI').length;
+  const kritisCount = withIndex.filter(s => getTierFromIndex(s.school_index.sigapp_index) === 'KRITIS').length;
+  const tinggiCount = withIndex.filter(s => getTierFromIndex(s.school_index.sigapp_index) === 'TINGGI').length;
 
   const avgIndex = withIndex.length > 0
-    ? withIndex.reduce((sum, s) => sum + (s.sigapp_index || 0), 0) / withIndex.length
+    ? withIndex.reduce((sum, s) => sum + s.school_index.sigapp_index, 0) / withIndex.length
     : 0;
 
   const uniqueKecamatan = new Set(schools.map(s => s.kecamatan)).size;
 
   const kpis = [
-    { title: "Total Sekolah",   value: totalSchools.toString(),                subtitle: "Provinsi NTT",    color: "#0D2137" },
+    { title: "Total Sekolah",   value: totalSchools.toString(),                subtitle: "DKI Jakarta (Sampel)",    color: "#0D2137" },
     { title: "Kritis + Tinggi", value: (kritisCount + tinggiCount).toString(), subtitle: "Butuh intervensi segera", color: "#DC2626" },
     { title: "Rata-rata Index", value: avgIndex.toFixed(2),                   subtitle: "Skala 0.0 – 1.0",         color: "#00B4B4" },
-    { title: "Kec. Terdampak",  value: uniqueKecamatan.toString(),             subtitle: "Dari seluruh kecamatan",  color: "#F97316" },
+    { title: "Kec. Terdampak",  value: uniqueKecamatan.toString(),             subtitle: "Dari 44 kecamatan",       color: "#F97316" },
   ];
 
   const distribution: DistributionItem[] = [
-    { label: 'Sangat Prioritas (Kritis)', tier: 'KRITIS', color: TIER_BG_COLORS_NTT.KRITIS, count: 0, total: totalSchools || 1 },
-    { label: 'Prioritas Tinggi',          tier: 'TINGGI', color: TIER_BG_COLORS_NTT.TINGGI, count: 0, total: totalSchools || 1 },
-    { label: 'Prioritas Sedang',          tier: 'SEDANG', color: TIER_BG_COLORS_NTT.SEDANG, count: 0, total: totalSchools || 1 },
-    { label: 'Prioritas Rendah',          tier: 'RENDAH', color: TIER_BG_COLORS_NTT.RENDAH, count: 0, total: totalSchools || 1 },
+    { label: 'Sangat Prioritas (Kritis)', tier: 'KRITIS', color: TIER_BG_COLORS.KRITIS, count: 0, total: totalSchools || 1 },
+    { label: 'Prioritas Tinggi',          tier: 'TINGGI', color: TIER_BG_COLORS.TINGGI, count: 0, total: totalSchools || 1 },
+    { label: 'Prioritas Sedang',          tier: 'SEDANG', color: TIER_BG_COLORS.SEDANG, count: 0, total: totalSchools || 1 },
+    { label: 'Prioritas Rendah',          tier: 'RENDAH', color: TIER_BG_COLORS.RENDAH, count: 0, total: totalSchools || 1 },
   ].map(item => ({
     ...item,
-    count: withIndex.filter(s => getTierNTT(s.sigapp_index) === item.tier).length,
+    count: withIndex.filter(s => getTierFromIndex(s.school_index.sigapp_index) === item.tier).length,
   })) as DistributionItem[];
 
   return (

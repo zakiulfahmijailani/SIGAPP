@@ -3,23 +3,23 @@
 import { ChevronRight, BarChart2, List, MessageCircle } from "lucide-react";
 import { StatsTab } from "./StatsTab";
 import { RankedTab } from "./RankedTab";
-import { SekolahNTTFull } from "@/lib/types-ntt";
-import type { Message } from "@/components/chat/ChatWidget";
-import { AgentTab } from "./AgentTab";
-import { ChatUI } from "@/components/chat/ChatUI";
-import { Bot } from "lucide-react";
+import { SchoolWithIndex } from "@/lib/types";
+import { ChatTab } from "./ChatTab";
+import type { ChatState, Message } from "@/components/chat/ChatWidget";
 
 export interface SidebarProps {
-  activeTab: 'stats' | 'list' | 'chat' | 'agent';
-  onTabChange: (tab: 'stats' | 'list' | 'chat' | 'agent') => void;
+  activeTab: 'stats' | 'list' | 'chat';
+  onTabChange: (tab: 'stats' | 'list' | 'chat') => void;
   onClose: () => void;
   selectedSchoolId?: string | null;
-  onSchoolSelect?: (school: SekolahNTTFull | null) => void;
+  onSchoolSelect?: (school: SchoolWithIndex | null) => void;
+  chatState: ChatState;
   messages: Message[];
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
   showChips: boolean;
   setShowChips: React.Dispatch<React.SetStateAction<boolean>>;
-  schools: SekolahNTTFull[];
+  onUndock: () => void;
+  schools: SchoolWithIndex[];
 }
 
 export function Sidebar({ 
@@ -28,10 +28,12 @@ export function Sidebar({
   onClose, 
   selectedSchoolId = null, 
   onSchoolSelect = () => {},
+  chatState,
   messages,
   setMessages,
   showChips,
   setShowChips,
+  onUndock,
   schools
 }: SidebarProps) {
   return (
@@ -63,21 +65,22 @@ export function Sidebar({
           onClick={() => onTabChange('list')}
         />
         <TabButton
-          icon={<MessageCircle size={16} />}
+          icon={
+            <div className="relative">
+              <MessageCircle size={16} />
+              {chatState === 'docked' && (
+                <span className="absolute -top-1 -right-1 w-2 h-2 bg-[#00B4B4] rounded-full" />
+              )}
+            </div>
+          }
           label="Chat"
           isActive={activeTab === 'chat'}
           onClick={() => onTabChange('chat')}
         />
-        <TabButton
-          icon={<Bot size={16} />}
-          label="Agent"
-          isActive={activeTab === 'agent'}
-          onClick={() => onTabChange('agent')}
-        />
       </div>
 
       {/* 3. TAB CONTENT AREA */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 pb-24">
+      <div className="flex-1 overflow-y-auto p-4">
         {activeTab === 'stats' && <StatsTab schools={schools} />}
         {activeTab === 'list' && (
           <RankedTab
@@ -86,16 +89,23 @@ export function Sidebar({
           />
         )}
         {activeTab === 'chat' && (
-          <ChatUI
-            messages={messages}
-            setMessages={setMessages}
-            showChips={showChips}
-            setShowChips={setShowChips}
-          />
+          chatState === 'docked'
+            ? <ChatTab
+                messages={messages}
+                setMessages={setMessages}
+                showChips={showChips}
+                setShowChips={setShowChips}
+                onUndock={onUndock}
+              />
+            : <div className="flex flex-col items-center justify-center h-full text-center p-8 gap-3">
+                <MessageCircle size={32} className="text-[#00B4B4] opacity-50" />
+                <p className="text-sm font-medium text-gray-600">AI Chat tersedia</p>
+                <p className="text-xs text-gray-400 max-w-[180px]">
+                  Gunakan tombol chat di pojok kanan bawah untuk mulai bertanya.
+                </p>
+              </div>
         )}
-        {activeTab === 'agent' && <AgentTab />}
       </div>
-
     </div>
   );
 }

@@ -222,14 +222,12 @@ export default function ReportAgent({
   };
 
   return (
-    <div className="border border-slate-600 bg-slate-950 rounded-xl p-5 shadow-2xl">
+    <div className="border border-emerald-200 bg-emerald-50 rounded-xl p-5">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="font-bold text-white text-sm">📄 Report Agent</h3>
-          <span className="text-[10px] uppercase tracking-widest text-emerald-300 font-bold bg-emerald-900/40 px-2 py-0.5 rounded border border-emerald-500/20 mt-1 inline-block">
-            🤖 Agent Aktif — Tier 1
-          </span>
+          <h3 className="font-semibold text-slate-800 text-sm">📄 Report Agent</h3>
+          <span className="text-xs text-emerald-700 font-medium">🤖 Agent Aktif — Tier 1</span>
         </div>
         {(status === "idle" || status === "generating") && (
           <button
@@ -259,20 +257,20 @@ export default function ReportAgent({
 
       {/* Status idle */}
       {status === "idle" && (
-        <p className="text-xs text-slate-300 italic leading-relaxed font-medium">
+        <p className="text-xs text-slate-500 italic">
           Laporan belum dibuat. Klik &ldquo;Generate Laporan&rdquo; untuk menyusun laporan kondisi sekolah ini.
         </p>
       )}
 
       {/* Status loading */}
       {status === "generating" && (
-        <div className="space-y-2 py-2">
-          <div className="flex items-center gap-2 text-xs text-emerald-300 font-bold uppercase tracking-wide">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-xs text-emerald-700">
             <span className="animate-spin text-lg">⚙️</span>
             <span>{loadingStep}</span>
           </div>
-          <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden border border-slate-700/50">
-            <div className="bg-emerald-500 h-1.5 rounded-full animate-pulse w-2/3 shadow-[0_0_8px_rgba(16,185,129,0.4)]" />
+          <div className="w-full bg-emerald-100 rounded-full h-1.5 overflow-hidden">
+            <div className="bg-emerald-500 h-1.5 rounded-full animate-pulse w-2/3" />
           </div>
         </div>
       )}
@@ -281,22 +279,22 @@ export default function ReportAgent({
       {status === "ready" && reportData && (
         <div className="space-y-3">
           {/* Meta */}
-          <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider bg-slate-900 w-fit px-2 py-0.5 rounded border border-slate-800">
+          <div className="text-[10px] text-slate-400 font-medium">
             DIBUAT: {new Date(reportData.generatedAt).toLocaleString("id-ID")} · VERSI {reportData.version}
           </div>
 
           {/* Summary */}
-          <div className="bg-slate-900 border border-slate-800 rounded-lg p-3 shadow-inner">
-            <p className="text-xs text-slate-200 leading-relaxed font-medium">{reportData.summary}</p>
+          <div className="bg-white border border-emerald-100 rounded-lg p-3 shadow-sm">
+            <p className="text-xs text-slate-700 leading-relaxed">{reportData.summary}</p>
           </div>
 
           {/* Rekomendasi */}
           <div>
-            <p className="text-[10px] uppercase tracking-widest font-bold text-slate-400 mb-2">Rekomendasi Utama:</p>
+            <p className="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-2">Rekomendasi Utama:</p>
             <ul className="space-y-2">
               {reportData.recommendations.map((rec, i) => (
-                <li key={i} className="text-xs text-slate-300 flex gap-2 font-medium">
-                  <span className="text-emerald-400 font-bold shrink-0">{i + 1}.</span>
+                <li key={i} className="text-xs text-slate-600 flex gap-2">
+                  <span className="text-emerald-500 font-bold shrink-0">{i + 1}.</span>
                   <span className="leading-tight">{rec}</span>
                 </li>
               ))}
@@ -306,7 +304,7 @@ export default function ReportAgent({
           {/* Tombol unduh */}
           <button
             onClick={handleDownloadPDF}
-            className="w-full text-xs bg-slate-900 border border-slate-700 hover:bg-slate-800 text-emerald-400 px-3 py-2.5 rounded-lg font-bold transition-all shadow-lg flex items-center justify-center gap-2 uppercase tracking-wide"
+            className="w-full text-xs bg-white border border-emerald-300 hover:bg-emerald-50 text-emerald-700 px-3 py-2.5 rounded-lg font-bold transition-all shadow-sm flex items-center justify-center gap-2"
           >
             📥 Unduh Laporan PDF
           </button>
