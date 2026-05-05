@@ -33,8 +33,7 @@ export default function SchoolsPage() {
 
       const { data, error: fetchError } = await getSupabase()
         .from("sekolah_ntt_full")
-        .select("*")
-        .order("sigapp_index", { ascending: false });
+        .select("*");
 
       if (fetchError) {
         setError(fetchError.message);
@@ -68,9 +67,9 @@ export default function SchoolsPage() {
 
   const jenjangOptions: string[] = ["SD", "SMP", "SMA", "SMK"];
 
-  // ── Filtered + paginated data ───────────────────────────────
+  // ── Filtered + sorted + paginated data ─────────────────────
   const filtered = useMemo(() => {
-    let result = schools;
+    let result = [...schools];
 
     if (search.trim()) {
       const q = search.toLowerCase();
@@ -90,6 +89,13 @@ export default function SchoolsPage() {
     if (jenjangFilter) {
       result = result.filter((s) => s?.jenjang === jenjangFilter);
     }
+
+    // Sort descending by sigapp_index — KRITIS (tertinggi) paling atas
+    result.sort((a, b) => {
+      const aScore = parseIndex(a?.sigapp_index);
+      const bScore = parseIndex(b?.sigapp_index);
+      return bScore - aScore;
+    });
 
     return result;
   }, [schools, search, kabupatenFilter, kecamatanFilter, jenjangFilter]);
