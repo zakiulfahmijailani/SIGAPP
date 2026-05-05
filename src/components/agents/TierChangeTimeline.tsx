@@ -95,7 +95,7 @@ export default function TierChangeTimeline({ entries, schoolName }: TierChangeTi
                 {/* Row 3: Note */}
                 {entry.note && (
                   <p className="text-[11px] text-slate-300 italic mt-1 leading-relaxed bg-slate-800/40 p-2 rounded border-l-2 border-slate-500">
-                    "{entry.note}"
+                    &ldquo;{entry.note}&rdquo;
                   </p>
                 )}
 
