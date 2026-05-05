@@ -7,6 +7,8 @@ import { fixLeafletIcons } from "./LeafletFix";
 import { SchoolWithIndex } from "@/lib/types";
 import { getTierFromIndex, TIER_BG_COLORS, PriorityTier } from "@/lib/utils";
 import L from "leaflet";
+import { PulsingMarker } from "./PulsingMarker";
+import { AGENT_NEWLY_FLAGGED_NPSN } from "@/lib/agentFlags";
 
 const TIER_LABELS: Record<PriorityTier, string> = {
   KRITIS: "Sangat Prioritas (Kritis)",
@@ -162,6 +164,19 @@ export default function SchoolMap({ schools, onSchoolClick, selectedSchoolId, lo
           const isSelected = selectedSchoolId === school.id;
           const tier = getTierFromIndex(school.school_index.sigapp_index);
           const color = TIER_BG_COLORS[tier] || "#94A3B8";
+          const isAgentFlagged = AGENT_NEWLY_FLAGGED_NPSN.includes(school.npsn ?? "");
+
+          if (isAgentFlagged) {
+            return (
+              <PulsingMarker
+                key={school.id}
+                school={school}
+                color={color}
+                isSelected={isSelected}
+                onClick={() => onSchoolClick(school)}
+              />
+            );
+          }
 
           return (
             <CircleMarker
