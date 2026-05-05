@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Sidebar } from "@/components/sidebar/Sidebar";
 import { FilterBar } from "@/components/ui/FilterBar";
 import ChatWidget, { ChatState, Message } from "@/components/chat/ChatWidget";
-import { useSchools } from "@/hooks/useSchools";
+import { useSekolahNTT } from "@/hooks/useSekolahNTT";
 import { getTierFromIndex } from "@/lib/utils";
 import dynamic from 'next/dynamic';
 import type { Map as LeafletMap } from 'leaflet';
@@ -55,7 +55,7 @@ function DashboardInner() {
   const [jenjangFilter, setJenjangFilter] = useState(searchParams.get('jenjang') || 'all');
   const [prioritasFilter, setPrioritasFilter] = useState(searchParams.get('prioritas') || 'all');
 
-  const { schools } = useSchools();
+  const { schools } = useSekolahNTT();
   const mapRef = useRef<LeafletMap | null>(null);
 
   const filteredSchools = useMemo(() => 
@@ -157,7 +157,7 @@ function DashboardInner() {
           <div className="flex items-center gap-4">
             <img src="/logo-light-mode-with-texts.png" alt="SIGAPP Logo" className="h-12 w-auto object-contain" />
             <div className="h-10 w-px bg-gray-200 ml-1 hidden sm:block"></div>
-            <span className="text-[#0D2137]/40 text-[10px] uppercase tracking-widest font-bold hidden sm:block">Jakarta Dashboard</span>
+            <span className="text-[#0D2137]/40 text-[10px] uppercase tracking-widest font-bold hidden sm:block">NTT Dashboard</span>
           </div>
 
           <div className="flex items-center gap-8">
