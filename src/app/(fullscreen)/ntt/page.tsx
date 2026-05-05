@@ -3,6 +3,7 @@
 
 import dynamic from "next/dynamic";
 import { useState } from "react";
+import AntrigravityIntro from "@/components/ntt/AntrigravityIntro";
 import { useSekolahNTT } from "@/hooks/useSekolahNTT";
 import {
   Jenjang, PriorityTierNTT,
@@ -36,6 +37,16 @@ export default function NTTPage() {
   const [colorMode, setColorMode]         = useState<ColorMode>("tier");
   const [selected, setSelected]           = useState<SekolahNTTFull | null>(null);
 
+  const [showIntro, setShowIntro] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return !sessionStorage.getItem("ntt_intro_seen");
+  });
+
+  const handleIntroComplete = () => {
+    sessionStorage.setItem("ntt_intro_seen", "1");
+    setShowIntro(false);
+  };
+
   const { data, loading, error, stats } = useSekolahNTT({
     jenjang: activeJenjang.length > 0 ? activeJenjang : undefined,
     tier:    activeTier.length   > 0 ? activeTier    : undefined,
@@ -51,6 +62,14 @@ export default function NTTPage() {
 
   return (
     <div className="flex flex-col h-screen w-full overflow-hidden bg-slate-900 text-slate-100">
+
+      {/* ── ANTIGRAVITY INTRO OVERLAY ── */}
+      {showIntro && (
+        <AntrigravityIntro
+          schools={data ?? []}
+          onComplete={handleIntroComplete}
+        />
+      )}
 
       {/* ── NAVBAR ── */}
       <nav className="h-14 bg-slate-800 flex-shrink-0 flex items-center justify-between px-5 border-b border-slate-700 z-50">
