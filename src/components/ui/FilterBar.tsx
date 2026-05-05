@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 
 interface FilterBarProps {
-  kotaFilter: string;
+  kabupatenFilter: string;
   jenjangFilter: string;
   prioritasFilter: string;
-  onKotaChange: (value: string) => void;
+  onKabupatenChange: (value: string) => void;
   onJenjangChange: (value: string) => void;
   onPrioritasChange: (value: string) => void;
   totalVisible: number;
@@ -14,10 +14,10 @@ interface FilterBarProps {
 }
 
 export function FilterBar({
-  kotaFilter,
+  kabupatenFilter,
   jenjangFilter,
   prioritasFilter,
-  onKotaChange,
+  onKabupatenChange,
   onJenjangChange,
   onPrioritasChange,
   totalVisible,
@@ -26,7 +26,7 @@ export function FilterBar({
   const [flash, setFlash] = useState(false);
   
   // Is any filter active?
-  const hasActiveFilter = kotaFilter !== "all" || jenjangFilter !== "all" || prioritasFilter !== "all";
+  const hasActiveFilter = kabupatenFilter !== "all" || jenjangFilter !== "all" || prioritasFilter !== "all";
 
   // Flash counter color on change
   useEffect(() => {
@@ -39,20 +39,21 @@ export function FilterBar({
     <div className="absolute top-4 left-4 z-10">
       <div className="bg-white rounded-xl shadow-md px-4 py-2.5 flex flex-row items-center gap-3 border border-gray-100">
         
-        {/* DROPDOWN 1 — Kota */}
+        {/* DROPDOWN 1 — Kabupaten */}
         <div className="flex flex-col gap-0.5">
-          <span className="text-[10px] uppercase tracking-widest text-gray-400 font-medium">Kota</span>
+          <span className="text-[10px] uppercase tracking-widest text-gray-400 font-medium">Kabupaten</span>
           <select
-            value={kotaFilter}
-            onChange={(e) => onKotaChange(e.target.value)}
+            value={kabupatenFilter}
+            onChange={(e) => onKabupatenChange(e.target.value)}
             className="text-sm text-gray-700 font-medium border-none outline-none bg-transparent cursor-pointer focus:ring-0 min-w-fit p-0"
           >
-            <option value="all">Semua Kota</option>
-            <option value="Jakarta Utara">Jakarta Utara</option>
-            <option value="Jakarta Selatan">Jakarta Selatan</option>
-            <option value="Jakarta Barat">Jakarta Barat</option>
-            <option value="Jakarta Timur">Jakarta Timur</option>
-            <option value="Jakarta Pusat">Jakarta Pusat</option>
+            <option value="all">Semua Kabupaten</option>
+            <option value="Sumba Barat Daya">Sumba Barat Daya</option>
+            <option value="Sumba Barat">Sumba Barat</option>
+            <option value="Sumba Tengah">Sumba Tengah</option>
+            <option value="Sumba Timur">Sumba Timur</option>
+            <option value="Kupang">Kupang</option>
+            <option value="Timor Tengah Selatan">Timor Tengah Selatan</option>
           </select>
         </div>
 
@@ -107,7 +108,7 @@ export function FilterBar({
         {hasActiveFilter && (
           <button
             onClick={() => {
-              onKotaChange("all");
+              onKabupatenChange("all");
               onJenjangChange("all");
               onPrioritasChange("all");
             }}

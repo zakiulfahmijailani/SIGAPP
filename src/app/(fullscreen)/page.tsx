@@ -7,15 +7,15 @@ import { Sidebar } from "@/components/sidebar/Sidebar";
 import { FilterBar } from "@/components/ui/FilterBar";
 import { AgentStatusBar } from "@/components/ui/AgentStatusBar";
 import type { Message } from "@/components/chat/ChatWidget";
-import { useSchools } from "@/hooks/useSchools";
+import { useSekolahNTT } from "@/hooks/useSekolahNTT";
 import { getTierFromIndex } from "@/lib/utils";
 import dynamic from 'next/dynamic';
 import type { Map as LeafletMap } from 'leaflet';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { SchoolWithIndex } from "@/lib/types";
+import { SekolahNTTFull } from "@/lib/types-ntt";
 
-const SchoolMap = dynamic(
-  () => import('@/components/map/SchoolMap'),
+const SchoolMapNTT = dynamic(
+  () => import('@/components/map/SchoolMapNTT'),
   { 
     ssr: false,
     loading: () => (
@@ -51,37 +51,37 @@ function DashboardInner() {
   const [showChips, setShowChips] = useState(true);
 
   // Filters
-  const [kotaFilter, setKotaFilter] = useState(searchParams.get('kota') || 'all');
+  const [kabupatenFilter, setKabupatenFilter] = useState(searchParams.get('kabupaten') || 'all');
   const [jenjangFilter, setJenjangFilter] = useState(searchParams.get('jenjang') || 'all');
   const [prioritasFilter, setPrioritasFilter] = useState(searchParams.get('prioritas') || 'all');
 
-  const { schools } = useSchools();
+  const { data: schools } = useSekolahNTT();
   const mapRef = useRef<LeafletMap | null>(null);
 
   const filteredSchools = useMemo(() => 
     schools.filter(s => {
-      const sKota = s.kota;
+      const sKabupaten = s.kabupaten;
       
       return (
-        (kotaFilter === 'all' || sKota === kotaFilter) &&
+        (kabupatenFilter === 'all' || sKabupaten === kabupatenFilter) &&
         (jenjangFilter === 'all' || s.jenjang === jenjangFilter) &&
-        (prioritasFilter === 'all' || getTierFromIndex(s.school_index?.sigapp_index || 0) === prioritasFilter)
+        (prioritasFilter === 'all' || getTierFromIndex(s.sigapp_index || 0) === prioritasFilter)
       );
     }),
-    [schools, kotaFilter, jenjangFilter, prioritasFilter]
+    [schools, kabupatenFilter, jenjangFilter, prioritasFilter]
   );
 
   function updateURL(overrides: {
     school?: string | null;
     q?: string;
-    kota?: string;
+    kabupaten?: string;
     jenjang?: string;
     prioritas?: string;
     tab?: string;
   }) {
     const params = new URLSearchParams(window.location.search);
     const school = 'school' in overrides ? overrides.school : selectedSchoolId;
-    const kota = overrides.kota ?? kotaFilter;
+    const kabupaten = overrides.kabupaten ?? kabupatenFilter;
     const jenjang = overrides.jenjang ?? jenjangFilter;
     const prioritas = overrides.prioritas ?? prioritasFilter;
     const tab = overrides.tab ?? activeTab;
@@ -89,8 +89,8 @@ function DashboardInner() {
     if (school) params.set('school', school);
     else params.delete('school');
 
-    if (kota !== 'all') params.set('kota', kota);
-    else params.delete('kota');
+    if (kabupaten !== 'all') params.set('kabupaten', kabupaten);
+    else params.delete('kabupaten');
 
     if (jenjang !== 'all') params.set('jenjang', jenjang);
     else params.delete('jenjang');
@@ -105,8 +105,8 @@ function DashboardInner() {
     router.replace(qs ? `?${qs}` : '/', { scroll: false });
   }
 
-  const handleSchoolSelect = (school: SchoolWithIndex | null) => {
-    const newId = school?.id || null;
+  const handleSchoolSelect = (school: SekolahNTTFull | null) => {
+    const newId = school?.id ? String(school.id) : null;
     setSelectedSchoolId(newId);
     if (school) {
       setActiveTab('list');
@@ -114,9 +114,9 @@ function DashboardInner() {
       updateURL({ school: newId, tab: 'list' });
       
       // Fly map to selected school
-      if (mapRef.current && school.latitude && school.longitude) {
+      if (mapRef.current && school.lat && school.lon) {
         mapRef.current.flyTo(
-          [school.latitude, school.longitude],
+          [school.lat, school.lon],
           15,
           { duration: 1.2, easeLinearity: 0.25 }
         );
@@ -126,7 +126,7 @@ function DashboardInner() {
     }
   };
 
-  const handleMapDotClick = (school: SchoolWithIndex) => {
+  const handleMapDotClick = (school: SekolahNTTFull) => {
     handleSchoolSelect(school);
   };
 
@@ -148,7 +148,7 @@ function DashboardInner() {
           <div className="flex items-center gap-4">
             <img src="/logo-light-mode-with-texts.png" alt="SIGAPP Logo" className="h-12 w-auto object-contain" />
             <div className="h-10 w-px bg-gray-200 ml-1 hidden sm:block"></div>
-            <span className="text-[#0D2137]/40 text-[10px] uppercase tracking-widest font-bold hidden sm:block">Jakarta Dashboard</span>
+            <span className="text-[#0D2137]/40 text-[10px] uppercase tracking-widest font-bold hidden sm:block">NTT Dashboard</span>
           </div>
 
           <div className="flex items-center gap-8">
@@ -169,18 +169,18 @@ function DashboardInner() {
         {/* 2a. MAP AREA */}
         <div className="flex-1 bg-gray-100 flex items-center justify-center relative z-0">
           <FilterBar
-            kotaFilter={kotaFilter}
+            kabupatenFilter={kabupatenFilter}
             jenjangFilter={jenjangFilter}
             prioritasFilter={prioritasFilter}
-            onKotaChange={(val) => { setKotaFilter(val); updateURL({ kota: val }); }}
+            onKabupatenChange={(val) => { setKabupatenFilter(val); updateURL({ kabupaten: val }); }}
             onJenjangChange={(val) => { setJenjangFilter(val); updateURL({ jenjang: val }); }}
             onPrioritasChange={(val) => { setPrioritasFilter(val); updateURL({ prioritas: val }); }}
             totalVisible={filteredSchools.length}
             totalAll={schools.length}
           />
-          <SchoolMap
+          <SchoolMapNTT
             schools={filteredSchools}
-            selectedSchoolId={selectedSchoolId}
+            selectedId={selectedSchoolId ? Number(selectedSchoolId) : null}
             onSchoolClick={handleMapDotClick}
             onMapReady={(map) => { mapRef.current = map; }}
           />

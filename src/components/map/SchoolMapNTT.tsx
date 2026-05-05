@@ -35,6 +35,16 @@ interface SchoolMapNTTProps {
   colorMode?: ColorMode;        // default: "tier"
   filterJenjang?: Jenjang[];
   filterTier?: PriorityTierNTT[];
+  onMapReady?: (map: L.Map) => void;
+}
+
+// MapController exposes the leaflet map instance to the parent
+function MapController({ onMapReady }: { onMapReady?: (map: L.Map) => void }) {
+  const map = useMap();
+  useEffect(() => {
+    if (onMapReady) onMapReady(map);
+  }, [map, onMapReady]);
+  return null;
 }
 
 // ─────────────────────────────────────────────────────────
@@ -154,6 +164,7 @@ export default function SchoolMapNTT({
   colorMode = "tier",
   filterJenjang = [],
   filterTier = [],
+  onMapReady,
 }: SchoolMapNTTProps) {
   const router = useRouter();
   useEffect(() => { fixLeafletIcons(); }, []);
@@ -239,6 +250,8 @@ export default function SchoolMapNTT({
           attribution='&copy; <a href="https://carto.com">CARTO</a>'
           url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
         />
+
+        <MapController onMapReady={onMapReady} />
 
         {/* Legend berganti sesuai colorMode */}
         {colorMode === "tier"

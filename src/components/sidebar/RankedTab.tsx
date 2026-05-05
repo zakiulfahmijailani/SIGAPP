@@ -3,17 +3,17 @@
 import { useState, useRef, useEffect } from "react";
 import { Search, School as SchoolIcon } from "lucide-react";
 import { useSearchParams, useRouter } from 'next/navigation';
-import { useSchools } from "@/hooks/useSchools";
-import { SchoolWithIndex } from "@/lib/types";
-import { getTierFromIndex, getTierColor, PriorityTier } from "@/lib/utils";
+import { useSekolahNTT } from "@/hooks/useSekolahNTT";
+import { SekolahNTTFull, PriorityTierNTT } from "@/lib/types-ntt";
+import { getTierNTT, getTierColorNTT } from "@/lib/utils-ntt";
 
 export interface RankedTabProps {
   selectedSchoolId: string | null;
-  onSchoolSelect: (school: SchoolWithIndex | null) => void;
+  onSchoolSelect: (school: SekolahNTTFull | null) => void;
 }
 
 export function RankedTab({ selectedSchoolId, onSchoolSelect }: RankedTabProps) {
-  const { schools, loading, error, retry } = useSchools();
+  const { data: schools, loading, error, refetch: retry } = useSekolahNTT();
   const searchParams = useSearchParams();
   const router = useRouter();
   const [query, setQuery] = useState(searchParams.get('q') || "");
@@ -21,10 +21,10 @@ export function RankedTab({ selectedSchoolId, onSchoolSelect }: RankedTabProps) 
 
   // Filter and sort schools
   const filteredAndSorted = schools
-    .filter((s) => s.school_name.toLowerCase().includes(query.toLowerCase()))
+    .filter((s) => (s.school_name || s.name || "").toLowerCase().includes(query.toLowerCase()))
     .sort((a, b) => {
-      const indexA = a.school_index?.sigapp_index || 0;
-      const indexB = b.school_index?.sigapp_index || 0;
+      const indexA = a.sigapp_index || 0;
+      const indexB = b.sigapp_index || 0;
       return indexB - indexA;
     });
 
@@ -38,7 +38,7 @@ export function RankedTab({ selectedSchoolId, onSchoolSelect }: RankedTabProps) 
   useEffect(() => {
     if (selectedSchoolId) {
       // If the selected school is not in the current filtered list, clear the query
-      const isVisible = filteredAndSorted.some(s => s.id === selectedSchoolId);
+      const isVisible = filteredAndSorted.some(s => String(s.id) === selectedSchoolId);
       if (!isVisible) {
         setQuery("");
         updateSearchURL("");
@@ -155,15 +155,15 @@ export function RankedTab({ selectedSchoolId, onSchoolSelect }: RankedTabProps) 
 
         {!loading &&
           filteredAndSorted.map((school, index) => {
-            const isSelected = selectedSchoolId === school.id;
-            const idxVal = school.school_index?.sigapp_index || 0;
-            const tier = getTierFromIndex(idxVal);
-            const badgeColors = getTierColor(tier as PriorityTier);
+            const isSelected = selectedSchoolId === String(school.id);
+            const idxVal = school.sigapp_index || 0;
+            const tier = getTierNTT(idxVal);
+            const badgeColors = getTierColorNTT(tier as PriorityTierNTT);
 
             return (
               <div
                 key={school.id}
-                ref={(el) => { itemRefs.current[school.id] = el; }}
+                ref={(el) => { itemRefs.current[String(school.id)] = el; }}
                 className={`
                   mb-2 overflow-hidden rounded-lg border cursor-pointer transition-all duration-150
                   active:scale-[0.98] hover:shadow-sm
@@ -220,10 +220,10 @@ export function RankedTab({ selectedSchoolId, onSchoolSelect }: RankedTabProps) 
                     </p>
                     
                     {[
-                      { label: "P1 · Kualitas", value: school.school_index?.p1_quality_gap || 0 },
-                      { label: "P2 · Spasial", value: school.school_index?.p2_spatial_inequity || 0 },
-                      { label: "P3 · Risiko", value: school.school_index?.p3_structural_risk || 0 },
-                      { label: "P4 · Sinyal", value: school.school_index?.p4_public_signal || 0 },
+                      { label: "P1 · Kualitas", value: school.p1_quality_gap || 0 },
+                      { label: "P2 · Spasial", value: school.p2_spatial_inequity || 0 },
+                      { label: "P3 · Risiko", value: school.p3_structural_risk || 0 },
+                      { label: "P4 · Sinyal", value: school.p4_public_signal || 0 },
                     ].map((pillar) => (
                       <div key={pillar.label} className="mb-2">
                         <div className="flex justify-between mb-1">
@@ -241,13 +241,13 @@ export function RankedTab({ selectedSchoolId, onSchoolSelect }: RankedTabProps) 
 
                     {/* Summary Line */}
                     <p className="text-xs text-gray-500 italic mt-3">
-                      {getSummaryText(school.school_index)}
+                      {getSummaryText(school)}
                     </p>
 
                     {/* DETAIL BUTTON */}
                     <div className="mt-4">
                       <a
-                        href={`/schools/${school.id}`}
+                        href={`/ntt/${school.id}`}
                         className="flex items-center justify-center gap-2 w-full py-2 bg-[#0D2137] text-white rounded-lg text-xs font-semibold hover:bg-[#1a3a5a] transition-colors"
                       >
                         Lihat Laporan Lengkap
@@ -264,14 +264,14 @@ export function RankedTab({ selectedSchoolId, onSchoolSelect }: RankedTabProps) 
 }
 
 // Helper to determine the highest pillar and return summary text
-function getSummaryText(indexRecord: NonNullable<SchoolWithIndex["school_index"]> | undefined) {
-  if (!indexRecord) return "";
+function getSummaryText(school: SekolahNTTFull | undefined) {
+  if (!school) return "";
   
   const pillars = [
-    { key: "p1", val: indexRecord.p1_quality_gap },
-    { key: "p2", val: indexRecord.p2_spatial_inequity },
-    { key: "p3", val: indexRecord.p3_structural_risk },
-    { key: "p4", val: indexRecord.p4_public_signal },
+    { key: "p1", val: school.p1_quality_gap || 0 },
+    { key: "p2", val: school.p2_spatial_inequity || 0 },
+    { key: "p3", val: school.p3_structural_risk || 0 },
+    { key: "p4", val: school.p4_public_signal || 0 },
   ];
 
   const highest = pillars.reduce((prev, current) => (prev.val > current.val ? prev : current));
