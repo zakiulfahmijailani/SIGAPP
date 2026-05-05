@@ -12,6 +12,7 @@ import dynamic from 'next/dynamic';
 import type { Map as LeafletMap } from 'leaflet';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { SchoolWithIndex } from "@/lib/types";
+import { AgentStatusBar } from "@/components/ui/AgentStatusBar";
 
 const SchoolMap = dynamic(
   () => import('@/components/map/SchoolMap'),
@@ -151,6 +152,10 @@ function DashboardInner() {
   return (
     <>
       <div className="flex flex-col h-screen w-full overflow-hidden bg-slate-50">
+
+      {/* 0. AGENT STATUS BAR */}
+      <AgentStatusBar />
+
       {/* 1. NAVBAR */}
       <nav className="h-16 bg-white flex-shrink-0 flex items-center justify-between px-6 z-50 shadow-sm border-b border-gray-100">
         <div className="flex items-center gap-10">
