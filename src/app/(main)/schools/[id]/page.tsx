@@ -38,6 +38,11 @@ const AgentStatusPanel = dynamic(
   { ssr: false, loading: () => <div className="h-[200px] skeleton-shimmer rounded-xl" /> }
 )
 
+const AgentDecisionPanel = dynamic(
+  () => import('@/components/agents/AgentDecisionPanel'),
+  { ssr: false, loading: () => <div className="h-[160px] skeleton-shimmer rounded-xl mb-6" /> }
+)
+
 // ── Pillar config ────────────────────────────────────────────────
 const PILLARS = [
   { key: "p1_quality_gap", weight: 35 },
@@ -160,23 +165,16 @@ export default function SchoolDetailPage() {
   if (loading) {
     return (
       <div className="animate-pulse space-y-6 p-6">
-        {/* Header */}
         <div className="space-y-2">
           <div className="h-6 w-2/3 rounded bg-muted" />
           <div className="h-4 w-1/3 rounded bg-muted" />
         </div>
-
-        {/* Index badge area */}
         <div className="h-16 w-40 rounded-lg bg-muted" />
-
-        {/* Cards grid */}
         <div className="grid grid-cols-2 gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} className="h-24 rounded-lg bg-muted" />
           ))}
         </div>
-
-        {/* Chart area */}
         <div className="h-64 rounded-xl bg-muted" />
       </div>
     );
@@ -225,6 +223,17 @@ export default function SchoolDetailPage() {
       >
         <ArrowLeft size={15} /> All Schools
       </Link>
+
+      <AgentDecisionPanel
+        dominantPillar="P3 — Structural Risk"
+        dominantScore={0.821}
+        previousTier="SEDANG"
+        currentTier="KRITIS"
+        tierChanged={true}
+        analysisDate="Monday, 5 May 2026 · 12:04 WIB"
+        reportGenerated={true}
+        emailDispatched={true}
+      />
 
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-slate-800 mb-2">
@@ -308,7 +317,6 @@ export default function SchoolDetailPage() {
           )}
         </div>
 
-
         <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
           <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
             Rank
@@ -361,7 +369,6 @@ export default function SchoolDetailPage() {
                   <PolarRadiusAxis angle={90} domain={[0, 1]} tick={{ fontSize: 10, fill: "#94A3B8" }} tickCount={5} />
                   <Tooltip
                     contentStyle={{ background: "#0D2137", border: "none", borderRadius: 8, fontSize: 12, color: "#fff" }}
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     formatter={(value: any) => [formatIndex(Number(value ?? 0)), "Score"]}
                   />
                   <Radar name="Score" dataKey="score" stroke="#00B4B4" fill="#00B4B4" fillOpacity={0.2} strokeWidth={2} />
