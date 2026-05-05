@@ -3,28 +3,44 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/lib/supabase";
-import { SekolahNTT, Jenjang } from "@/lib/types-ntt";
+import { Jenjang, SekolahNTTFull, PriorityTierNTT } from "@/lib/types-ntt";
+import { getTierNTT } from "@/lib/utils-ntt";
+
+// ─────────────────────────────────────────────
+// OPTIONS
+// ─────────────────────────────────────────────
 
 interface UseSekolahNTTOptions {
-  jenjang?: Jenjang[];      // filter jenjang, kosong = semua
-  kota?: string;            // filter kota/kabupaten
-  limit?: number;           // default 2000
+  jenjang?: Jenjang[];
+  kabupaten?: string;
+  tier?: PriorityTierNTT[];
+  limit?: number;
 }
 
 interface UseSekolahNTTReturn {
-  data: SekolahNTT[];
+  data: SekolahNTTFull[];
   loading: boolean;
   error: string | null;
   refetch: () => void;
-  stats: Record<Jenjang, number>;
+  stats: {
+    byJenjang: Partial<Record<Jenjang, number>>;
+    byTier: Partial<Record<PriorityTierNTT, number>>;
+    byKabupaten: Record<string, number>;
+    total: number;
+    hasIndex: number;   // berapa yang sudah punya sigapp_index
+  };
 }
+
+// ─────────────────────────────────────────────
+// HOOK
+// ─────────────────────────────────────────────
 
 export function useSekolahNTT(
   options: UseSekolahNTTOptions = {}
 ): UseSekolahNTTReturn {
-  const { jenjang, kota, limit = 2000 } = options;
+  const { jenjang, kabupaten, tier, limit = 3000 } = options;
 
-  const [data, setData]       = useState<SekolahNTT[]>([]);
+  const [data, setData]       = useState<SekolahNTTFull[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState<string | null>(null);
 
@@ -33,48 +49,120 @@ export function useSekolahNTT(
     setError(null);
 
     try {
+      // Query dari VIEW sekolah_ntt_full (sudah join index + pillar)
       let query = supabase
-        .from("sekolah_ntt")
-        .select("id, name, jenjang, addr_city, addr_street, operator, isced_level, website, phone, lat, lon")
+        .from("sekolah_ntt_full")
+        .select("*")
         .not("lat", "is", null)
         .not("lon", "is", null)
         .limit(limit);
 
-      // Filter jenjang (multi-value)
       if (jenjang && jenjang.length > 0) {
         query = query.in("jenjang", jenjang);
       }
 
-      // Filter kota
-      if (kota) {
-        query = query.ilike("addr_city", `%${kota}%`);
+      if (kabupaten) {
+        query = query.ilike("kabupaten", `%${kabupaten}%`);
       }
 
       const { data: rows, error: err } = await query;
-
       if (err) throw err;
 
-      setData((rows as SekolahNTT[]) ?? []);
+      let result = (rows as SekolahNTTFull[]) ?? [];
+
+      // Filter by tier (client-side, karena tier dihitung dari sigapp_index)
+      if (tier && tier.length > 0) {
+        result = result.filter((s) =>
+          tier.includes(getTierNTT(s.sigapp_index ?? undefined))
+        );
+      }
+
+      setData(result);
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Gagal fetch data sekolah NTT");
+      setError(
+        e instanceof Error ? e.message : "Gagal fetch data sekolah NTT"
+      );
     } finally {
       setLoading(false);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [jenjang?.join(","), kota, limit]);
+  }, [
+    jenjang?.join(","),
+    kabupaten,
+    tier?.join(","),
+    limit,
+  ]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
-  // Hitung stats per jenjang
+  // ── Stats ──────────────────────────────────
   const stats = data.reduce(
     (acc, s) => {
-      acc[s.jenjang] = (acc[s.jenjang] ?? 0) + 1;
+      // by jenjang
+      acc.byJenjang[s.jenjang] = (acc.byJenjang[s.jenjang] ?? 0) + 1;
+
+      // by tier
+      const t = getTierNTT(s.sigapp_index ?? undefined);
+      acc.byTier[t] = (acc.byTier[t] ?? 0) + 1;
+
+      // by kabupaten
+      const kab = s.kabupaten ?? s.addr_city ?? "Tidak Diketahui";
+      acc.byKabupaten[kab] = (acc.byKabupaten[kab] ?? 0) + 1;
+
+      // has index
+      if (s.sigapp_index != null) acc.hasIndex += 1;
+
+      acc.total += 1;
       return acc;
     },
-    {} as Record<Jenjang, number>
+    {
+      byJenjang: {} as Partial<Record<Jenjang, number>>,
+      byTier: {} as Partial<Record<PriorityTierNTT, number>>,
+      byKabupaten: {} as Record<string, number>,
+      total: 0,
+      hasIndex: 0,
+    }
   );
 
   return { data, loading, error, refetch: fetchData, stats };
+}
+
+// ─────────────────────────────────────────────
+// SINGLE SCHOOL HOOK — untuk halaman /ntt/[id]
+// ─────────────────────────────────────────────
+
+interface UseSekolahNTTDetailReturn {
+  data: SekolahNTTFull | null;
+  loading: boolean;
+  error: string | null;
+}
+
+export function useSekolahNTTDetail(
+  schoolId: number | null
+): UseSekolahNTTDetailReturn {
+  const [data, setData]       = useState<SekolahNTTFull | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError]     = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!schoolId) return;
+
+    setLoading(true);
+    setError(null);
+
+    supabase
+      .from("sekolah_ntt_full")
+      .select("*")
+      .eq("id", schoolId)
+      .single()
+      .then(({ data: row, error: err }) => {
+        if (err) setError(err.message);
+        else setData(row as SekolahNTTFull);
+        setLoading(false);
+      });
+  }, [schoolId]);
+
+  return { data, loading, error };
 }
