@@ -6,7 +6,6 @@ import { useParams } from "next/navigation";
 import { useSekolahNTTDetail } from "@/hooks/useSekolahNTT";
 import { 
   JENJANG_COLOR, 
-  TIER_BG_COLORS_NTT, 
   PILLAR_LABEL, 
   PILLAR_ICON 
 } from "@/lib/types-ntt";
@@ -32,7 +31,6 @@ export default function NTTSchoolDetailPage() {
     if (!school) return [];
     
     const currentIdx = school.sigapp_index ?? 0.45;
-    const currentTier = getTierNTT(currentIdx);
     
     // Generate 5 months of history
     const months = ["Januari", "Februari", "Maret", "April", "Mei"];
@@ -242,7 +240,7 @@ export default function NTTSchoolDetailPage() {
 
                 <div>
                   <p className="text-[10px] text-slate-500 uppercase font-bold mb-1">Operator</p>
-                  <p className="text-sm text-slate-200 font-medium">🏛 {school.operator || "—"}</p>
+                  <p className="text-sm text-slate-200 font-medium">🏙 {school.operator || "—"}</p>
                 </div>
 
                 <div className="pt-4 space-y-3">
