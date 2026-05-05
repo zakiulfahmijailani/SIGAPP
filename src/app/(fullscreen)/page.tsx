@@ -209,7 +209,7 @@ function DashboardInner() {
           />
         </aside>
 
-        {/* 3. SIDEBAR TOGGLE BUTTON (When closed) [<-] */}
+        {/* 3. SIDEBAR TOGGLE BUTTON (When closed) [←] */}
         {!sidebarOpen && (
           <button
             onClick={() => setSidebarOpen(true)}
