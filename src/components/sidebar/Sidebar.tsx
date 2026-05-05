@@ -6,6 +6,7 @@ import { RankedTab } from "./RankedTab";
 import { SchoolWithIndex } from "@/lib/types";
 import { ChatTab } from "./ChatTab";
 import type { ChatState, Message } from "@/components/chat/ChatWidget";
+import { AgentActivityFeed } from "./AgentActivityFeed";
 
 export interface SidebarProps {
   activeTab: 'stats' | 'list' | 'chat';
@@ -81,7 +82,12 @@ export function Sidebar({
 
       {/* 3. TAB CONTENT AREA */}
       <div className="flex-1 overflow-y-auto p-4">
-        {activeTab === 'stats' && <StatsTab schools={schools} />}
+        {activeTab === 'stats' && (
+          <div className="flex flex-col gap-4">
+            <StatsTab schools={schools} />
+            <AgentActivityFeed />
+          </div>
+        )}
         {activeTab === 'list' && (
           <RankedTab
             selectedSchoolId={selectedSchoolId}
