@@ -372,7 +372,7 @@ export default function SchoolDetailPage() {
                   <PolarRadiusAxis angle={90} domain={[0, 1]} tick={{ fontSize: 10, fill: "#94A3B8" }} tickCount={5} />
                   <Tooltip
                     contentStyle={{ background: "#0D2137", border: "none", borderRadius: 8, fontSize: 12, color: "#fff" }}
-                    formatter={(value: number | string) => [formatIndex(Number(value ?? 0)), "Score"]}
+                    formatter={(value) => [formatIndex(Number(value ?? 0)), "Score"]}
                   />
                   <Radar name="Score" dataKey="score" stroke="#00B4B4" fill="#00B4B4" fillOpacity={0.2} strokeWidth={2} />
                 </RadarChart>
