@@ -4,8 +4,9 @@
 import { useEffect } from "react";
 import {
   MapContainer, TileLayer,
-  CircleMarker, Tooltip, useMap,
+  CircleMarker, Tooltip, Popup, useMap,
 } from "react-leaflet";
+import { useRouter } from "next/navigation";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { fixLeafletIcons } from "./LeafletFix";
@@ -154,9 +155,10 @@ export default function SchoolMapNTT({
   filterJenjang = [],
   filterTier = [],
 }: SchoolMapNTTProps) {
+  const router = useRouter();
   useEffect(() => { fixLeafletIcons(); }, []);
 
-  const center: [number, number] = [-9.0, 121.5];
+  const center: [number, number] = [-9.5, 121.5];
 
   function getColor(school: SekolahNTTFull): string {
     if (colorMode === "jenjang") {
@@ -273,6 +275,54 @@ export default function SchoolMapNTT({
                   )}
                 </div>
               </Tooltip>
+
+              <Popup>
+                <div style={{ fontSize: 12, lineHeight: 1.5, minWidth: "160px" }}>
+                  <div style={{ fontWeight: 800, marginBottom: 4, color: "#f8fafc", fontSize: "13px" }}>{name}</div>
+                  <div style={{ color: "#94a3b8", marginBottom: 6 }}>
+                    {school.jenjang} · {school.kabupaten ?? school.addr_city ?? "-"}
+                  </div>
+                  
+                  {school.sigapp_index != null && (
+                    <div style={{ 
+                      backgroundColor: `${TIER_BG_COLORS_NTT[tier]}22`,
+                      border: `1px solid ${TIER_BG_COLORS_NTT[tier]}44`,
+                      padding: "4px 8px",
+                      borderRadius: "6px",
+                      marginBottom: "10px"
+                    }}>
+                      <div style={{ fontSize: "10px", fontWeight: 700, textTransform: "uppercase", color: TIER_BG_COLORS_NTT[tier], letterSpacing: "0.05em" }}>
+                        SIGAPP Index
+                      </div>
+                      <div style={{ fontSize: "14px", fontWeight: 900, color: "#f1f5f9" }}>
+                        {school.sigapp_index.toFixed(3)} <span style={{ fontSize: "10px", fontWeight: 700, opacity: 0.8 }}>• {TIER_LABEL_NTT[tier]}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  <div style={{ marginTop: "8px", borderTop: "1px solid #334155", paddingTop: "8px" }}>
+                    <button
+                      onClick={() => router.push(`/ntt/${school.id}`)}
+                      style={{
+                        width: "100%",
+                        padding: "6px 8px",
+                        backgroundColor: "#0f172a",
+                        color: "#38bdf8",
+                        border: "1px solid #334155",
+                        borderRadius: "6px",
+                        fontSize: "11px",
+                        cursor: "pointer",
+                        fontWeight: "800",
+                        letterSpacing: "0.05em",
+                        textTransform: "uppercase",
+                        transition: "all 0.2s"
+                      }}
+                    >
+                      🔍 Lihat Detail Sekolah →
+                    </button>
+                  </div>
+                </div>
+              </Popup>
             </CircleMarker>
           );
         })}
