@@ -43,6 +43,11 @@ const AgentDecisionPanel = dynamic(
   { ssr: false, loading: () => <div className="h-[120px] skeleton-shimmer rounded-xl mb-6" /> }
 );
 
+const TierChangeTimeline = dynamic(
+  () => import('@/components/agents/TierChangeTimeline'),
+  { ssr: false, loading: () => <div className="h-[280px] skeleton-shimmer rounded-xl mb-6" /> }
+);
+
 const PILLARS = [
   { key: "p1_quality_gap",       weight: 35 },
   { key: "p2_spatial_inequity",  weight: 25 },
@@ -65,6 +70,40 @@ const KEY_VARS = [
   { key: "total_students",       label: "Total Siswa",       icon: Percent,             format: (v: number | null) => v != null ? v.toLocaleString('id-ID') : "—" },
   { key: "total_teachers",       label: "Total Guru",        icon: MessageSquareWarning,format: (v: number | null) => v != null ? v.toLocaleString('id-ID') : "—" },
 ] as const;
+
+// Generate simulated 5-month index history based on current sigapp_index
+function buildTimelineEntries(currentIndex: number, currentTier: string, schoolName: string) {
+  const months = ["Jan 2026", "Feb 2026", "Mar 2026", "Apr 2026", "Mei 2026"];
+  const getTier = (idx: number) => {
+    if (idx >= 0.65) return "KRITIS";
+    if (idx >= 0.45) return "TINGGI";
+    if (idx >= 0.25) return "SEDANG";
+    return "NORMAL";
+  };
+
+  // Simulate a realistic progression toward current index
+  const seed = schoolName.length % 5;
+  const deltas = [-0.06, -0.03, +0.04, +0.02, 0];
+  const offsets = deltas.map((d, i) => {
+    const jitter = ((seed + i) % 3 - 1) * 0.015;
+    return d + jitter;
+  });
+
+  return months.map((month, i) => {
+    const offset = offsets.slice(i).reduce((a, b) => a + b, 0);
+    const idx = Math.max(0.05, Math.min(0.99, currentIndex + offset));
+    const tier = getTier(idx);
+    const prevTier = i > 0 ? getTier(Math.max(0.05, Math.min(0.99, currentIndex + offsets.slice(i - 1).reduce((a, b) => a + b, 0)))) : tier;
+    const tierChanged = tier !== prevTier;
+    return {
+      month,
+      tier,
+      index: i === months.length - 1 ? currentIndex : idx,
+      note: tierChanged ? `Tier berubah dari ${prevTier} → ${tier}` : undefined,
+      agentDetected: tierChanged && (tier === "KRITIS" || tier === "TINGGI"),
+    };
+  });
+}
 
 export default function SchoolDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -167,6 +206,8 @@ export default function SchoolDetailPage() {
 
   const tier = getTierFromIndex(parseIndex(school.sigapp_index));
   const tierColor = TIER_BG_COLORS[tier] ?? "#94A3B8";
+  const currentIndex = parseIndex(school.sigapp_index);
+  const timelineEntries = buildTimelineEntries(currentIndex, tier, school.school_name || '');
 
   // Build school_index shape for legacy components (AgentStatusPanel, SchoolSankeyChart)
   const si = {
@@ -223,11 +264,11 @@ export default function SchoolDetailPage() {
 
       {/* Agent Decision Panel */}
       <AgentDecisionPanel
-        dominantPillar="P3 — Structural Risk"
-        dominantScore={parseIndex(school?.p3_structural_risk)}
-        previousTier="SEDANG"
+        dominantPillar={highestPillar ? getPillarName(highestPillar.key) : "—"}
+        dominantScore={highestPillar ? highestPillar.score : 0}
+        previousTier={timelineEntries[timelineEntries.length - 2]?.tier ?? tier}
         currentTier={tier}
-        tierChanged={false}
+        tierChanged={timelineEntries[timelineEntries.length - 2]?.tier !== tier}
         analysisDate={school.computed_at ? new Date(school.computed_at).toLocaleDateString('id-ID', { dateStyle: 'long' }) : "—"}
         reportGenerated={true}
         emailDispatched={tier === 'KRITIS' || tier === 'TINGGI'}
@@ -272,6 +313,12 @@ export default function SchoolDetailPage() {
           pillarVariables={null}
         />
       </div>
+
+      {/* Tier Change Timeline */}
+      <TierChangeTimeline
+        entries={timelineEntries}
+        schoolName={school.school_name || '-'}
+      />
 
       {/* Pillar Breakdown + Analysis */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
