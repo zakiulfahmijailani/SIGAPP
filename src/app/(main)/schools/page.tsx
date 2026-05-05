@@ -6,6 +6,7 @@ import { Search, ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import { getSupabase } from "@/lib/supabase";
 import { SekolahNTTFull } from "@/lib/types";
 import { IndexBadge } from "@/components/ui/IndexBadge";
+import { parseIndex } from "@/lib/utils";
 import { SkeletonRow } from "@/components/ui/SkeletonRow";
 
 const PAGE_SIZE = 20;
@@ -265,7 +266,7 @@ export default function SchoolsPage() {
 
                     {/* SIGAPP Index */}
                     <td className="px-4 py-3">
-                      <IndexBadge index={school?.sigapp_index ? Number(school.sigapp_index) : 0} />
+                      <IndexBadge index={parseIndex(school?.sigapp_index)} />
                     </td>
 
                     {/* Link */}

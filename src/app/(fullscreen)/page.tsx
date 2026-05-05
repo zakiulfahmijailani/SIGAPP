@@ -7,7 +7,7 @@ import { Sidebar } from "@/components/sidebar/Sidebar";
 import { FilterBar } from "@/components/ui/FilterBar";
 import ChatWidget, { ChatState, Message } from "@/components/chat/ChatWidget";
 import { useSekolahNTT } from "@/hooks/useSekolahNTT";
-import { getTierFromIndex } from "@/lib/utils";
+import { getTierFromIndex, parseIndex } from "@/lib/utils";
 import dynamic from 'next/dynamic';
 import type { Map as LeafletMap } from 'leaflet';
 import { useSearchParams, useRouter } from 'next/navigation';
@@ -66,7 +66,7 @@ function DashboardInner() {
       return (
         (kabupatenFilter === 'all' || sKab === kabupatenFilter) &&
         (jenjangFilter === 'all' || s?.jenjang === jenjangFilter) &&
-        (prioritasFilter === 'all' || getTierFromIndex(Number(s?.sigapp_index) || 0) === prioritasFilter)
+        (prioritasFilter === 'all' || getTierFromIndex(parseIndex(s?.sigapp_index)) === prioritasFilter)
       );
     }),
     [schools, kabupatenFilter, jenjangFilter, prioritasFilter]

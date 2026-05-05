@@ -51,6 +51,17 @@ export function formatIndex(index: number): string {
 }
 
 /**
+ * Safely parses a Supabase numeric/string value to a float.
+ * Supabase returns `numeric` columns as strings (e.g. "0.7423").
+ * Handles null, undefined, empty string, and NaN gracefully.
+ */
+export function parseIndex(value: string | number | null | undefined): number {
+  if (value == null || value === '') return 0
+  const parsed = typeof value === 'number' ? value : parseFloat(value)
+  return isNaN(parsed) ? 0 : parsed
+}
+
+/**
  * Returns a human-readable pillar name from its key.
  */
 export function getPillarName(key: string): string {

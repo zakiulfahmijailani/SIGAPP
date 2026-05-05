@@ -25,7 +25,7 @@ import {
 } from "recharts";
 import { getSupabase } from "@/lib/supabase";
 import { SekolahNTTFull } from "@/lib/types";
-import { formatIndex, getTierFromIndex, getPillarName, TIER_BG_COLORS } from "@/lib/utils";
+import { formatIndex, getTierFromIndex, getPillarName, TIER_BG_COLORS, parseIndex } from "@/lib/utils";
 import dynamic from 'next/dynamic';
 
 const SchoolSankeyChart = dynamic(
@@ -110,7 +110,7 @@ export default function SchoolDetailPage() {
     if (!school) return [];
     return PILLARS.map(({ key }) => ({
       pillar: getPillarName(key),
-      score: Number(school[key as PillarKey]) || 0,
+      score: parseIndex(school[key as PillarKey]),
       fullMark: 1,
     }));
   }, [school]);
@@ -119,7 +119,7 @@ export default function SchoolDetailPage() {
     if (!school) return null;
     let max = { key: "", score: -1 };
     for (const { key } of PILLARS) {
-      const s = Number(school[key as PillarKey]) || 0;
+      const s = parseIndex(school[key as PillarKey]);
       if (s > max.score) max = { key, score: s };
     }
     return max;
@@ -128,10 +128,10 @@ export default function SchoolDetailPage() {
   const analysisText = useMemo(() => {
     if (!school) return "";
     if (school.index_notes) return school.index_notes;
-    const tier = getTierFromIndex(Number(school.sigapp_index) || 0);
+    const tier = getTierFromIndex(parseIndex(school.sigapp_index));
     const pillarLabel = highestPillar ? getPillarName(highestPillar.key) : "N/A";
     const pillarScore = highestPillar ? formatIndex(highestPillar.score) : "N/A";
-    return `Sekolah ${school?.school_name || '-'} di ${school?.kecamatan || '-'}, ${school?.kabupaten || '-'} mendapat SIGAPP Index ${formatIndex(Number(school?.sigapp_index) || 0)}, masuk tier prioritas ${tier}. Indikator utama: ${pillarLabel} (skor: ${pillarScore}).`;
+    return `Sekolah ${school?.school_name || '-'} di ${school?.kecamatan || '-'}, ${school?.kabupaten || '-'} mendapat SIGAPP Index ${formatIndex(parseIndex(school?.sigapp_index))}, masuk tier prioritas ${tier}. Indikator utama: ${pillarLabel} (skor: ${pillarScore}).`;
   }, [school, highestPillar]);
 
   if (loading) {
@@ -165,18 +165,18 @@ export default function SchoolDetailPage() {
     );
   }
 
-  const tier = getTierFromIndex(Number(school.sigapp_index) || 0);
+  const tier = getTierFromIndex(parseIndex(school.sigapp_index));
   const tierColor = TIER_BG_COLORS[tier] ?? "#94A3B8";
 
   // Build school_index shape for legacy components (AgentStatusPanel, SchoolSankeyChart)
   const si = {
     id: String(school.id),
     school_id: String(school.id),
-    sigapp_index: Number(school.sigapp_index) || 0,
-    p1_quality_gap: Number(school.p1_quality_gap) || 0,
-    p2_spatial_inequity: Number(school.p2_spatial_inequity) || 0,
-    p3_structural_risk: Number(school.p3_structural_risk) || 0,
-    p4_public_signal: Number(school.p4_public_signal) || 0,
+    sigapp_index: parseIndex(school.sigapp_index),
+    p1_quality_gap: parseIndex(school.p1_quality_gap),
+    p2_spatial_inequity: parseIndex(school.p2_spatial_inequity),
+    p3_structural_risk: parseIndex(school.p3_structural_risk),
+    p4_public_signal: parseIndex(school.p4_public_signal),
     notes: school.index_notes,
     computed_at: school.computed_at ?? "",
   };
@@ -224,7 +224,7 @@ export default function SchoolDetailPage() {
       {/* Agent Decision Panel */}
       <AgentDecisionPanel
         dominantPillar="P3 — Structural Risk"
-        dominantScore={Number(school?.p3_structural_risk) || 0}
+        dominantScore={parseIndex(school?.p3_structural_risk)}
         previousTier="SEDANG"
         currentTier={tier}
         tierChanged={false}
@@ -238,7 +238,7 @@ export default function SchoolDetailPage() {
         <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
           <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">SIGAPP Index</p>
           <p className="text-4xl font-bold tabular-nums" style={{ color: tierColor }}>
-            {formatIndex(Number(school?.sigapp_index) || 0)}
+            {formatIndex(parseIndex(school?.sigapp_index))}
           </p>
         </div>
 
@@ -255,7 +255,7 @@ export default function SchoolDetailPage() {
         <AgentStatusPanel
           agentType="report"
           priorityTier={tier}
-          sigappIndex={Number(school?.sigapp_index) || 0}
+          sigappIndex={parseIndex(school?.sigapp_index)}
           schoolName={school?.school_name || '-'}
           school={schoolShape}
           schoolIndex={si}
@@ -265,7 +265,7 @@ export default function SchoolDetailPage() {
         <AgentStatusPanel
           agentType="email"
           priorityTier={tier}
-          sigappIndex={Number(school?.sigapp_index) || 0}
+          sigappIndex={parseIndex(school?.sigapp_index)}
           schoolName={school?.school_name || '-'}
           school={schoolShape}
           schoolIndex={si}
@@ -279,7 +279,7 @@ export default function SchoolDetailPage() {
           <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wider mb-5">Pillar Breakdown</h2>
           <div className="space-y-4 mb-6">
             {PILLARS.map(({ key, weight }) => {
-              const score = Number(school[key as PillarKey]) || 0;
+              const score = parseIndex(school[key as PillarKey]);
               const barColor = pillarBarColor(score);
               return (
                 <div key={key}>

@@ -5,7 +5,7 @@ import { Search, School as SchoolIcon } from "lucide-react";
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useSekolahNTT } from "@/hooks/useSekolahNTT";
 import { SekolahNTTFull } from "@/lib/types";
-import { getTierFromIndex, getTierColor, PriorityTier } from "@/lib/utils";
+import { getTierFromIndex, getTierColor, PriorityTier, parseIndex } from "@/lib/utils";
 
 export interface RankedTabProps {
   selectedSchoolId: string | null;
@@ -23,8 +23,8 @@ export function RankedTab({ selectedSchoolId, onSchoolSelect }: RankedTabProps) 
   const filteredAndSorted = schools
     .filter((s) => (s?.school_name || "").toLowerCase().includes(query.toLowerCase()))
     .sort((a, b) => {
-      const indexA = Number(a.sigapp_index) || 0;
-      const indexB = Number(b.sigapp_index) || 0;
+      const indexA = parseIndex(a.sigapp_index);
+      const indexB = parseIndex(b.sigapp_index);
       return indexB - indexA;
     });
 
@@ -128,7 +128,7 @@ export function RankedTab({ selectedSchoolId, onSchoolSelect }: RankedTabProps) 
         {!loading &&
           filteredAndSorted.map((school, index) => {
             const isSelected = selectedSchoolId === String(school.id);
-            const idxVal = Number(school.sigapp_index) || 0;
+            const idxVal = parseIndex(school.sigapp_index);
             const tier = getTierFromIndex(idxVal);
             const badgeColors = getTierColor(tier as PriorityTier);
 
@@ -172,10 +172,10 @@ export function RankedTab({ selectedSchoolId, onSchoolSelect }: RankedTabProps) 
                   <div className="px-3 pb-3 pt-3 border-t border-gray-100">
                     <p className="text-xs uppercase tracking-wide text-gray-400 mb-3 font-medium">Breakdown Skor</p>
                     {[
-                      { label: "P1 · Kualitas", value: Number(school.p1_quality_gap) || 0 },
-                      { label: "P2 · Spasial", value: Number(school.p2_spatial_inequity) || 0 },
-                      { label: "P3 · Risiko", value: Number(school.p3_structural_risk) || 0 },
-                      { label: "P4 · Sinyal", value: Number(school.p4_public_signal) || 0 },
+                      { label: "P1 · Kualitas", value: parseIndex(school.p1_quality_gap) },
+                      { label: "P2 · Spasial", value: parseIndex(school.p2_spatial_inequity) },
+                      { label: "P3 · Risiko", value: parseIndex(school.p3_structural_risk) },
+                      { label: "P4 · Sinyal", value: parseIndex(school.p4_public_signal) },
                     ].map((pillar) => (
                       <div key={pillar.label} className="mb-2">
                         <div className="flex justify-between mb-1">
@@ -209,10 +209,10 @@ export function RankedTab({ selectedSchoolId, onSchoolSelect }: RankedTabProps) 
 function getSummaryText(school: SekolahNTTFull | undefined) {
   if (!school) return "";
   const pillars = [
-    { key: "p1", val: Number(school.p1_quality_gap) || 0 },
-    { key: "p2", val: Number(school.p2_spatial_inequity) || 0 },
-    { key: "p3", val: Number(school.p3_structural_risk) || 0 },
-    { key: "p4", val: Number(school.p4_public_signal) || 0 },
+    { key: "p1", val: parseIndex(school.p1_quality_gap) },
+    { key: "p2", val: parseIndex(school.p2_spatial_inequity) },
+    { key: "p3", val: parseIndex(school.p3_structural_risk) },
+    { key: "p4", val: parseIndex(school.p4_public_signal) },
   ];
   const highest = pillars.reduce((prev, current) => (prev.val > current.val ? prev : current));
   switch (highest.key) {

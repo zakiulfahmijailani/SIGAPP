@@ -5,7 +5,7 @@ import { MapContainer, TileLayer, CircleMarker, Tooltip, useMap } from "react-le
 import "leaflet/dist/leaflet.css";
 import { fixLeafletIcons } from "./LeafletFix";
 import { SekolahNTTFull } from "@/lib/types";
-import { getTierFromIndex, TIER_BG_COLORS, PriorityTier } from "@/lib/utils";
+import { getTierFromIndex, TIER_BG_COLORS, PriorityTier, parseIndex } from "@/lib/utils";
 import L from "leaflet";
 import { PulsingMarker } from "./PulsingMarker";
 import { AGENT_NEWLY_FLAGGED_NPSN } from "@/lib/agentFlags";
@@ -162,7 +162,7 @@ export default function SchoolMap({ schools, onSchoolClick, selectedSchoolId, lo
           if (!school.lat || !school.lon || school.sigapp_index == null) return null;
 
           const isSelected = selectedSchoolId === String(school.id);
-          const tier = getTierFromIndex(Number(school.sigapp_index) || 0);
+          const tier = getTierFromIndex(parseIndex(school.sigapp_index));
           const color = TIER_BG_COLORS[tier] || "#94A3B8";
           const isAgentFlagged = AGENT_NEWLY_FLAGGED_NPSN.includes(school.npsn ?? "");
 
