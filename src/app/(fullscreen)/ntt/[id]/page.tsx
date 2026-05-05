@@ -4,7 +4,6 @@ import React, { useMemo } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useSekolahNTTDetail } from "@/hooks/useSekolahNTT";
-import { SekolahNTTFull } from "@/lib/types-ntt";
 import { 
   JENJANG_COLOR, 
   PILLAR_LABEL, 
@@ -78,7 +77,7 @@ export default function NTTSchoolDetailPage() {
   }
 
   // After null check, school is guaranteed non-null
-  const s = school as SekolahNTTFull;
+  const s = school;
 
   const name = getDisplayName(s);
   const tier = getTierNTT(s.sigapp_index);
