@@ -60,12 +60,12 @@ function pillarBarColor(score: number): string {
 
 // ── Key variable cards config ───────────────────────────────────
 const KEY_VARS = [
-  { key: "literacy_score", label: "Literacy Score", icon: BookOpen, format: (v: number) => formatIndex(v) },
-  { key: "numeracy_score", label: "Numeracy Score", icon: Calculator, format: (v: number) => formatIndex(v) },
-  { key: "poverty_rate", label: "Poverty Rate", icon: Percent, format: (v: number) => `${(v * 100).toFixed(1)}%` },
-  { key: "travel_time_minutes", label: "Travel Time", icon: Clock, format: (v: number) => `${v} min` },
-  { key: "building_damage_weight", label: "Building Damage", icon: Building2, format: (v: number) => formatIndex(v) },
-  { key: "complaint_frequency", label: "Complaint Frequency", icon: MessageSquareWarning, format: (v: number) => v.toFixed(0) },
+  { key: "literacy_score", label: "Literacy Score", icon: BookOpen, format: (v: number | null) => v != null ? formatIndex(v) : "—" },
+  { key: "numeracy_score", label: "Numeracy Score", icon: Calculator, format: (v: number | null) => v != null ? formatIndex(v) : "—" },
+  { key: "poverty_rate", label: "Poverty Rate", icon: Percent, format: (v: number | null) => v != null ? `${(v * 100).toFixed(1)}%` : "—" },
+  { key: "travel_time_minutes", label: "Travel Time", icon: Clock, format: (v: number | null) => v != null ? `${v} min` : "—" },
+  { key: "building_damage_weight", label: "Building Damage", icon: Building2, format: (v: number | null) => v != null ? formatIndex(v) : "—" },
+  { key: "complaint_frequency", label: "Complaint Frequency", icon: MessageSquareWarning, format: (v: number | null) => v != null ? v.toFixed(0) : "—" },
 ] as const;
 
 // ════════════════════════════════════════════════════════════
@@ -400,7 +400,7 @@ export default function SchoolDetailPage() {
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
             {KEY_VARS.map(({ key, label, icon: Icon, format }) => {
-              const value = pv[key as keyof typeof pv] as number;
+              const value = pv[key as keyof typeof pv] as number | null;
               return (
                 <div key={key} className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
                   <Icon size={18} className="text-teal mb-2" />
