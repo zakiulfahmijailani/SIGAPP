@@ -40,7 +40,7 @@ const AgentStatusPanel = dynamic(
 
 const AgentDecisionPanel = dynamic(
   () => import('@/components/agents/AgentDecisionPanel'),
-  { ssr: false, loading: () => <div className="h-[160px] skeleton-shimmer rounded-xl mb-6" /> }
+  { ssr: false, loading: () => <div className="h-[120px] skeleton-shimmer rounded-xl mb-6" /> }
 )
 
 // ── Pillar config ────────────────────────────────────────────────
@@ -224,18 +224,8 @@ export default function SchoolDetailPage() {
         <ArrowLeft size={15} /> All Schools
       </Link>
 
-      <AgentDecisionPanel
-        dominantPillar="P3 — Structural Risk"
-        dominantScore={0.821}
-        previousTier="SEDANG"
-        currentTier="KRITIS"
-        tierChanged={true}
-        analysisDate="Monday, 5 May 2026 · 12:04 WIB"
-        reportGenerated={true}
-        emailDispatched={true}
-      />
-
-      <div className="mb-6">
+      {/* ── School header ─────────────────────────────────────── */}
+      <div className="mb-5">
         <h1 className="text-2xl font-bold text-slate-800 mb-2">
           {school.school_name}
         </h1>
@@ -252,58 +242,21 @@ export default function SchoolDetailPage() {
         </div>
       </div>
 
-      {/* Agent Section */}
-      {si && (
-        <div className="mb-8">
-          <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wider mb-4">
-            SIGAPP Agents
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <AgentStatusPanel
-              agentType="report"
-              priorityTier={tier}
-              sigappIndex={si.sigapp_index}
-              schoolName={school.school_name}
-              school={{
-                id: school.id,
-                school_name: school.school_name,
-                address: school.address,
-                kelurahan: school.kelurahan,
-                kecamatan: school.kecamatan,
-                kota: school.kota,
-                jenjang: school.jenjang,
-                npsn: school.npsn,
-                total_students: school.total_students,
-                total_teachers: school.total_teachers,
-              }}
-              schoolIndex={si}
-              pillarVariables={pv ?? null}
-            />
-            <AgentStatusPanel
-              agentType="email"
-              priorityTier={tier}
-              sigappIndex={si.sigapp_index}
-              schoolName={school.school_name}
-              school={{
-                id: school.id,
-                school_name: school.school_name,
-                address: school.address,
-                kelurahan: school.kelurahan,
-                kecamatan: school.kecamatan,
-                kota: school.kota,
-                jenjang: school.jenjang,
-                npsn: school.npsn,
-                total_students: school.total_students,
-                total_teachers: school.total_teachers,
-              }}
-              schoolIndex={si}
-              pillarVariables={pv ?? null}
-            />
-          </div>
-        </div>
-      )}
+      {/* ── Agent Decision Panel (compact, always visible) ──────── */}
+      <AgentDecisionPanel
+        dominantPillar="P3 — Structural Risk"
+        dominantScore={0.821}
+        previousTier="SEDANG"
+        currentTier="KRITIS"
+        tierChanged={true}
+        analysisDate="Monday, 5 May 2026 · 12:04 WIB"
+        reportGenerated={true}
+        emailDispatched={true}
+      />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+      {/* ── SIGAPP Index + Rank + Agent status (one unified panel) ─ */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
+        {/* SIGAPP Index */}
         <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
           <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
             SIGAPP Index
@@ -317,6 +270,7 @@ export default function SchoolDetailPage() {
           )}
         </div>
 
+        {/* Rank */}
         <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
           <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
             Rank
@@ -328,8 +282,57 @@ export default function SchoolDetailPage() {
             </p>
           </div>
         </div>
+
+        {/* Agent: Report */}
+        {si && (
+          <AgentStatusPanel
+            agentType="report"
+            priorityTier={tier}
+            sigappIndex={si.sigapp_index}
+            schoolName={school.school_name}
+            school={{
+              id: school.id,
+              school_name: school.school_name,
+              address: school.address,
+              kelurahan: school.kelurahan,
+              kecamatan: school.kecamatan,
+              kota: school.kota,
+              jenjang: school.jenjang,
+              npsn: school.npsn,
+              total_students: school.total_students,
+              total_teachers: school.total_teachers,
+            }}
+            schoolIndex={si}
+            pillarVariables={pv ?? null}
+          />
+        )}
+
+        {/* Agent: Email */}
+        {si && (
+          <AgentStatusPanel
+            agentType="email"
+            priorityTier={tier}
+            sigappIndex={si.sigapp_index}
+            schoolName={school.school_name}
+            school={{
+              id: school.id,
+              school_name: school.school_name,
+              address: school.address,
+              kelurahan: school.kelurahan,
+              kecamatan: school.kecamatan,
+              kota: school.kota,
+              jenjang: school.jenjang,
+              npsn: school.npsn,
+              total_students: school.total_students,
+              total_teachers: school.total_teachers,
+            }}
+            schoolIndex={si}
+            pillarVariables={pv ?? null}
+          />
+        )}
       </div>
 
+      {/* ── Pillar + Analysis ──────────────────────────────────── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
           <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wider mb-5">
@@ -369,7 +372,7 @@ export default function SchoolDetailPage() {
                   <PolarRadiusAxis angle={90} domain={[0, 1]} tick={{ fontSize: 10, fill: "#94A3B8" }} tickCount={5} />
                   <Tooltip
                     contentStyle={{ background: "#0D2137", border: "none", borderRadius: 8, fontSize: 12, color: "#fff" }}
-                    formatter={(value: any) => [formatIndex(Number(value ?? 0)), "Score"]}
+                    formatter={(value: number | string) => [formatIndex(Number(value ?? 0)), "Score"]}
                   />
                   <Radar name="Score" dataKey="score" stroke="#00B4B4" fill="#00B4B4" fillOpacity={0.2} strokeWidth={2} />
                 </RadarChart>
@@ -389,6 +392,7 @@ export default function SchoolDetailPage() {
         </div>
       </div>
 
+      {/* ── Key Variables ─────────────────────────────────────── */}
       {pv && (
         <div>
           <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wider mb-4">
@@ -409,6 +413,7 @@ export default function SchoolDetailPage() {
         </div>
       )}
 
+      {/* ── Sankey ────────────────────────────────────────────── */}
       {si && (
         <div className="mt-8">
           <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wider mb-2">
