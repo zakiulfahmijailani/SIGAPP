@@ -15,12 +15,16 @@ const TIER_LABELS: Record<PriorityTier, string> = {
   RENDAH: "Prioritas Rendah",
 };
 
+// Major kabupaten/kota in NTT
 const CITY_LABELS = [
-  { name: "Jakarta Utara", pos: [-6.1481, 106.8998] as [number, number] },
-  { name: "Jakarta Selatan", pos: [-6.2935, 106.8318] as [number, number] },
-  { name: "Jakarta Barat", pos: [-6.1674, 106.7637] as [number, number] },
-  { name: "Jakarta Timur", pos: [-6.2251, 106.9004] as [number, number] },
-  { name: "Jakarta Pusat", pos: [-6.1862, 106.8358] as [number, number] },
+  { name: "Kupang",         pos: [-10.1772, 123.6070] as [number, number] },
+  { name: "Ende",           pos: [-8.8432,  121.6629] as [number, number] },
+  { name: "Maumere",        pos: [-8.6194,  122.2153] as [number, number] },
+  { name: "Waingapu",       pos: [-9.6567,  120.2641] as [number, number] },
+  { name: "Labuan Bajo",    pos: [-8.4968,  119.8862] as [number, number] },
+  { name: "Ruteng",         pos: [-8.6108,  120.4692] as [number, number] },
+  { name: "Atambua",        pos: [-9.1066,  124.8921] as [number, number] },
+  { name: "Soe",            pos: [-9.8611,  124.2847] as [number, number] },
 ];
 
 interface SchoolMapProps {
@@ -91,7 +95,8 @@ export default function SchoolMap({ schools, onSchoolClick, selectedSchoolId, lo
     fixLeafletIcons();
   }, []);
 
-  const center: [number, number] = [-6.2088, 106.8456];
+  // Center of NTT province
+  const center: [number, number] = [-8.6573, 121.0794];
 
   return (
     <div className="relative w-full h-full bg-slate-50">
@@ -116,8 +121,8 @@ export default function SchoolMap({ schools, onSchoolClick, selectedSchoolId, lo
 
       <MapContainer
         center={center}
-        zoom={11}
-        minZoom={10}
+        zoom={8}
+        minZoom={7}
         maxZoom={16}
         scrollWheelZoom={true}
         style={{ height: "100%", width: "100%", zIndex: 0 }}
@@ -130,12 +135,6 @@ export default function SchoolMap({ schools, onSchoolClick, selectedSchoolId, lo
         <MapController onMapReady={onMapReady} />
 
         <LegendControl />
-
-        {/* TODO: Add GeoJSON boundary layers here once files are available in /public/geojson/:
-             - jakarta_province.geojson -> style: black border 1.5px, no fill
-             - jakarta_cities.geojson -> style: gray #6B7280 border 1px, no fill
-             - jakarta_subdistricts.geojson -> style: gray #9CA3AF dashed border 0.5px, no fill
-        */}
 
         {/* City Labels */}
         {CITY_LABELS.map((city) => (
@@ -177,7 +176,6 @@ export default function SchoolMap({ schools, onSchoolClick, selectedSchoolId, lo
                 click: () => onSchoolClick(school),
               }}
             >
-              {/* Tooltip on hover (optional enhancement since popups are disabled) */}
               <Tooltip>{school.school_name}</Tooltip>
             </CircleMarker>
           );
