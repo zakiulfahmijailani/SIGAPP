@@ -7,7 +7,7 @@ import { useSekolahNTT } from "@/hooks/useSekolahNTT";
 import {
   Jenjang, PriorityTierNTT,
   JENJANG_COLOR, TIER_BG_COLORS_NTT,
-  TIER_LABEL_NTT, SekolahNTTFull,
+  SekolahNTTFull,
 } from "@/lib/types-ntt";
 import {
   getTierNTT, getTierBgHex, getTierLabel,
@@ -55,6 +55,7 @@ export default function NTTPage() {
       {/* ── NAVBAR ── */}
       <nav className="h-14 bg-slate-800 flex-shrink-0 flex items-center justify-between px-5 border-b border-slate-700 z-50">
         <div className="flex items-center gap-3">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/logo-light-mode-with-texts.png" alt="SIGAPP"
             className="h-8 w-auto object-contain brightness-0 invert" />
           <div className="h-7 w-px bg-slate-600 hidden sm:block" />
@@ -169,10 +170,10 @@ export default function NTTPage() {
         const tierHex = getTierBgHex(tier);
         const name = getDisplayName(selected);
         const pillars = [
-          { label: "P1 Kualitas",  icon: "\uD83C\uDF93", val: selected.p1_quality_gap },
-          { label: "P2 Spasial",   icon: "\uD83D\uDCCD", val: selected.p2_spatial_inequity },
-          { label: "P3 Struktural",icon: "\uD83C\uDFDA", val: selected.p3_structural_risk },
-          { label: "P4 Publik",    icon: "\uD83D\uDCE1", val: selected.p4_public_signal },
+          { label: "P1 Kualitas",   icon: "\uD83C\uDF93", val: selected.p1_quality_gap },
+          { label: "P2 Spasial",    icon: "\uD83D\uDCCD", val: selected.p2_spatial_inequity },
+          { label: "P3 Struktural", icon: "\uD83C\uDFDA", val: selected.p3_structural_risk },
+          { label: "P4 Publik",     icon: "\uD83D\uDCE1", val: selected.p4_public_signal },
         ];
 
         return (
