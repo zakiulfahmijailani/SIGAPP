@@ -4,6 +4,7 @@ import React, { useMemo } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useSekolahNTTDetail } from "@/hooks/useSekolahNTT";
+import { SekolahNTTFull } from "@/lib/types-ntt";
 import { 
   JENJANG_COLOR, 
   PILLAR_LABEL, 
@@ -35,12 +36,9 @@ export default function NTTSchoolDetailPage() {
     // Generate 5 months of history
     const months = ["Januari", "Februari", "Maret", "April", "Mei"];
     return months.map((m, i) => {
-      // Logic: trend naik sedikit demi sedikit menuju hari ini
       const isLast = i === months.length - 1;
       const val = isLast ? currentIdx : currentIdx - (0.05 * (months.length - 1 - i));
       const t = getTierNTT(val);
-      
-      // TierChangeTimeline menggunakan "NORMAL" untuk hijau
       const displayTier = t === "RENDAH" ? "NORMAL" : t;
 
       return {
@@ -64,7 +62,7 @@ export default function NTTSchoolDetailPage() {
     );
   }
 
-  if (error || (!loading && !school)) {
+  if (error || !school) {
     return (
       <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-6 text-center">
         <div className="text-5xl mb-6">⚠️</div>
@@ -79,16 +77,19 @@ export default function NTTSchoolDetailPage() {
     );
   }
 
-  const name = getDisplayName(school);
-  const tier = getTierNTT(school.sigapp_index);
+  // After null check, school is guaranteed non-null
+  const s = school as SekolahNTTFull;
+
+  const name = getDisplayName(s);
+  const tier = getTierNTT(s.sigapp_index);
   const tierHex = getTierBgHex(tier);
-  const jenjangColor = JENJANG_COLOR[school.jenjang];
+  const jenjangColor = JENJANG_COLOR[s.jenjang];
 
   const pillars = [
-    { id: "p1_quality_gap", label: PILLAR_LABEL.p1_quality_gap, icon: PILLAR_ICON.p1_quality_gap, val: school.p1_quality_gap },
-    { id: "p2_spatial_inequity", label: PILLAR_LABEL.p2_spatial_inequity, icon: PILLAR_ICON.p2_spatial_inequity, val: school.p2_spatial_inequity },
-    { id: "p3_structural_risk", label: PILLAR_LABEL.p3_structural_risk, icon: PILLAR_ICON.p3_structural_risk, val: school.p3_structural_risk },
-    { id: "p4_public_signal", label: PILLAR_LABEL.p4_public_signal, icon: PILLAR_ICON.p4_public_signal, val: school.p4_public_signal },
+    { id: "p1_quality_gap", label: PILLAR_LABEL.p1_quality_gap, icon: PILLAR_ICON.p1_quality_gap, val: s.p1_quality_gap },
+    { id: "p2_spatial_inequity", label: PILLAR_LABEL.p2_spatial_inequity, icon: PILLAR_ICON.p2_spatial_inequity, val: s.p2_spatial_inequity },
+    { id: "p3_structural_risk", label: PILLAR_LABEL.p3_structural_risk, icon: PILLAR_ICON.p3_structural_risk, val: s.p3_structural_risk },
+    { id: "p4_public_signal", label: PILLAR_LABEL.p4_public_signal, icon: PILLAR_ICON.p4_public_signal, val: s.p4_public_signal },
   ];
 
   return (
@@ -124,12 +125,12 @@ export default function NTTSchoolDetailPage() {
         <section className="mb-8">
           <div className="flex flex-wrap items-center gap-3 mb-4">
             <span className="px-3 py-1 rounded-lg text-xs font-black text-white" style={{ backgroundColor: jenjangColor }}>
-              {school.jenjang}
+              {s.jenjang}
             </span>
             <span className={`px-3 py-1 rounded-lg text-xs font-black border ${getTierColorNTT(tier)}`}>
               {getTierLabel(tier)}
             </span>
-            <span className="text-slate-500 text-xs font-mono ml-auto">NPSN: {school.npsn || "—"}</span>
+            <span className="text-slate-500 text-xs font-mono ml-auto">NPSN: {s.npsn || "—"}</span>
           </div>
           
           <h1 className="text-3xl sm:text-4xl font-black text-white leading-tight mb-2">
@@ -138,9 +139,9 @@ export default function NTTSchoolDetailPage() {
           
           <div className="flex items-center gap-2 text-slate-400 text-sm">
             <span className="text-teal-500">📍</span>
-            <span>{school.kabupaten || "—"}</span>
+            <span>{s.kabupaten || "—"}</span>
             <span className="opacity-30">•</span>
-            <span>Kec. {school.kecamatan || "—"}</span>
+            <span>Kec. {s.kecamatan || "—"}</span>
           </div>
         </section>
 
@@ -157,7 +158,7 @@ export default function NTTSchoolDetailPage() {
                 <p className="text-[10px] text-slate-500 uppercase tracking-[0.3em] font-black mb-4">SIGAPP COMPOSITE INDEX</p>
                 <div className="flex items-baseline gap-4 mb-6">
                   <h2 className="text-7xl font-black tracking-tighter" style={{ color: tierHex }}>
-                    {formatIndex(school.sigapp_index)}
+                    {formatIndex(s.sigapp_index)}
                   </h2>
                   <div className="flex flex-col">
                     <span className="text-xs font-bold text-slate-400">NTT Tier 2026</span>
@@ -169,7 +170,7 @@ export default function NTTSchoolDetailPage() {
                   <div 
                     className="h-full rounded-full shadow-[0_0_20px_rgba(0,0,0,0.5)] transition-all duration-1000"
                     style={{ 
-                      width: `${((school.sigapp_index ?? 0) * 100).toFixed(1)}%`,
+                      width: `${((s.sigapp_index ?? 0) * 100).toFixed(1)}%`,
                       backgroundColor: tierHex,
                       boxShadow: `0 0 15px ${tierHex}44`
                     }}
@@ -223,45 +224,45 @@ export default function NTTSchoolDetailPage() {
                 <div>
                   <p className="text-[10px] text-slate-500 uppercase font-bold mb-1">Alamat</p>
                   <p className="text-sm text-slate-200 leading-relaxed">
-                    {school.address || school.addr_street || "Informasi alamat tidak tersedia"}
+                    {s.address || s.addr_street || "Informasi alamat tidak tersedia"}
                   </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <p className="text-[10px] text-slate-500 uppercase font-bold mb-1">Siswa</p>
-                    <p className="text-sm text-white font-bold">{school.total_students ? school.total_students.toLocaleString("id-ID") : "—"}</p>
+                    <p className="text-sm text-white font-bold">{s.total_students ? s.total_students.toLocaleString("id-ID") : "—"}</p>
                   </div>
                   <div>
                     <p className="text-[10px] text-slate-500 uppercase font-bold mb-1">Guru</p>
-                    <p className="text-sm text-white font-bold">{school.total_teachers ? school.total_teachers.toLocaleString("id-ID") : "—"}</p>
+                    <p className="text-sm text-white font-bold">{s.total_teachers ? s.total_teachers.toLocaleString("id-ID") : "—"}</p>
                   </div>
                 </div>
 
                 <div>
                   <p className="text-[10px] text-slate-500 uppercase font-bold mb-1">Operator</p>
-                  <p className="text-sm text-slate-200 font-medium">🏙 {school.operator || "—"}</p>
+                  <p className="text-sm text-slate-200 font-medium">🏙 {s.operator || "—"}</p>
                 </div>
 
                 <div className="pt-4 space-y-3">
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-slate-400">Akses Internet</span>
-                    <span className={`font-bold ${school.internet_access ? 'text-emerald-400' : 'text-red-400'}`}>
-                      {school.internet_access ? "✅ Tersedia" : "❌ Tidak Ada"}
+                    <span className={`font-bold ${s.internet_access ? 'text-emerald-400' : 'text-red-400'}`}>
+                      {s.internet_access ? "✅ Tersedia" : "❌ Tidak Ada"}
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-xs">
                     <span className="text-slate-400">Status Wilayah</span>
                     <span className="text-slate-200 font-bold">
-                      {school.remote_status ? "🏔 Terpencil / 3T" : "—"}
+                      {s.remote_status ? "🏔 Terpencil / 3T" : "—"}
                     </span>
                   </div>
                 </div>
 
-                {school.phone && (
+                {s.phone && (
                   <div className="pt-4">
                     <p className="text-[10px] text-slate-500 uppercase font-bold mb-1">Kontak</p>
-                    <p className="text-sm text-teal-400 font-mono">📞 {school.phone}</p>
+                    <p className="text-sm text-teal-400 font-mono">📞 {s.phone}</p>
                   </div>
                 )}
               </div>
@@ -274,8 +275,8 @@ export default function NTTSchoolDetailPage() {
                 <button className="bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold py-3 px-4 rounded-xl transition-all text-center">
                   📄 Cetak Profil Sekolah
                 </button>
-                {school.website && (
-                  <a href={school.website} target="_blank" className="bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold py-3 px-4 rounded-xl transition-all text-center">
+                {s.website && (
+                  <a href={s.website} target="_blank" className="bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold py-3 px-4 rounded-xl transition-all text-center">
                     🌐 Kunjungi Website
                   </a>
                 )}
