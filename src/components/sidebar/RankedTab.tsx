@@ -4,12 +4,12 @@ import { useState, useRef, useEffect } from "react";
 import { Search, School as SchoolIcon } from "lucide-react";
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useSekolahNTT } from "@/hooks/useSekolahNTT";
-import { SchoolWithIndex } from "@/lib/types";
+import { SekolahNTTFull } from "@/lib/types";
 import { getTierFromIndex, getTierColor, PriorityTier } from "@/lib/utils";
 
 export interface RankedTabProps {
   selectedSchoolId: string | null;
-  onSchoolSelect: (school: SchoolWithIndex | null) => void;
+  onSchoolSelect: (school: SekolahNTTFull | null) => void;
 }
 
 export function RankedTab({ selectedSchoolId, onSchoolSelect }: RankedTabProps) {
@@ -21,10 +21,10 @@ export function RankedTab({ selectedSchoolId, onSchoolSelect }: RankedTabProps) 
 
   // Filter and sort schools
   const filteredAndSorted = schools
-    .filter((s) => s.school_name.toLowerCase().includes(query.toLowerCase()))
+    .filter((s) => (s?.school_name || "").toLowerCase().includes(query.toLowerCase()))
     .sort((a, b) => {
-      const indexA = a.school_index?.sigapp_index || 0;
-      const indexB = b.school_index?.sigapp_index || 0;
+      const indexA = Number(a.sigapp_index) || 0;
+      const indexB = Number(b.sigapp_index) || 0;
       return indexB - indexA;
     });
 
@@ -37,7 +37,7 @@ export function RankedTab({ selectedSchoolId, onSchoolSelect }: RankedTabProps) 
 
   useEffect(() => {
     if (selectedSchoolId) {
-      const isVisible = filteredAndSorted.some(s => s.id === selectedSchoolId);
+      const isVisible = filteredAndSorted.some(s => String(s.id) === selectedSchoolId);
       if (!isVisible) {
         setQuery("");
         updateSearchURL("");
@@ -127,15 +127,15 @@ export function RankedTab({ selectedSchoolId, onSchoolSelect }: RankedTabProps) 
 
         {!loading &&
           filteredAndSorted.map((school, index) => {
-            const isSelected = selectedSchoolId === school.id;
-            const idxVal = school.school_index?.sigapp_index || 0;
+            const isSelected = selectedSchoolId === String(school.id);
+            const idxVal = Number(school.sigapp_index) || 0;
             const tier = getTierFromIndex(idxVal);
             const badgeColors = getTierColor(tier as PriorityTier);
 
             return (
               <div
                 key={school.id}
-                ref={(el) => { itemRefs.current[school.id] = el; }}
+                ref={(el) => { itemRefs.current[String(school.id)] = el; }}
                 className={`
                   mb-2 overflow-hidden rounded-lg border cursor-pointer transition-all duration-150
                   active:scale-[0.98] hover:shadow-sm
@@ -151,8 +151,8 @@ export function RankedTab({ selectedSchoolId, onSchoolSelect }: RankedTabProps) 
                 >
                   <div className="text-xs font-bold text-gray-400 w-6 text-center">{index + 1}</div>
                   <div className="flex-1 min-w-0">
-                    <h4 className="text-sm sm:text-base font-medium text-gray-800 truncate">{school.school_name}</h4>
-                    <p className="text-xs sm:text-sm text-gray-400 truncate">{school.kecamatan} · {school.jenjang}</p>
+                    <h4 className="text-sm sm:text-base font-medium text-gray-800 truncate">{school?.school_name || '-'}</h4>
+                    <p className="text-xs sm:text-sm text-gray-400 truncate">{school?.kecamatan || '-'} · {school?.jenjang || '-'}</p>
                   </div>
                   <div className="flex flex-col items-end gap-1 shrink-0">
                     <div className={`rounded-full px-2 py-0.5 text-xs font-bold ${badgeColors}`}>
@@ -172,10 +172,10 @@ export function RankedTab({ selectedSchoolId, onSchoolSelect }: RankedTabProps) 
                   <div className="px-3 pb-3 pt-3 border-t border-gray-100">
                     <p className="text-xs uppercase tracking-wide text-gray-400 mb-3 font-medium">Breakdown Skor</p>
                     {[
-                      { label: "P1 · Kualitas", value: school.school_index?.p1_quality_gap || 0 },
-                      { label: "P2 · Spasial", value: school.school_index?.p2_spatial_inequity || 0 },
-                      { label: "P3 · Risiko", value: school.school_index?.p3_structural_risk || 0 },
-                      { label: "P4 · Sinyal", value: school.school_index?.p4_public_signal || 0 },
+                      { label: "P1 · Kualitas", value: Number(school.p1_quality_gap) || 0 },
+                      { label: "P2 · Spasial", value: Number(school.p2_spatial_inequity) || 0 },
+                      { label: "P3 · Risiko", value: Number(school.p3_structural_risk) || 0 },
+                      { label: "P4 · Sinyal", value: Number(school.p4_public_signal) || 0 },
                     ].map((pillar) => (
                       <div key={pillar.label} className="mb-2">
                         <div className="flex justify-between mb-1">
@@ -187,7 +187,7 @@ export function RankedTab({ selectedSchoolId, onSchoolSelect }: RankedTabProps) 
                         </div>
                       </div>
                     ))}
-                    <p className="text-xs text-gray-500 italic mt-3">{getSummaryText(school.school_index)}</p>
+                    <p className="text-xs text-gray-500 italic mt-3">{getSummaryText(school)}</p>
                     <div className="mt-4">
                       <a
                         href={`/schools/${school.id}`}
@@ -206,13 +206,13 @@ export function RankedTab({ selectedSchoolId, onSchoolSelect }: RankedTabProps) 
   );
 }
 
-function getSummaryText(indexRecord: NonNullable<SchoolWithIndex["school_index"]> | undefined) {
-  if (!indexRecord) return "";
+function getSummaryText(school: SekolahNTTFull | undefined) {
+  if (!school) return "";
   const pillars = [
-    { key: "p1", val: indexRecord.p1_quality_gap },
-    { key: "p2", val: indexRecord.p2_spatial_inequity },
-    { key: "p3", val: indexRecord.p3_structural_risk },
-    { key: "p4", val: indexRecord.p4_public_signal },
+    { key: "p1", val: Number(school.p1_quality_gap) || 0 },
+    { key: "p2", val: Number(school.p2_spatial_inequity) || 0 },
+    { key: "p3", val: Number(school.p3_structural_risk) || 0 },
+    { key: "p4", val: Number(school.p4_public_signal) || 0 },
   ];
   const highest = pillars.reduce((prev, current) => (prev.val > current.val ? prev : current));
   switch (highest.key) {

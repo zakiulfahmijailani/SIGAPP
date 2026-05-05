@@ -3,7 +3,7 @@
 import { ChevronRight, BarChart2, List, MessageCircle } from "lucide-react";
 import { StatsTab } from "./StatsTab";
 import { RankedTab } from "./RankedTab";
-import { SchoolWithIndex } from "@/lib/types";
+import { SekolahNTTFull } from "@/lib/types";
 import { ChatTab } from "./ChatTab";
 import type { ChatState, Message } from "@/components/chat/ChatWidget";
 import { AgentActivityFeed } from "./AgentActivityFeed";
@@ -13,14 +13,14 @@ export interface SidebarProps {
   onTabChange: (tab: 'stats' | 'list' | 'chat') => void;
   onClose: () => void;
   selectedSchoolId?: string | null;
-  onSchoolSelect?: (school: SchoolWithIndex | null) => void;
+  onSchoolSelect?: (school: SekolahNTTFull | null) => void;
   chatState: ChatState;
   messages: Message[];
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
   showChips: boolean;
   setShowChips: React.Dispatch<React.SetStateAction<boolean>>;
   onUndock: () => void;
-  schools: SchoolWithIndex[];
+  schools: SekolahNTTFull[];
 }
 
 export function Sidebar({ 

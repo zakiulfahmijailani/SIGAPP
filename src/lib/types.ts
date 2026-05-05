@@ -53,33 +53,34 @@ export interface SchoolDetail extends School {
 // ─── NTT Types ────────────────────────────────────────────────────────────────
 
 export interface SekolahNTT {
-  id: number
-  npsn: string
-  school_name: string
-  jenjang: string
-  kabupaten: string
-  kecamatan: string
-  addr_city: string | null
-  addr_street: string | null
-  operator: string | null
-  lat: number
-  lon: number
-  total_students: number
-  total_teachers: number
-  teacher_ratio: number | null
-  facility_score: number | null
-  nearest_school_km: number | null
-  disaster_risk_score: number | null
-  internet_access: boolean | null
-  remote_status: boolean | null
-  // Index columns (embedded in sekolah_ntt_full)
-  sigapp_index: number
-  p1_quality_gap: number
-  p2_spatial_inequity: number
-  p3_structural_risk: number
-  p4_public_signal: number
-  index_notes: string | null
-  computed_at: string | null
+  id: number;
+  school_name: string | null;
+  npsn: string | null;
+  jenjang: string | null;
+  kabupaten: string | null;
+  kecamatan: string | null;
+  kelurahan: string | null;
+  provinsi: string | null;
+  addr_city: string | null;
+  addr_street: string | null;
+  operator: string | null;
+  lat: number;
+  lon: number;
+  total_students: number | null;
+  total_teachers: number | null;
+  sigapp_index: string | null;
+  p1_quality_gap: string | null;
+  p2_spatial_inequity: string | null;
+  p3_structural_risk: string | null;
+  p4_public_signal: string | null;
+  index_notes: string | null;
+  computed_at: string | null;
+  teacher_ratio: string | null;
+  facility_score: string | null;
+  nearest_school_km: string | null;
+  disaster_risk_score: string | null;
+  internet_access: boolean | null;
+  remote_status: boolean | null;
 }
 
 export interface SekolahNTTIndex {

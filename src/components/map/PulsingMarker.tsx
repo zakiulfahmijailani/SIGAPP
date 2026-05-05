@@ -3,10 +3,10 @@
 import { useEffect, useRef } from "react";
 import L from "leaflet";
 import { useMap } from "react-leaflet";
-import { SchoolWithIndex } from "@/lib/types";
+import { SekolahNTTFull } from "@/lib/types";
 
 interface PulsingMarkerProps {
-  school: SchoolWithIndex;
+  school: SekolahNTTFull;
   color: string;
   isSelected: boolean;
   onClick: () => void;
@@ -89,9 +89,9 @@ export function PulsingMarker({ school, color, isSelected, onClick }: PulsingMar
       `,
     });
 
-    const marker = L.marker([school.latitude, school.longitude], { icon });
+    const marker = L.marker([school.lat, school.lon], { icon });
     marker.on("click", onClick);
-    marker.bindTooltip(school.school_name);
+    marker.bindTooltip(school?.school_name || '-');
     marker.addTo(map);
     markerRef.current = marker;
 

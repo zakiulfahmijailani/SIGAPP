@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { MapContainer, TileLayer, CircleMarker, Tooltip, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import { fixLeafletIcons } from "./LeafletFix";
-import { SchoolWithIndex } from "@/lib/types";
+import { SekolahNTTFull } from "@/lib/types";
 import { getTierFromIndex, TIER_BG_COLORS, PriorityTier } from "@/lib/utils";
 import L from "leaflet";
 import { PulsingMarker } from "./PulsingMarker";
@@ -30,8 +30,8 @@ const CITY_LABELS = [
 ];
 
 interface SchoolMapProps {
-  schools: SchoolWithIndex[];
-  onSchoolClick: (school: SchoolWithIndex) => void;
+  schools: SekolahNTTFull[];
+  onSchoolClick: (school: SekolahNTTFull) => void;
   selectedSchoolId: string | null;
   loading?: boolean;
   onMapReady?: (map: L.Map) => void;
@@ -159,10 +159,10 @@ export default function SchoolMap({ schools, onSchoolClick, selectedSchoolId, lo
 
         {/* School Dots */}
         {schools.map((school) => {
-          if (!school.latitude || !school.longitude || !school.school_index) return null;
+          if (!school.lat || !school.lon || school.sigapp_index == null) return null;
 
-          const isSelected = selectedSchoolId === school.id;
-          const tier = getTierFromIndex(school.school_index.sigapp_index);
+          const isSelected = selectedSchoolId === String(school.id);
+          const tier = getTierFromIndex(Number(school.sigapp_index) || 0);
           const color = TIER_BG_COLORS[tier] || "#94A3B8";
           const isAgentFlagged = AGENT_NEWLY_FLAGGED_NPSN.includes(school.npsn ?? "");
 
@@ -181,7 +181,7 @@ export default function SchoolMap({ schools, onSchoolClick, selectedSchoolId, lo
           return (
             <CircleMarker
               key={school.id}
-              center={[school.latitude, school.longitude]}
+              center={[school.lat, school.lon]}
               radius={isSelected ? 9 : 6}
               fillColor={color}
               fillOpacity={0.85}
@@ -191,7 +191,7 @@ export default function SchoolMap({ schools, onSchoolClick, selectedSchoolId, lo
                 click: () => onSchoolClick(school),
               }}
             >
-              <Tooltip>{school.school_name}</Tooltip>
+              <Tooltip>{school.school_name || '-'}</Tooltip>
             </CircleMarker>
           );
         })}

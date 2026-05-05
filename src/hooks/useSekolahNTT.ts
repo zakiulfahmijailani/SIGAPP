@@ -23,44 +23,10 @@ export function getPriorityClass(index: number): string {
   return 'tidak_prioritas';
 }
 
-/**
- * Adapter: converts SekolahNTTFull into the shape expected by existing
- * components (SchoolWithIndex). This allows SchoolMap, Sidebar, FilterBar,
- * etc. to work without any modification.
- */
-export function adaptSekolahNTT(s: SekolahNTTFull) {
-  return {
-    // --- School fields ---
-    id: String(s.id),
-    npsn: s.npsn,
-    school_name: s.school_name,
-    jenjang: s.jenjang as 'SD' | 'SMP' | 'SMA' | 'SMK',
-    kecamatan: s.kecamatan,
-    kelurahan: '',                   // not available in NTT
-    kota: s.kabupaten,               // map kabupaten → kota so filters work
-    address: s.addr_street ?? '',
-    latitude: s.lat,
-    longitude: s.lon,
-    total_students: s.total_students,
-    total_teachers: s.total_teachers,
-    student_kip_count: 0,            // not available in NTT
-    // --- SchoolIndex fields (flat in NTT, nested in Jakarta) ---
-    school_index: {
-      id: String(s.id),
-      school_id: String(s.id),
-      sigapp_index: s.sigapp_index,
-      p1_quality_gap: s.p1_quality_gap,
-      p2_spatial_inequity: s.p2_spatial_inequity,
-      p3_structural_risk: s.p3_structural_risk,
-      p4_public_signal: s.p4_public_signal,
-      notes: s.index_notes,
-      computed_at: s.computed_at ?? '',
-    },
-  };
-}
+// Removed adaptSekolahNTT since components now use SekolahNTTFull directly
 
 export function useSekolahNTT() {
-  const [schools, setSchools] = useState<ReturnType<typeof adaptSekolahNTT>[]>([]);
+  const [schools, setSchools] = useState<SekolahNTTFull[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -75,8 +41,7 @@ export function useSekolahNTT() {
 
       if (fetchErr) throw new Error(fetchErr.message);
 
-      const adapted = (data ?? []).map((s) => adaptSekolahNTT(s as SekolahNTTFull));
-      setSchools(adapted);
+      setSchools((data ?? []) as SekolahNTTFull[]);
     } catch (err: unknown) {
       console.error("Failed to fetch sekolah NTT:", err);
       setError("Gagal memuat data sekolah NTT");

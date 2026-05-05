@@ -110,7 +110,7 @@ export default function SchoolDetailPage() {
     if (!school) return [];
     return PILLARS.map(({ key }) => ({
       pillar: getPillarName(key),
-      score: school[key as PillarKey] ?? 0,
+      score: Number(school[key as PillarKey]) || 0,
       fullMark: 1,
     }));
   }, [school]);
@@ -119,7 +119,7 @@ export default function SchoolDetailPage() {
     if (!school) return null;
     let max = { key: "", score: -1 };
     for (const { key } of PILLARS) {
-      const s = school[key as PillarKey] ?? 0;
+      const s = Number(school[key as PillarKey]) || 0;
       if (s > max.score) max = { key, score: s };
     }
     return max;
@@ -128,10 +128,10 @@ export default function SchoolDetailPage() {
   const analysisText = useMemo(() => {
     if (!school) return "";
     if (school.index_notes) return school.index_notes;
-    const tier = getTierFromIndex(school.sigapp_index);
+    const tier = getTierFromIndex(Number(school.sigapp_index) || 0);
     const pillarLabel = highestPillar ? getPillarName(highestPillar.key) : "N/A";
     const pillarScore = highestPillar ? formatIndex(highestPillar.score) : "N/A";
-    return `Sekolah ${school.school_name} di ${school.kecamatan}, ${school.kabupaten} mendapat SIGAPP Index ${formatIndex(school.sigapp_index)}, masuk tier prioritas ${tier}. Indikator utama: ${pillarLabel} (skor: ${pillarScore}).`;
+    return `Sekolah ${school?.school_name || '-'} di ${school?.kecamatan || '-'}, ${school?.kabupaten || '-'} mendapat SIGAPP Index ${formatIndex(Number(school?.sigapp_index) || 0)}, masuk tier prioritas ${tier}. Indikator utama: ${pillarLabel} (skor: ${pillarScore}).`;
   }, [school, highestPillar]);
 
   if (loading) {
@@ -165,18 +165,18 @@ export default function SchoolDetailPage() {
     );
   }
 
-  const tier = getTierFromIndex(school.sigapp_index);
+  const tier = getTierFromIndex(Number(school.sigapp_index) || 0);
   const tierColor = TIER_BG_COLORS[tier] ?? "#94A3B8";
 
   // Build school_index shape for legacy components (AgentStatusPanel, SchoolSankeyChart)
   const si = {
     id: String(school.id),
     school_id: String(school.id),
-    sigapp_index: school.sigapp_index,
-    p1_quality_gap: school.p1_quality_gap,
-    p2_spatial_inequity: school.p2_spatial_inequity,
-    p3_structural_risk: school.p3_structural_risk,
-    p4_public_signal: school.p4_public_signal,
+    sigapp_index: Number(school.sigapp_index) || 0,
+    p1_quality_gap: Number(school.p1_quality_gap) || 0,
+    p2_spatial_inequity: Number(school.p2_spatial_inequity) || 0,
+    p3_structural_risk: Number(school.p3_structural_risk) || 0,
+    p4_public_signal: Number(school.p4_public_signal) || 0,
     notes: school.index_notes,
     computed_at: school.computed_at ?? "",
   };
@@ -184,15 +184,15 @@ export default function SchoolDetailPage() {
   // Build school shape for AgentStatusPanel
   const schoolShape = {
     id: String(school.id),
-    school_name: school.school_name,
+    school_name: school.school_name || '-',
     address: school.addr_street ?? "",
     kelurahan: "",
-    kecamatan: school.kecamatan,
-    kota: school.kabupaten,
-    jenjang: school.jenjang as 'SD' | 'SMP' | 'SMA' | 'SMK',
-    npsn: school.npsn,
-    total_students: school.total_students,
-    total_teachers: school.total_teachers,
+    kecamatan: school.kecamatan || '-',
+    kota: school.kabupaten || '-',
+    jenjang: (school.jenjang as 'SD' | 'SMP' | 'SMA' | 'SMK') || 'SD',
+    npsn: school.npsn || '-',
+    total_students: school.total_students || 0,
+    total_teachers: school.total_teachers || 0,
   };
 
   return (
@@ -203,7 +203,7 @@ export default function SchoolDetailPage() {
         <ChevronRight className="w-3.5 h-3.5 flex-shrink-0" />
         <Link href="/schools" className="hover:text-[#00B4B4] transition-colors">Sekolah</Link>
         <ChevronRight className="w-3.5 h-3.5 flex-shrink-0" />
-        <span className="truncate max-w-[200px] text-slate-800 font-medium">{school.school_name}</span>
+        <span className="truncate max-w-[200px] text-slate-800 font-medium">{school?.school_name || '-'}</span>
       </nav>
 
       <Link href="/schools" className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-teal-500 transition-colors mb-5">
@@ -212,19 +212,19 @@ export default function SchoolDetailPage() {
 
       {/* Header */}
       <div className="mb-5">
-        <h1 className="text-2xl font-bold text-slate-800 mb-2">{school.school_name}</h1>
+        <h1 className="text-2xl font-bold text-slate-800 mb-2">{school?.school_name || '-'}</h1>
         <div className="flex flex-wrap items-center gap-2">
-          <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">NPSN {school.npsn}</span>
-          <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">{school.jenjang}</span>
-          <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">{school.kecamatan}</span>
-          <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">{school.kabupaten}</span>
+          <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">NPSN {school?.npsn || '-'}</span>
+          <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">{school?.jenjang || '-'}</span>
+          <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">{school?.kecamatan || '-'}</span>
+          <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">{school?.kabupaten || '-'}</span>
         </div>
       </div>
 
       {/* Agent Decision Panel */}
       <AgentDecisionPanel
         dominantPillar="P3 — Structural Risk"
-        dominantScore={school.p3_structural_risk}
+        dominantScore={Number(school?.p3_structural_risk) || 0}
         previousTier="SEDANG"
         currentTier={tier}
         tierChanged={false}
@@ -238,7 +238,7 @@ export default function SchoolDetailPage() {
         <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
           <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">SIGAPP Index</p>
           <p className="text-4xl font-bold tabular-nums" style={{ color: tierColor }}>
-            {formatIndex(school.sigapp_index)}
+            {formatIndex(Number(school?.sigapp_index) || 0)}
           </p>
         </div>
 
@@ -255,8 +255,8 @@ export default function SchoolDetailPage() {
         <AgentStatusPanel
           agentType="report"
           priorityTier={tier}
-          sigappIndex={school.sigapp_index}
-          schoolName={school.school_name}
+          sigappIndex={Number(school?.sigapp_index) || 0}
+          schoolName={school?.school_name || '-'}
           school={schoolShape}
           schoolIndex={si}
           pillarVariables={null}
@@ -265,8 +265,8 @@ export default function SchoolDetailPage() {
         <AgentStatusPanel
           agentType="email"
           priorityTier={tier}
-          sigappIndex={school.sigapp_index}
-          schoolName={school.school_name}
+          sigappIndex={Number(school?.sigapp_index) || 0}
+          schoolName={school?.school_name || '-'}
           school={schoolShape}
           schoolIndex={si}
           pillarVariables={null}
@@ -279,7 +279,7 @@ export default function SchoolDetailPage() {
           <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wider mb-5">Pillar Breakdown</h2>
           <div className="space-y-4 mb-6">
             {PILLARS.map(({ key, weight }) => {
-              const score = school[key as PillarKey] ?? 0;
+              const score = Number(school[key as PillarKey]) || 0;
               const barColor = pillarBarColor(score);
               return (
                 <div key={key}>

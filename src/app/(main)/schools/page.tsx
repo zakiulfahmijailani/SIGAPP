@@ -18,6 +18,7 @@ export default function SchoolsPage() {
   // Filters
   const [search, setSearch] = useState("");
   const [kecamatanFilter, setKecamatanFilter] = useState("");
+  const [kabupatenFilter, setKabupatenFilter] = useState("");
   const [jenjangFilter, setJenjangFilter] = useState("");
 
   // Pagination
@@ -50,7 +51,15 @@ export default function SchoolsPage() {
   // ── Derived: unique filter options ──────────────────────────
   const kecamatanOptions = useMemo(
     () =>
-      Array.from(new Set(schools.map((s) => s.kecamatan)))
+      Array.from(new Set(schools.map((s) => s?.kecamatan)))
+        .filter(Boolean)
+        .sort(),
+    [schools]
+  );
+
+  const kabupatenOptions = useMemo(
+    () =>
+      Array.from(new Set(schools.map((s) => s?.kabupaten)))
         .filter(Boolean)
         .sort(),
     [schools]
@@ -65,20 +74,24 @@ export default function SchoolsPage() {
     if (search.trim()) {
       const q = search.toLowerCase();
       result = result.filter((s) =>
-        s.school_name.toLowerCase().includes(q)
+        s?.school_name?.toLowerCase().includes(q)
       );
     }
 
+    if (kabupatenFilter) {
+      result = result.filter((s) => s?.kabupaten === kabupatenFilter);
+    }
+
     if (kecamatanFilter) {
-      result = result.filter((s) => s.kecamatan === kecamatanFilter);
+      result = result.filter((s) => s?.kecamatan === kecamatanFilter);
     }
 
     if (jenjangFilter) {
-      result = result.filter((s) => s.jenjang === jenjangFilter);
+      result = result.filter((s) => s?.jenjang === jenjangFilter);
     }
 
     return result;
-  }, [schools, search, kecamatanFilter, jenjangFilter]);
+  }, [schools, search, kabupatenFilter, kecamatanFilter, jenjangFilter]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -86,7 +99,7 @@ export default function SchoolsPage() {
   // Reset to page 1 when filters change
   useEffect(() => {
     setPage(1);
-  }, [search, kecamatanFilter, jenjangFilter]);
+  }, [search, kabupatenFilter, kecamatanFilter, jenjangFilter]);
 
   // ── Rank helper (global rank in filtered set) ───────────────
   function getRank(pageIndex: number) {
@@ -125,6 +138,23 @@ export default function SchoolsPage() {
           />
         </div>
 
+        {/* Kabupaten */}
+        <select
+          id="filter-kabupaten"
+          value={kabupatenFilter}
+          onChange={(e) => setKabupatenFilter(e.target.value)}
+          className="px-3 py-2 text-sm rounded-lg border border-slate-200 bg-white text-slate-700
+                     focus:outline-none focus:ring-2 focus:ring-teal/30 focus:border-teal
+                     transition-colors min-w-[160px]"
+        >
+          <option value="">All Kabupaten</option>
+          {kabupatenOptions.map((k) => (
+            <option key={k as string} value={k as string}>
+              {k as string}
+            </option>
+          ))}
+        </select>
+
         {/* Kecamatan */}
         <select
           id="filter-kecamatan"
@@ -136,8 +166,8 @@ export default function SchoolsPage() {
         >
           <option value="">All Kecamatan</option>
           {kecamatanOptions.map((k) => (
-            <option key={k} value={k}>
-              {k}
+            <option key={k as string} value={k as string}>
+              {k as string}
             </option>
           ))}
         </select>
@@ -218,24 +248,24 @@ export default function SchoolsPage() {
 
                     {/* School Name */}
                     <td className="px-4 py-3 font-medium text-slate-800 max-w-[280px] truncate">
-                      {school.school_name}
+                      {school?.school_name || '-'}
                     </td>
 
                     {/* Kecamatan */}
                     <td className="px-4 py-3 text-slate-600">
-                      {school.kecamatan}
+                      {school?.kecamatan || '-'}
                     </td>
 
                     {/* Jenjang */}
                     <td className="px-4 py-3">
                       <span className="inline-block px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-600">
-                        {school.jenjang}
+                        {school?.jenjang || '-'}
                       </span>
                     </td>
 
                     {/* SIGAPP Index */}
                     <td className="px-4 py-3">
-                      <IndexBadge index={school.sigapp_index} />
+                      <IndexBadge index={school?.sigapp_index ? Number(school.sigapp_index) : 0} />
                     </td>
 
                     {/* Link */}

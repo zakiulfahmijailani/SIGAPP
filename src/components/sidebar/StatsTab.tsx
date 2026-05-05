@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { SchoolWithIndex } from "@/lib/types";
+import { SekolahNTTFull } from "@/lib/types";
 import { PriorityTier, TIER_BG_COLORS, getTierFromIndex } from "@/lib/utils";
 
 interface StatsTabProps {
-  schools: SchoolWithIndex[];
+  schools: SekolahNTTFull[];
 }
 
 interface DistributionItem {
@@ -18,13 +18,13 @@ interface DistributionItem {
 
 export function StatsTab({ schools }: StatsTabProps) {
   const totalSchools = schools.length;
-  const withIndex = schools.filter(s => s.school_index);
+  const withIndex = schools.filter(s => s.sigapp_index != null);
 
-  const kritisCount = withIndex.filter(s => getTierFromIndex(s.school_index.sigapp_index) === 'KRITIS').length;
-  const tinggiCount = withIndex.filter(s => getTierFromIndex(s.school_index.sigapp_index) === 'TINGGI').length;
+  const kritisCount = withIndex.filter(s => getTierFromIndex(Number(s.sigapp_index) || 0) === 'KRITIS').length;
+  const tinggiCount = withIndex.filter(s => getTierFromIndex(Number(s.sigapp_index) || 0) === 'TINGGI').length;
 
   const avgIndex = withIndex.length > 0
-    ? withIndex.reduce((sum, s) => sum + s.school_index.sigapp_index, 0) / withIndex.length
+    ? withIndex.reduce((sum, s) => sum + (Number(s.sigapp_index) || 0), 0) / withIndex.length
     : 0;
 
   const uniqueKecamatan = new Set(schools.map(s => s.kecamatan)).size;
@@ -43,7 +43,7 @@ export function StatsTab({ schools }: StatsTabProps) {
     { label: 'Prioritas Rendah',          tier: 'RENDAH', color: TIER_BG_COLORS.RENDAH, count: 0, total: totalSchools || 1 },
   ].map(item => ({
     ...item,
-    count: withIndex.filter(s => getTierFromIndex(s.school_index.sigapp_index) === item.tier).length,
+    count: withIndex.filter(s => getTierFromIndex(Number(s.sigapp_index) || 0) === item.tier).length,
   })) as DistributionItem[];
 
   return (
