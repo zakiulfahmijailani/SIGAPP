@@ -30,10 +30,10 @@ export function StatsTab({ schools }: StatsTabProps) {
   const uniqueKecamatan = new Set(schools.map(s => s.kecamatan)).size;
 
   const kpis = [
-    { title: "Total Sekolah",   value: totalSchools.toString(),                subtitle: "DKI Jakarta (Sampel)",    color: "#0D2137" },
-    { title: "Kritis + Tinggi", value: (kritisCount + tinggiCount).toString(), subtitle: "Butuh intervensi segera", color: "#DC2626" },
-    { title: "Rata-rata Index", value: avgIndex.toFixed(2),                   subtitle: "Skala 0.0 – 1.0",         color: "#00B4B4" },
-    { title: "Kec. Terdampak",  value: uniqueKecamatan.toString(),             subtitle: "Dari 44 kecamatan",       color: "#F97316" },
+    { title: "Total Sekolah",   value: totalSchools.toString(),                subtitle: "NTT",                      color: "#0D2137" },
+    { title: "Kritis + Tinggi", value: (kritisCount + tinggiCount).toString(), subtitle: "Butuh intervensi segera",   color: "#DC2626" },
+    { title: "Rata-rata Index", value: avgIndex.toFixed(2),                   subtitle: "Skala 0.0 – 1.0",           color: "#00B4B4" },
+    { title: "Kec. Terdampak",  value: uniqueKecamatan.toString(),             subtitle: "Kecamatan",                 color: "#F97316" },
   ];
 
   const distribution: DistributionItem[] = [
@@ -49,30 +49,20 @@ export function StatsTab({ schools }: StatsTabProps) {
   return (
     <div className="flex flex-col gap-6">
       <section>
-        <h3 className="text-xs uppercase tracking-widest text-gray-400 font-medium mb-3">
-          Ringkasan Data
-        </h3>
+        <h3 className="text-xs uppercase tracking-widest text-gray-400 font-medium mb-3">Ringkasan Data</h3>
         <div className="grid grid-cols-2 gap-3">
           {kpis.map((kpi, idx) => (
             <div key={idx} className="bg-white rounded-lg border border-gray-100 shadow-sm p-3">
-              <h4 className="text-[10px] text-gray-400 uppercase tracking-wide mb-1 truncate" title={kpi.title}>
-                {kpi.title}
-              </h4>
-              <p className="text-2xl font-bold" style={{ color: kpi.color }}>
-                {kpi.value}
-              </p>
-              <p className="text-[10px] text-gray-400 mt-1 leading-tight">
-                {kpi.subtitle}
-              </p>
+              <h4 className="text-[10px] text-gray-400 uppercase tracking-wide mb-1 truncate" title={kpi.title}>{kpi.title}</h4>
+              <p className="text-2xl font-bold" style={{ color: kpi.color }}>{kpi.value}</p>
+              <p className="text-[10px] text-gray-400 mt-1 leading-tight">{kpi.subtitle}</p>
             </div>
           ))}
         </div>
       </section>
 
       <section>
-        <h3 className="text-xs uppercase tracking-widest text-gray-400 font-medium mb-3">
-          Distribusi Prioritas
-        </h3>
+        <h3 className="text-xs uppercase tracking-widest text-gray-400 font-medium mb-3">Distribusi Prioritas</h3>
         <div>
           {distribution.map((item, idx) => (
             <AnimatedBar key={idx} item={item} index={idx} />
@@ -83,20 +73,12 @@ export function StatsTab({ schools }: StatsTabProps) {
   );
 }
 
-function AnimatedBar({
-  item,
-  index,
-}: {
-  item: DistributionItem;
-  index: number;
-}) {
+function AnimatedBar({ item, index }: { item: DistributionItem; index: number }) {
   const [width, setWidth] = useState(0);
 
   useEffect(() => {
     const targetWidth = (item.count / item.total) * 100;
-    const timer = setTimeout(() => {
-      setWidth(targetWidth);
-    }, index * 100 + 50);
+    const timer = setTimeout(() => { setWidth(targetWidth); }, index * 100 + 50);
     return () => clearTimeout(timer);
   }, [item.count, item.total, index]);
 
