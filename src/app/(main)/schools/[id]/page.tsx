@@ -24,257 +24,226 @@ import {
   Tooltip,
 } from "recharts";
 import { getSupabase } from "@/lib/supabase";
-import { SchoolDetail } from "@/lib/types";
+import { SekolahNTTFull } from "@/lib/types";
 import { formatIndex, getTierFromIndex, getPillarName, TIER_BG_COLORS } from "@/lib/utils";
 import dynamic from 'next/dynamic';
 
 const SchoolSankeyChart = dynamic(
   () => import('@/components/charts/SchoolSankeyChart'),
   { ssr: false, loading: () => <div className="h-[480px] skeleton-shimmer rounded-xl" /> }
-)
+);
 
 const AgentStatusPanel = dynamic(
   () => import('@/components/agents/AgentStatusPanel'),
   { ssr: false, loading: () => <div className="h-[200px] skeleton-shimmer rounded-xl" /> }
-)
+);
 
 const AgentDecisionPanel = dynamic(
   () => import('@/components/agents/AgentDecisionPanel'),
   { ssr: false, loading: () => <div className="h-[120px] skeleton-shimmer rounded-xl mb-6" /> }
-)
+);
 
-// ── Pillar config ────────────────────────────────────────────────
 const PILLARS = [
-  { key: "p1_quality_gap", weight: 35 },
-  { key: "p2_spatial_inequity", weight: 25 },
-  { key: "p3_structural_risk", weight: 25 },
-  { key: "p4_public_signal", weight: 15 },
+  { key: "p1_quality_gap",       weight: 35 },
+  { key: "p2_spatial_inequity",  weight: 25 },
+  { key: "p3_structural_risk",   weight: 25 },
+  { key: "p4_public_signal",     weight: 15 },
 ] as const;
 
 type PillarKey = (typeof PILLARS)[number]["key"];
 
 function pillarBarColor(score: number): string {
-  const tier = getTierFromIndex(score);
-  return TIER_BG_COLORS[tier];
+  return TIER_BG_COLORS[getTierFromIndex(score)];
 }
 
-// ── Key variable cards config ───────────────────────────────────
+// NTT-specific key variables (from sekolah_ntt_full columns)
 const KEY_VARS = [
-  { key: "literacy_score", label: "Literacy Score", icon: BookOpen, format: (v: number | null) => v != null ? formatIndex(v) : "—" },
-  { key: "numeracy_score", label: "Numeracy Score", icon: Calculator, format: (v: number | null) => v != null ? formatIndex(v) : "—" },
-  { key: "poverty_rate", label: "Poverty Rate", icon: Percent, format: (v: number | null) => v != null ? `${(v * 100).toFixed(1)}%` : "—" },
-  { key: "travel_time_minutes", label: "Travel Time", icon: Clock, format: (v: number | null) => v != null ? `${v} min` : "—" },
-  { key: "building_damage_weight", label: "Building Damage", icon: Building2, format: (v: number | null) => v != null ? formatIndex(v) : "—" },
-  { key: "complaint_frequency", label: "Complaint Frequency", icon: MessageSquareWarning, format: (v: number | null) => v != null ? v.toFixed(0) : "—" },
+  { key: "teacher_ratio",        label: "Rasio Guru/Siswa",  icon: BookOpen,            format: (v: number | null) => v != null ? v.toFixed(2) : "—" },
+  { key: "facility_score",       label: "Skor Fasilitas",    icon: Calculator,          format: (v: number | null) => v != null ? formatIndex(v) : "—" },
+  { key: "nearest_school_km",    label: "Sekolah Terdekat",  icon: Clock,               format: (v: number | null) => v != null ? `${v.toFixed(1)} km` : "—" },
+  { key: "disaster_risk_score",  label: "Risiko Bencana",    icon: Building2,           format: (v: number | null) => v != null ? formatIndex(v) : "—" },
+  { key: "total_students",       label: "Total Siswa",       icon: Percent,             format: (v: number | null) => v != null ? v.toLocaleString('id-ID') : "—" },
+  { key: "total_teachers",       label: "Total Guru",        icon: MessageSquareWarning,format: (v: number | null) => v != null ? v.toLocaleString('id-ID') : "—" },
 ] as const;
 
-// ════════════════════════════════════════════════════════════
-// Component
-// ════════════════════════════════════════════════════════════
 export default function SchoolDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const [school, setSchool] = useState<SchoolDetail | null>(null);
+  const [school, setSchool] = useState<SekolahNTTFull | null>(null);
   const [rank, setRank] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // ── Fetch school ─────────────────────────────────────────────
   useEffect(() => {
     if (!id) return;
-
     async function fetchSchool() {
       setLoading(true);
       setError(null);
       const sb = getSupabase();
 
       const { data, error: fetchErr } = await sb
-        .from("schools")
-        .select("*, school_index(*), pillar_variables(*)")
-        .eq("id", id)
+        .from("sekolah_ntt_full")
+        .select("*")
+        .eq("id", Number(id))
         .single();
 
       if (fetchErr || !data) {
-        setError(fetchErr?.message ?? "School not found");
+        setError(fetchErr?.message ?? "Sekolah tidak ditemukan");
         setLoading(false);
         return;
       }
 
-      const normalized: SchoolDetail = {
-        ...data,
-        school_index: Array.isArray(data.school_index)
-          ? data.school_index[0]
-          : data.school_index,
-        pillar_variables: Array.isArray(data.pillar_variables)
-          ? data.pillar_variables[0]
-          : data.pillar_variables,
-      } as SchoolDetail;
+      setSchool(data as SekolahNTTFull);
 
-      setSchool(normalized);
+      // Calculate rank: count schools with higher sigapp_index
+      const { count } = await sb
+        .from("sekolah_ntt_full")
+        .select("id", { count: "exact", head: true })
+        .gt("sigapp_index", (data as SekolahNTTFull).sigapp_index);
 
-      if (normalized.school_index) {
-        const { count } = await sb
-          .from("school_index")
-          .select("id", { count: "exact", head: true })
-          .gt("sigapp_index", normalized.school_index.sigapp_index);
-
-        setRank(count !== null ? count + 1 : null);
-      }
-
+      setRank(count !== null ? count + 1 : null);
       setLoading(false);
     }
-
     fetchSchool();
   }, [id]);
 
-  // ── Derived: radar chart data ──────────────────────────────────
   const radarData = useMemo(() => {
-    if (!school?.school_index) return [];
+    if (!school) return [];
     return PILLARS.map(({ key }) => ({
       pillar: getPillarName(key),
-      score: school.school_index[key as PillarKey],
+      score: school[key as PillarKey] ?? 0,
       fullMark: 1,
     }));
   }, [school]);
 
-  // ── Derived: highest pillar ─────────────────────────────────────
   const highestPillar = useMemo(() => {
-    if (!school?.school_index) return null;
+    if (!school) return null;
     let max = { key: "", score: -1 };
     for (const { key } of PILLARS) {
-      const s = school.school_index[key as PillarKey];
+      const s = school[key as PillarKey] ?? 0;
       if (s > max.score) max = { key, score: s };
     }
     return max;
   }, [school]);
 
-  // ── Derived: analysis text ──────────────────────────────────────
   const analysisText = useMemo(() => {
-    if (!school?.school_index) return "";
-    const si = school.school_index;
-
-    if (si.notes) return si.notes;
-
+    if (!school) return "";
+    if (school.index_notes) return school.index_notes;
+    const tier = getTierFromIndex(school.sigapp_index);
     const pillarLabel = highestPillar ? getPillarName(highestPillar.key) : "N/A";
     const pillarScore = highestPillar ? formatIndex(highestPillar.score) : "N/A";
-
-    const tier = getTierFromIndex(si.sigapp_index);
-    return `School ${school.school_name} in ${school.kecamatan} received a SIGAPP Index of ${formatIndex(si.sigapp_index)}, placing it in the ${tier} priority tier. The primary concern is ${pillarLabel} (score: ${pillarScore}), which indicates structural and academic vulnerabilities requiring immediate attention.`;
+    return `Sekolah ${school.school_name} di ${school.kecamatan}, ${school.kabupaten} mendapat SIGAPP Index ${formatIndex(school.sigapp_index)}, masuk tier prioritas ${tier}. Indikator utama: ${pillarLabel} (skor: ${pillarScore}).`;
   }, [school, highestPillar]);
 
-  // ── Loading skeleton ──────────────────────────────────────────────
   if (loading) {
     return (
       <div className="animate-pulse space-y-6 p-6">
         <div className="space-y-2">
-          <div className="h-6 w-2/3 rounded bg-muted" />
-          <div className="h-4 w-1/3 rounded bg-muted" />
+          <div className="h-6 w-2/3 rounded bg-slate-200" />
+          <div className="h-4 w-1/3 rounded bg-slate-200" />
         </div>
-        <div className="h-16 w-40 rounded-lg bg-muted" />
+        <div className="h-16 w-40 rounded-lg bg-slate-200" />
         <div className="grid grid-cols-2 gap-4">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-24 rounded-lg bg-muted" />
+            <div key={i} className="h-24 rounded-lg bg-slate-200" />
           ))}
         </div>
-        <div className="h-64 rounded-xl bg-muted" />
+        <div className="h-64 rounded-xl bg-slate-200" />
       </div>
     );
   }
 
-  // ── Error state ──────────────────────────────────────────────────
   if (error || !school) {
     return (
       <div className="p-6 lg:p-8 max-w-[1400px]">
-        <Link
-          href="/schools"
-          className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-teal transition-colors mb-6"
-        >
-          <ArrowLeft size={15} /> All Schools
+        <Link href="/schools" className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-teal-500 transition-colors mb-6">
+          <ArrowLeft size={15} /> Semua Sekolah
         </Link>
         <div className="px-4 py-8 rounded-xl bg-red-50 border border-red-200 text-center text-red-700">
-          {error ?? "School not found."}
+          {error ?? "Sekolah tidak ditemukan."}
         </div>
       </div>
     );
   }
 
-  const si = school.school_index;
-  const pv = school.pillar_variables;
-  const tier = getTierFromIndex(si?.sigapp_index ?? 0);
+  const tier = getTierFromIndex(school.sigapp_index);
   const tierColor = TIER_BG_COLORS[tier] ?? "#94A3B8";
+
+  // Build school_index shape for legacy components (AgentStatusPanel, SchoolSankeyChart)
+  const si = {
+    id: String(school.id),
+    school_id: String(school.id),
+    sigapp_index: school.sigapp_index,
+    p1_quality_gap: school.p1_quality_gap,
+    p2_spatial_inequity: school.p2_spatial_inequity,
+    p3_structural_risk: school.p3_structural_risk,
+    p4_public_signal: school.p4_public_signal,
+    notes: school.index_notes,
+    computed_at: school.computed_at ?? "",
+  };
+
+  // Build school shape for AgentStatusPanel
+  const schoolShape = {
+    id: String(school.id),
+    school_name: school.school_name,
+    address: school.addr_street ?? "",
+    kelurahan: "",
+    kecamatan: school.kecamatan,
+    kota: school.kabupaten,
+    jenjang: school.jenjang as 'SD' | 'SMP' | 'SMA' | 'SMK',
+    npsn: school.npsn,
+    total_students: school.total_students,
+    total_teachers: school.total_teachers,
+  };
 
   return (
     <div className="p-6 lg:p-8 max-w-[1400px]">
+      {/* Breadcrumb */}
       <nav aria-label="Breadcrumb" className="flex items-center gap-1.5 text-sm text-slate-500 mb-6">
-        <Link href="/" className="hover:text-[#00B4B4] transition-colors">
-          Dashboard
-        </Link>
+        <Link href="/" className="hover:text-[#00B4B4] transition-colors">Dashboard</Link>
         <ChevronRight className="w-3.5 h-3.5 flex-shrink-0" />
-        <span>Detail Sekolah</span>
+        <Link href="/schools" className="hover:text-[#00B4B4] transition-colors">Sekolah</Link>
         <ChevronRight className="w-3.5 h-3.5 flex-shrink-0" />
-        <span className="truncate max-w-[200px] text-slate-800 font-medium">
-          {school.school_name}
-        </span>
+        <span className="truncate max-w-[200px] text-slate-800 font-medium">{school.school_name}</span>
       </nav>
 
-      <Link
-        href="/schools"
-        id="back-to-schools"
-        className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-teal transition-colors mb-5"
-      >
-        <ArrowLeft size={15} /> All Schools
+      <Link href="/schools" className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-teal-500 transition-colors mb-5">
+        <ArrowLeft size={15} /> Semua Sekolah
       </Link>
 
-      {/* ── School header ─────────────────────────────────────── */}
+      {/* Header */}
       <div className="mb-5">
-        <h1 className="text-2xl font-bold text-slate-800 mb-2">
-          {school.school_name}
-        </h1>
+        <h1 className="text-2xl font-bold text-slate-800 mb-2">{school.school_name}</h1>
         <div className="flex flex-wrap items-center gap-2">
-          <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">
-            NPSN {school.npsn}
-          </span>
-          <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">
-            {school.jenjang}
-          </span>
-          <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">
-            {school.kecamatan}
-          </span>
+          <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">NPSN {school.npsn}</span>
+          <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">{school.jenjang}</span>
+          <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">{school.kecamatan}</span>
+          <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200">{school.kabupaten}</span>
         </div>
       </div>
 
-      {/* ── Agent Decision Panel (compact, always visible) ──────── */}
+      {/* Agent Decision Panel */}
       <AgentDecisionPanel
         dominantPillar="P3 — Structural Risk"
-        dominantScore={0.821}
+        dominantScore={school.p3_structural_risk}
         previousTier="SEDANG"
-        currentTier="KRITIS"
-        tierChanged={true}
-        analysisDate="Monday, 5 May 2026 · 12:04 WIB"
+        currentTier={tier}
+        tierChanged={false}
+        analysisDate={school.computed_at ? new Date(school.computed_at).toLocaleDateString('id-ID', { dateStyle: 'long' }) : "—"}
         reportGenerated={true}
-        emailDispatched={true}
+        emailDispatched={tier === 'KRITIS' || tier === 'TINGGI'}
       />
 
-      {/* ── SIGAPP Index + Rank + Agent status (one unified panel) ─ */}
+      {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
-        {/* SIGAPP Index */}
         <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
-          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
-            SIGAPP Index
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">SIGAPP Index</p>
+          <p className="text-4xl font-bold tabular-nums" style={{ color: tierColor }}>
+            {formatIndex(school.sigapp_index)}
           </p>
-          {si ? (
-            <p className="text-4xl font-bold tabular-nums" style={{ color: tierColor }}>
-              {formatIndex(si.sigapp_index)}
-            </p>
-          ) : (
-            <p className="text-4xl font-bold text-slate-300">—</p>
-          )}
         </div>
 
-        {/* Rank */}
         <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
-          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">
-            Rank
-          </p>
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Rank</p>
           <div className="flex items-center gap-2">
             <Trophy size={22} className="text-amber-400" />
             <p className="text-4xl font-bold text-slate-800 tabular-nums">
@@ -283,64 +252,34 @@ export default function SchoolDetailPage() {
           </div>
         </div>
 
-        {/* Agent: Report */}
-        {si && (
-          <AgentStatusPanel
-            agentType="report"
-            priorityTier={tier}
-            sigappIndex={si.sigapp_index}
-            schoolName={school.school_name}
-            school={{
-              id: school.id,
-              school_name: school.school_name,
-              address: school.address,
-              kelurahan: school.kelurahan,
-              kecamatan: school.kecamatan,
-              kota: school.kota,
-              jenjang: school.jenjang,
-              npsn: school.npsn,
-              total_students: school.total_students,
-              total_teachers: school.total_teachers,
-            }}
-            schoolIndex={si}
-            pillarVariables={pv ?? null}
-          />
-        )}
+        <AgentStatusPanel
+          agentType="report"
+          priorityTier={tier}
+          sigappIndex={school.sigapp_index}
+          schoolName={school.school_name}
+          school={schoolShape}
+          schoolIndex={si}
+          pillarVariables={null}
+        />
 
-        {/* Agent: Email */}
-        {si && (
-          <AgentStatusPanel
-            agentType="email"
-            priorityTier={tier}
-            sigappIndex={si.sigapp_index}
-            schoolName={school.school_name}
-            school={{
-              id: school.id,
-              school_name: school.school_name,
-              address: school.address,
-              kelurahan: school.kelurahan,
-              kecamatan: school.kecamatan,
-              kota: school.kota,
-              jenjang: school.jenjang,
-              npsn: school.npsn,
-              total_students: school.total_students,
-              total_teachers: school.total_teachers,
-            }}
-            schoolIndex={si}
-            pillarVariables={pv ?? null}
-          />
-        )}
+        <AgentStatusPanel
+          agentType="email"
+          priorityTier={tier}
+          sigappIndex={school.sigapp_index}
+          schoolName={school.school_name}
+          school={schoolShape}
+          schoolIndex={si}
+          pillarVariables={null}
+        />
       </div>
 
-      {/* ── Pillar + Analysis ──────────────────────────────────── */}
+      {/* Pillar Breakdown + Analysis */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
         <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
-          <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wider mb-5">
-            Pillar Breakdown
-          </h2>
+          <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wider mb-5">Pillar Breakdown</h2>
           <div className="space-y-4 mb-6">
             {PILLARS.map(({ key, weight }) => {
-              const score = si?.[key as PillarKey] ?? 0;
+              const score = school[key as PillarKey] ?? 0;
               const barColor = pillarBarColor(score);
               return (
                 <div key={key}>
@@ -354,10 +293,7 @@ export default function SchoolDetailPage() {
                     </div>
                   </div>
                   <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
-                    <div
-                      className="h-full rounded-full transition-all duration-500"
-                      style={{ width: `${Math.min(score * 100, 100)}%`, backgroundColor: barColor }}
-                    />
+                    <div className="h-full rounded-full transition-all duration-500" style={{ width: `${Math.min(score * 100, 100)}%`, backgroundColor: barColor }} />
                   </div>
                 </div>
               );
@@ -382,52 +318,55 @@ export default function SchoolDetailPage() {
         </div>
 
         <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm flex flex-col">
-          <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wider mb-4">
-            Analysis Summary
-          </h2>
+          <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wider mb-4">Analysis Summary</h2>
           <p className="text-sm text-slate-600 leading-relaxed flex-1">{analysisText}</p>
-          <p className="mt-6 text-xs italic text-slate-400">
-            Note: LLM-powered narrative coming in Phase 2.
-          </p>
+          {school.internet_access !== null && (
+            <div className="mt-4 flex items-center gap-2">
+              <span className="text-xs text-slate-400">Akses Internet:</span>
+              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${ school.internet_access ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }`}>
+                {school.internet_access ? 'Tersedia' : 'Tidak Tersedia'}
+              </span>
+            </div>
+          )}
+          {school.remote_status !== null && (
+            <div className="mt-2 flex items-center gap-2">
+              <span className="text-xs text-slate-400">Status Terpencil:</span>
+              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${ school.remote_status ? 'bg-orange-100 text-orange-700' : 'bg-slate-100 text-slate-600' }`}>
+                {school.remote_status ? 'Ya' : 'Tidak'}
+              </span>
+            </div>
+          )}
+          <p className="mt-6 text-xs italic text-slate-400">Note: LLM-powered narrative coming in Phase 2.</p>
         </div>
       </div>
 
-      {/* ── Key Variables ─────────────────────────────────────── */}
-      {pv && (
-        <div>
-          <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wider mb-4">
-            Key Variables
-          </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-            {KEY_VARS.map(({ key, label, icon: Icon, format }) => {
-              const value = pv[key as keyof typeof pv] as number | null;
-              return (
-                <div key={key} className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
-                  <Icon size={18} className="text-teal mb-2" />
-                  <p className="text-xs text-slate-400 font-medium mb-1">{label}</p>
-                  <p className="text-lg font-bold text-slate-800 tabular-nums">{format(value)}</p>
-                </div>
-              );
-            })}
-          </div>
+      {/* Key Variables */}
+      <div className="mb-8">
+        <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wider mb-4">Key Variables</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+          {KEY_VARS.map(({ key, label, icon: Icon, format }) => {
+            const value = school[key as keyof SekolahNTTFull] as number | null;
+            return (
+              <div key={key} className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
+                <Icon size={18} className="text-teal-500 mb-2" />
+                <p className="text-xs text-slate-400 font-medium mb-1">{label}</p>
+                <p className="text-lg font-bold text-slate-800 tabular-nums">{format(value)}</p>
+              </div>
+            );
+          })}
         </div>
-      )}
+      </div>
 
-      {/* ── Sankey ────────────────────────────────────────────── */}
-      {si && (
-        <div className="mt-8">
-          <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wider mb-2">
-            Data Flow — Transparansi Metodologi
-          </h2>
-          <p className="text-xs text-slate-400 mb-4">
-            Alur nilai dari sumber data → variabel → pilar → SIGAPP Index untuk sekolah ini.
-            Hover pada node or link untuk melihat nilai aktual.
-          </p>
-          <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm overflow-hidden">
-            <SchoolSankeyChart schoolIndex={si} pillarVariables={pv ?? null} />
-          </div>
+      {/* Sankey */}
+      <div className="mt-8">
+        <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wider mb-2">Data Flow — Transparansi Metodologi</h2>
+        <p className="text-xs text-slate-400 mb-4">
+          Alur nilai dari sumber data → variabel → pilar → SIGAPP Index untuk sekolah ini.
+        </p>
+        <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm overflow-hidden">
+          <SchoolSankeyChart schoolIndex={si} pillarVariables={null} />
         </div>
-      )}
+      </div>
     </div>
   );
 }
