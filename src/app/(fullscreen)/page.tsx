@@ -1,279 +1,236 @@
-// src/app/(fullscreen)/page.tsx
 "use client";
 
-import dynamic from "next/dynamic";
-import { useState } from "react";
-import AntrigravityIntro from "@/components/ntt/AntrigravityIntro";
-import { useSekolahNTT } from "@/hooks/useSekolahNTT";
-import {
-  Jenjang, PriorityTierNTT,
-  JENJANG_COLOR, TIER_BG_COLORS_NTT,
-  SekolahNTTFull,
-} from "@/lib/types-ntt";
-import {
-  getTierNTT, getTierBgHex, getTierLabel,
-  getTierColorNTT, getDisplayName, formatIndex,
-} from "@/lib/utils-ntt";
+import { useState, useRef, useMemo, Suspense } from "react";
+import { ChevronLeft } from "lucide-react";
+import Link from "next/link";
+import { Sidebar } from "@/components/sidebar/Sidebar";
+import { FilterBar } from "@/components/ui/FilterBar";
+import { AgentStatusBar } from "@/components/ui/AgentStatusBar";
+import type { Message } from "@/components/chat/ChatWidget";
+import { useSchools } from "@/hooks/useSchools";
+import { getTierFromIndex } from "@/lib/utils";
+import dynamic from 'next/dynamic';
+import type { Map as LeafletMap } from 'leaflet';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { SchoolWithIndex } from "@/lib/types";
 
-const SchoolMapNTT = dynamic(
-  () => import("@/components/map/SchoolMapNTT"),
-  {
+const SchoolMap = dynamic(
+  () => import('@/components/map/SchoolMap'),
+  { 
     ssr: false,
     loading: () => (
-      <div className="w-full h-full bg-slate-900 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-teal-400 border-t-transparent rounded-full animate-spin" />
+      <div className="flex-1 flex w-full h-full items-center justify-center bg-gray-100">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-4 border-[#00B4B4] border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm text-gray-400">Memuat peta...</p>
+        </div>
       </div>
-    ),
+    )
   }
 );
 
-const ALL_JENJANG: Jenjang[] = ["TK", "SD", "SMP", "SMA"];
-const ALL_TIER: PriorityTierNTT[] = ["KRITIS", "TINGGI", "SEDANG", "RENDAH"];
-type ColorMode = "tier" | "jenjang";
+function DashboardInner() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
-export default function DashboardRoot() {
-  const [activeJenjang, setActiveJenjang] = useState<Jenjang[]>([]);
-  const [activeTier, setActiveTier]       = useState<PriorityTierNTT[]>([]);
-  const [colorMode, setColorMode]         = useState<ColorMode>("tier");
-  const [selected, setSelected]           = useState<SekolahNTTFull | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [activeTab, setActiveTab] = useState<'stats'|'list'|'chat'|'agent'>(
+    (searchParams.get('tab') as 'stats'|'list'|'chat'|'agent') || 'stats'
+  );
+  const [selectedSchoolId, setSelectedSchoolId] = useState<string | null>(
+    searchParams.get('school')
+  );
 
-  const [showIntro, setShowIntro] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return !sessionStorage.getItem("ntt_intro_seen");
-  });
+  // Chat State
+  const [messages, setMessages] = useState<Message[]>([
+    { id: '0', role: 'bot', 
+      text: "Halo! Saya asisten SIGAPP. Pilih pertanyaan di bawah atau ketik sendiri.", 
+      timestamp: new Date() 
+    }
+  ]);
+  const [showChips, setShowChips] = useState(true);
 
-  const handleIntroComplete = () => {
-    sessionStorage.setItem("ntt_intro_seen", "1");
-    setShowIntro(false);
+  // Filters
+  const [kotaFilter, setKotaFilter] = useState(searchParams.get('kota') || 'all');
+  const [jenjangFilter, setJenjangFilter] = useState(searchParams.get('jenjang') || 'all');
+  const [prioritasFilter, setPrioritasFilter] = useState(searchParams.get('prioritas') || 'all');
+
+  const { schools } = useSchools();
+  const mapRef = useRef<LeafletMap | null>(null);
+
+  const filteredSchools = useMemo(() => 
+    schools.filter(s => {
+      const sKota = s.kota;
+      
+      return (
+        (kotaFilter === 'all' || sKota === kotaFilter) &&
+        (jenjangFilter === 'all' || s.jenjang === jenjangFilter) &&
+        (prioritasFilter === 'all' || getTierFromIndex(s.school_index?.sigapp_index || 0) === prioritasFilter)
+      );
+    }),
+    [schools, kotaFilter, jenjangFilter, prioritasFilter]
+  );
+
+  function updateURL(overrides: {
+    school?: string | null;
+    q?: string;
+    kota?: string;
+    jenjang?: string;
+    prioritas?: string;
+    tab?: string;
+  }) {
+    const params = new URLSearchParams(window.location.search);
+    const school = 'school' in overrides ? overrides.school : selectedSchoolId;
+    const kota = overrides.kota ?? kotaFilter;
+    const jenjang = overrides.jenjang ?? jenjangFilter;
+    const prioritas = overrides.prioritas ?? prioritasFilter;
+    const tab = overrides.tab ?? activeTab;
+
+    if (school) params.set('school', school);
+    else params.delete('school');
+
+    if (kota !== 'all') params.set('kota', kota);
+    else params.delete('kota');
+
+    if (jenjang !== 'all') params.set('jenjang', jenjang);
+    else params.delete('jenjang');
+
+    if (prioritas !== 'all') params.set('prioritas', prioritas);
+    else params.delete('prioritas');
+
+    if (tab !== 'stats') params.set('tab', tab);
+    else params.delete('tab');
+
+    const qs = params.toString();
+    router.replace(qs ? `?${qs}` : '/', { scroll: false });
+  }
+
+  const handleSchoolSelect = (school: SchoolWithIndex | null) => {
+    const newId = school?.id || null;
+    setSelectedSchoolId(newId);
+    if (school) {
+      setActiveTab('list');
+      setSidebarOpen(true);
+      updateURL({ school: newId, tab: 'list' });
+      
+      // Fly map to selected school
+      if (mapRef.current && school.latitude && school.longitude) {
+        mapRef.current.flyTo(
+          [school.latitude, school.longitude],
+          15,
+          { duration: 1.2, easeLinearity: 0.25 }
+        );
+      }
+    } else {
+      updateURL({ school: null });
+    }
   };
 
-  const { data, loading, error, stats } = useSekolahNTT({
-    jenjang: activeJenjang.length > 0 ? activeJenjang : undefined,
-    tier:    activeTier.length   > 0 ? activeTier    : undefined,
-  });
+  const handleMapDotClick = (school: SchoolWithIndex) => {
+    handleSchoolSelect(school);
+  };
 
-  const toggleJenjang = (j: Jenjang) =>
-    setActiveJenjang(p => p.includes(j) ? p.filter(x => x !== j) : [...p, j]);
+  function changeTab(tab: 'stats'|'list'|'chat'|'agent') {
+    setActiveTab(tab);
+    updateURL({ tab });
+  }
 
-  const toggleTier = (t: PriorityTierNTT) =>
-    setActiveTier(p => p.includes(t) ? p.filter(x => x !== t) : [...p, t]);
 
-  const today = new Date().toLocaleDateString("id-ID", { dateStyle: "long" });
+  const today = new Date().toLocaleDateString('id-ID', { dateStyle: 'long' });
 
   return (
-    <div className="flex flex-col h-screen w-full overflow-hidden bg-slate-900 text-slate-100">
+    <>
+      <div className="flex flex-col h-screen w-full overflow-hidden bg-slate-50">
+      <AgentStatusBar />
+      {/* 1. NAVBAR */}
+      <nav className="h-16 bg-white flex-shrink-0 flex items-center justify-between px-6 z-50 shadow-sm border-b border-gray-100">
+        <div className="flex items-center gap-10">
+          <div className="flex items-center gap-4">
+            <img src="/logo-light-mode-with-texts.png" alt="SIGAPP Logo" className="h-12 w-auto object-contain" />
+            <div className="h-10 w-px bg-gray-200 ml-1 hidden sm:block"></div>
+            <span className="text-[#0D2137]/40 text-[10px] uppercase tracking-widest font-bold hidden sm:block">Jakarta Dashboard</span>
+          </div>
 
-      {/* ── ANTIGRAVITY INTRO OVERLAY ── */}
-      {showIntro && (
-        <AntrigravityIntro
-          schools={data ?? []}
-          onComplete={handleIntroComplete}
-        />
-      )}
-
-      {/* ── NAVBAR ── */}
-      <nav className="h-14 bg-slate-800 flex-shrink-0 flex items-center justify-between px-5 border-b border-slate-700 z-50">
-        <div className="flex items-center gap-3">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo-light-mode-with-texts.png" alt="SIGAPP"
-            className="h-8 w-auto object-contain brightness-0 invert" />
-          <div className="h-7 w-px bg-slate-600 hidden sm:block" />
-          <span className="text-slate-400 text-[10px] uppercase tracking-widest font-bold hidden sm:block">
-            NTT • Nusa Tenggara Timur
-          </span>
+          <div className="flex items-center gap-8">
+            <Link href="/schools" className="text-[#0D2137]/60 hover:text-[#00B4B4] text-xs uppercase tracking-widest font-bold transition-colors">Schools</Link>
+            <Link href="/insights" className="text-[#0D2137]/60 hover:text-[#00B4B4] text-xs uppercase tracking-widest font-bold transition-colors">Insights</Link>
+            <Link href="/about" className="text-[#0D2137]/60 hover:text-[#00B4B4] text-xs uppercase tracking-widest font-bold transition-colors">About</Link>
+          </div>
         </div>
-
-        {/* Color Mode Toggle */}
-        <div className="flex items-center gap-1 bg-slate-700 rounded-lg p-1 text-xs">
-          {(["tier", "jenjang"] as ColorMode[]).map((mode) => (
-            <button
-              key={mode}
-              onClick={() => setColorMode(mode)}
-              className={`px-3 py-1 rounded-md font-semibold transition-all capitalize ${
-                colorMode === mode
-                  ? "bg-teal-500 text-white"
-                  : "text-slate-400 hover:text-slate-200"
-              }`}
-            >
-              {mode === "tier" ? "\uD83D\uDFE1 Tier" : "\uD83C\uDFEB Jenjang"}
-            </button>
-          ))}
+        
+        <div className="text-[#0D2137]/60 text-xs font-bold uppercase tracking-wide">
+          {today}
         </div>
-
-        <div className="text-slate-500 text-xs font-medium hidden sm:block">{today}</div>
       </nav>
 
-      {/* ── FILTER BAR ── */}
-      <div className="flex items-center gap-x-3 gap-y-1.5 px-4 py-2
-                      bg-slate-800 border-b border-slate-700 flex-wrap">
-
-        {/* Filter Tier */}
-        <div className="flex items-center gap-1.5">
-          <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Tier</span>
-          {ALL_TIER.map(t => (
-            <button key={t} onClick={() => toggleTier(t)}
-              className={`px-2.5 py-0.5 rounded-full text-xs font-bold transition-all border ${
-                activeTier.includes(t) || activeTier.length === 0
-                  ? "border-transparent text-white"
-                  : "border-slate-600 text-slate-500 bg-transparent"
-              }`}
-              style={{
-                backgroundColor:
-                  activeTier.includes(t) || activeTier.length === 0
-                    ? TIER_BG_COLORS_NTT[t] : undefined,
-              }}
-            >
-              {t}
-              {stats.byTier[t] ? (
-                <span className="ml-1 opacity-70">({stats.byTier[t]})</span>
-              ) : null}
-            </button>
-          ))}
+      {/* 2. MAIN AREA */}
+      <main className="flex flex-1 flex-row overflow-hidden relative">
+        
+        {/* 2a. MAP AREA */}
+        <div className="flex-1 bg-gray-100 flex items-center justify-center relative z-0">
+          <FilterBar
+            kotaFilter={kotaFilter}
+            jenjangFilter={jenjangFilter}
+            prioritasFilter={prioritasFilter}
+            onKotaChange={(val) => { setKotaFilter(val); updateURL({ kota: val }); }}
+            onJenjangChange={(val) => { setJenjangFilter(val); updateURL({ jenjang: val }); }}
+            onPrioritasChange={(val) => { setPrioritasFilter(val); updateURL({ prioritas: val }); }}
+            totalVisible={filteredSchools.length}
+            totalAll={schools.length}
+          />
+          <SchoolMap
+            schools={filteredSchools}
+            selectedSchoolId={selectedSchoolId}
+            onSchoolClick={handleMapDotClick}
+            onMapReady={(map) => { mapRef.current = map; }}
+          />
         </div>
 
-        <div className="w-px h-5 bg-slate-600 hidden sm:block" />
+        {/* 2b. SIDEBAR */}
+        <aside
+          className={`
+            bg-white border-l border-gray-200 shadow-xl z-40
+            transition-transform duration-300 ease-in-out absolute top-0 right-0 bottom-0
+            flex flex-col
+          `}
+          style={{ width: "320px", transform: sidebarOpen ? "translateX(0)" : "translateX(100%)" }}
+        >
+          <Sidebar
+            activeTab={activeTab}
+            onTabChange={changeTab}
+            onClose={() => setSidebarOpen(false)}
+            selectedSchoolId={selectedSchoolId}
+            onSchoolSelect={handleSchoolSelect}
+            messages={messages}
+            setMessages={setMessages}
+            showChips={showChips}
+            setShowChips={setShowChips}
+            schools={schools}
+          />
+        </aside>
 
-        {/* Filter Jenjang */}
-        <div className="flex items-center gap-1.5">
-          <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Jenjang</span>
-          {ALL_JENJANG.map(j => (
-            <button key={j} onClick={() => toggleJenjang(j)}
-              className={`px-2.5 py-0.5 rounded-full text-xs font-semibold transition-all border ${
-                activeJenjang.includes(j) || activeJenjang.length === 0
-                  ? "border-transparent text-white"
-                  : "border-slate-600 text-slate-500 bg-transparent"
-              }`}
-              style={{
-                backgroundColor:
-                  activeJenjang.includes(j) || activeJenjang.length === 0
-                    ? JENJANG_COLOR[j] : undefined,
-              }}
-            >
-              {j}
-              {stats.byJenjang[j] ? (
-                <span className="ml-1 opacity-70">({stats.byJenjang[j]})</span>
-              ) : null}
-            </button>
-          ))}
-        </div>
+        {/* 3. SIDEBAR TOGGLE BUTTON (When closed) [←] */}
+        {!sidebarOpen && (
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="absolute right-0 top-1/2 -translate-y-1/2 bg-white border border-gray-200 border-r-0 shadow-md p-2 rounded-l-md z-40 text-slate-500 hover:text-slate-800 transition-colors"
+            aria-label="Open sidebar"
+          >
+            <ChevronLeft size={20} />
+          </button>
+        )}
 
-        {/* Total + error */}
-        <div className="ml-auto flex items-center gap-2">
-          {!loading && (
-            <span className="text-xs text-slate-400">
-              <span className="text-teal-400 font-semibold">
-                {data.length.toLocaleString("id-ID")}
-              </span>{" "}sekolah
-            </span>
-          )}
-          {error && <span className="text-xs text-red-400">⚠ {error}</span>}
-        </div>
+      </main>
       </div>
 
-      {/* ── MAP ── */}
-      <div className="flex-1 relative">
-        <SchoolMapNTT
-          schools={data}
-          loading={loading}
-          colorMode={colorMode}
-          filterJenjang={activeJenjang}
-          filterTier={activeTier}
-          selectedId={selected?.id ?? null}
-          onSchoolClick={setSelected}
-        />
-      </div>
+    </>
+  );
+}
 
-      {/* ── DETAIL PANEL ── */}
-      {selected && (() => {
-        const tier = getTierNTT(selected.sigapp_index ?? undefined);
-        const tierHex = getTierBgHex(tier);
-        const name = getDisplayName(selected);
-        const pillars = [
-          { label: "P1 Kualitas",   icon: "\uD83C\uDF93", val: selected.p1_quality_gap },
-          { label: "P2 Spasial",    icon: "\uD83D\uDCCD", val: selected.p2_spatial_inequity },
-          { label: "P3 Struktural", icon: "\uD83C\uDFDA", val: selected.p3_structural_risk },
-          { label: "P4 Publik",     icon: "\uD83D\uDCE1", val: selected.p4_public_signal },
-        ];
-
-        return (
-          <div className="absolute bottom-4 left-4 z-[1001] w-80 bg-slate-800
-                          border border-slate-600 rounded-xl shadow-2xl overflow-hidden">
-
-            {/* Header */}
-            <div className="px-4 py-3 flex items-start justify-between gap-2"
-              style={{ borderBottom: `2px solid ${tierHex}` }}>
-              <div className="flex-1 min-w-0">
-                <p className="font-bold text-white text-sm truncate">{name}</p>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  {selected.jenjang} · {selected.kabupaten ?? selected.addr_city ?? "-"}
-                </p>
-              </div>
-              <button onClick={() => setSelected(null)}
-                className="text-slate-400 hover:text-white text-xl leading-none flex-shrink-0">
-                ×
-              </button>
-            </div>
-
-            {/* SIGAPP Index */}
-            <div className="px-4 py-3 flex items-center justify-between border-b border-slate-700">
-              <div>
-                <p className="text-[10px] text-slate-500 uppercase tracking-widest">SIGAPP Index</p>
-                <p className="text-2xl font-black mt-0.5" style={{ color: tierHex }}>
-                  {formatIndex(selected.sigapp_index)}
-                </p>
-              </div>
-              <span className={`text-xs font-bold px-2.5 py-1 rounded-full border ${
-                getTierColorNTT(tier)
-              }`}>
-                {getTierLabel(tier)}
-              </span>
-            </div>
-
-            {/* Pilar Breakdown */}
-            <div className="px-4 py-3 border-b border-slate-700">
-              <p className="text-[10px] text-slate-500 uppercase tracking-widest mb-2">Breakdown Pilar</p>
-              <div className="space-y-2">
-                {pillars.map(({ label, icon, val }) => (
-                  <div key={label}>
-                    <div className="flex justify-between text-xs mb-1">
-                      <span className="text-slate-300">{icon} {label}</span>
-                      <span className="text-slate-400 font-mono">
-                        {val != null ? val.toFixed(3) : "—"}
-                      </span>
-                    </div>
-                    <div className="w-full bg-slate-700 rounded-full h-1.5">
-                      <div
-                        className="h-1.5 rounded-full transition-all"
-                        style={{
-                          width: `${((val ?? 0) * 100).toFixed(1)}%`,
-                          backgroundColor: tierHex,
-                        }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Info tambahan */}
-            <div className="px-4 py-2.5 text-xs text-slate-400 space-y-0.5">
-              {selected.kecamatan && <p>\uD83D\uDDFA Kec. {selected.kecamatan}</p>}
-              {selected.operator  && <p>\uD83C\uDFDB {selected.operator}</p>}
-              {selected.phone     && <p>\uD83D\uDCDE {selected.phone}</p>}
-              {selected.internet_access != null && (
-                <p>{selected.internet_access ? "\u2705" : "\u274C"} Internet access</p>
-              )}
-              {selected.remote_status != null && selected.remote_status && (
-                <p>\uD83D\uDEA8 Area terpencil / 3T</p>
-              )}
-              <p className="text-slate-600 mt-1">
-                {selected.lat.toFixed(5)}, {selected.lon.toFixed(5)}
-              </p>
-            </div>
-
-          </div>
-        );
-      })()}
-    </div>
+export default function DashboardRoot() {
+  return (
+    <Suspense fallback={null}>
+      <DashboardInner />
+    </Suspense>
   );
 }
