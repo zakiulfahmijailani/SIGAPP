@@ -77,28 +77,28 @@ export default function AgentStatusPanel({
 
     // Default active UI (if data is missing)
     return (
-      <div className="border border-emerald-200 bg-emerald-50 rounded-xl p-5 shadow-sm">
+      <div className="border border-slate-600 bg-slate-950 rounded-xl p-5 shadow-xl">
         <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2 text-emerald-800 font-bold">
+          <div className="flex items-center gap-2 text-emerald-300 font-bold">
             {icon}
             <span>{title}</span>
           </div>
-          <span className="flex items-center gap-1 text-xs px-2.5 py-1 bg-emerald-100 text-emerald-700 rounded-full font-semibold border border-emerald-200">
+          <span className="flex items-center gap-1 text-[10px] px-2.5 py-1 bg-emerald-900/40 text-emerald-200 rounded-full font-bold border border-emerald-500/30 uppercase tracking-wide">
             <CheckCircle2 size={12} />
             Agent Aktif — Tier 1
           </span>
         </div>
 
         <div className="space-y-4">
-          <div className="p-3 bg-white/50 rounded-lg border border-emerald-100 border-dashed">
-            <p className="text-sm text-emerald-600/70 italic text-center">
+          <div className="p-4 bg-slate-900 rounded-lg border border-slate-700 border-dashed">
+            <p className="text-sm text-slate-400 italic text-center font-medium">
               {isReport ? "Laporan belum dibuat" : "Belum ada pengiriman"}
             </p>
           </div>
           
           <button 
             disabled 
-            className="w-full py-2.5 bg-emerald-600 text-white rounded-lg text-sm font-semibold opacity-50 cursor-not-allowed transition-all"
+            className="w-full py-2.5 bg-emerald-600 text-white rounded-lg text-sm font-bold opacity-50 cursor-not-allowed shadow-lg"
           >
             {isReport ? "Generate Laporan" : "Kirim Laporan"}
           </button>
@@ -112,30 +112,30 @@ export default function AgentStatusPanel({
     const progress = Math.min((sigappIndex / threshold) * 100, 100);
 
     return (
-      <div className="border border-amber-200 bg-amber-50 rounded-xl p-5 shadow-sm">
+      <div className="border border-slate-600 bg-slate-950 rounded-xl p-5 shadow-xl">
         <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2 text-amber-800 font-bold">
+          <div className="flex items-center gap-2 text-amber-300 font-bold">
             {icon}
             <span>{title}</span>
           </div>
-          <span className="flex items-center gap-1 text-xs px-2.5 py-1 bg-amber-100 text-amber-700 rounded-full font-semibold border border-amber-200">
+          <span className="flex items-center gap-1 text-[10px] px-2.5 py-1 bg-amber-900/40 text-amber-200 rounded-full font-bold border border-amber-500/30 uppercase tracking-wide">
             <AlertCircle size={12} />
             🟡 Agent Standby — Tier 2
           </span>
         </div>
 
-        <p className="text-sm text-amber-800/80 mb-4 leading-relaxed">
+        <p className="text-sm text-slate-300 mb-4 leading-relaxed font-medium">
           Sekolah ini berada di status {priorityTier}. Agent akan aktif otomatis jika sekolah naik ke Tier 1.
         </p>
 
         <div className="space-y-2 mb-4">
-          <div className="flex justify-between text-xs font-medium text-amber-700">
+          <div className="flex justify-between text-xs font-bold text-slate-400 uppercase">
             <span>Jarak ke Tier 1</span>
-            <span>{sigappIndex.toFixed(3)} / {threshold.toFixed(3)}</span>
+            <span className="text-slate-200">{sigappIndex.toFixed(3)} / {threshold.toFixed(3)}</span>
           </div>
-          <div className="bg-amber-200/50 rounded-full h-2 w-full overflow-hidden">
+          <div className="bg-slate-800 rounded-full h-2 w-full overflow-hidden border border-slate-700/50">
             <div 
-              className="bg-amber-400 h-full rounded-full transition-all duration-1000"
+              className="bg-amber-500 h-full rounded-full transition-all duration-1000 shadow-[0_0_8px_rgba(245,158,11,0.3)]"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -143,7 +143,7 @@ export default function AgentStatusPanel({
 
         <button 
           disabled 
-          className="w-full py-2.5 border border-amber-300 text-amber-700 rounded-lg text-sm font-semibold opacity-50 cursor-not-allowed hover:bg-amber-100/50 transition-all flex items-center justify-center gap-2"
+          className="w-full py-2.5 border border-slate-700 bg-slate-900 text-slate-400 rounded-lg text-sm font-bold opacity-50 cursor-not-allowed flex items-center justify-center gap-2"
         >
           <Lock size={14} />
           Aktifkan Manual
@@ -154,22 +154,22 @@ export default function AgentStatusPanel({
 
   // Unavailable
   return (
-    <div className="border border-slate-200 bg-slate-50 rounded-xl p-5 opacity-75 shadow-sm">
+    <div className="border border-slate-700 bg-slate-900/50 rounded-xl p-5 opacity-80 shadow-inner">
       <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2 text-slate-500 font-bold">
+        <div className="flex items-center gap-2 text-slate-400 font-bold uppercase tracking-tight">
           {icon}
           <span>{title}</span>
         </div>
-        <span className="flex items-center gap-1 text-xs px-2.5 py-1 bg-slate-200 text-slate-600 rounded-full font-semibold border border-slate-300">
+        <span className="flex items-center gap-1 text-[10px] px-2.5 py-1 bg-slate-800 text-slate-300 rounded-full font-bold border border-slate-700 uppercase tracking-wide">
           <Slash size={12} />
           ⚫ Agent Tidak Tersedia
         </span>
       </div>
 
-      <p className="text-sm text-slate-600 mb-2">
+      <p className="text-sm text-slate-300 mb-2 font-medium">
         Sekolah ini berada di status {priorityTier}. Sumber daya agent diprioritaskan untuk Tier 1 dan 2.
       </p>
-      <p className="text-xs text-slate-400">
+      <p className="text-xs text-slate-400 italic">
         Data sekolah tetap tersedia for analisis manual melalui panel di atas.
       </p>
     </div>

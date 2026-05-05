@@ -20,18 +20,18 @@ export default function EmailThreadModal({
     >
       {/* Modal box */}
       <div
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200"
+        className="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header modal */}
-        <div className="px-6 py-5 border-b border-slate-100 flex items-start justify-between bg-slate-50/50">
+        <div className="px-6 py-5 border-b border-slate-700 flex items-start justify-between bg-slate-800/50">
           <div>
-            <p className="font-bold text-slate-800 text-base">{recipient.role}</p>
-            <p className="text-xs text-slate-500 font-medium">{recipient.email}</p>
+            <p className="font-bold text-white text-base tracking-tight">{recipient.role}</p>
+            <p className="text-xs text-slate-300 font-bold uppercase tracking-widest mt-0.5">{recipient.email}</p>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-200 text-slate-400 hover:text-slate-600 transition-colors"
+            className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-700 text-slate-300 hover:text-white transition-colors border border-slate-700"
           >
             ✕
           </button>
@@ -48,23 +48,23 @@ export default function EmailThreadModal({
             >
               {/* Bubble */}
               <div
-                className={`max-w-[90%] rounded-2xl px-4 py-3 text-xs leading-relaxed whitespace-pre-line shadow-sm ${
+                className={`max-w-[90%] rounded-2xl px-4 py-3 text-xs leading-relaxed whitespace-pre-line shadow-lg ${
                   msg.from === "system"
                     ? msg.isAuto
-                      ? "bg-slate-100 text-slate-600 border border-slate-200 rounded-tr-none"
-                      : "bg-emerald-600 text-white rounded-tr-none"
-                    : "bg-white text-slate-800 border border-slate-200 rounded-tl-none"
+                      ? "bg-slate-800 text-slate-200 border border-slate-700 rounded-tr-none font-medium"
+                      : "bg-emerald-600 text-white rounded-tr-none font-bold"
+                    : "bg-slate-950 text-white border border-slate-800 rounded-tl-none font-medium"
                 }`}
               >
                 {msg.body}
               </div>
               {/* Meta */}
-              <div className={`flex items-center gap-1.5 px-1 text-[10px] font-medium text-slate-400 ${msg.from === "system" ? "flex-row-reverse" : "flex-row"}`}>
-                <span>{msg.senderName}</span>
-                <span>·</span>
+              <div className={`flex items-center gap-1.5 px-1 text-[10px] font-bold text-slate-400 uppercase tracking-tighter ${msg.from === "system" ? "flex-row-reverse" : "flex-row"}`}>
+                <span className="text-slate-300">{msg.senderName}</span>
+                <span className="opacity-50">·</span>
                 <span>{msg.timestamp}</span>
                 {msg.isAuto && (
-                  <span className="bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded italic">otomatis</span>
+                  <span className="bg-slate-800 text-slate-300 px-1.5 py-0.5 rounded italic border border-slate-700/50">otomatis</span>
                 )}
               </div>
             </div>
@@ -72,8 +72,8 @@ export default function EmailThreadModal({
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-slate-100 bg-slate-50/30">
-          <p className="text-[10px] text-slate-400 text-center italic font-medium">
+        <div className="px-6 py-4 border-t border-slate-700 bg-slate-800/30">
+          <p className="text-[10px] text-slate-400 text-center italic font-bold uppercase tracking-wider">
             Thread ini dikelola secara otomatis oleh SIGAPP Email Agent untuk memantau respons pemangku kepentingan.
           </p>
         </div>

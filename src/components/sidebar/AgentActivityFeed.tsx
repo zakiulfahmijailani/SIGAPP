@@ -48,10 +48,10 @@ const TYPE_CONFIG: Record<string, { icon: string; color: string }> = {
 
 export function AgentActivityFeed() {
   return (
-    <div className="w-full bg-slate-900/60 rounded-xl p-3 border border-slate-800 overflow-hidden my-2">
+    <div className="w-full bg-slate-900/80 rounded-xl p-3 border border-slate-600 overflow-hidden my-2 shadow-lg">
       {/* Header */}
       <div className="flex items-center justify-between mb-2">
-        <span className="text-xs font-medium text-slate-400">
+        <span className="text-xs font-semibold text-slate-300">
           🤖 Agent Activity
         </span>
         <div className="flex items-center gap-1.5">
@@ -72,8 +72,8 @@ export function AgentActivityFeed() {
               className={`flex items-start gap-2 py-1.5 ${!isLast ? "border-b border-slate-800" : ""}`}
             >
               <span className="text-xs leading-none mt-0.5">{config.icon}</span>
-              <span className="text-[10px] text-slate-500 w-8 flex-shrink-0 mt-px">{entry.time}</span>
-              <span className={`text-xs ${config.color} leading-snug`}>{entry.message}</span>
+              <span className="text-[10px] text-slate-400 w-8 flex-shrink-0 mt-px">{entry.time}</span>
+              <span className={`text-xs ${config.color} leading-snug font-medium`}>{entry.message}</span>
             </div>
           );
         })}
