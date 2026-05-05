@@ -161,6 +161,7 @@ export interface SekolahNTTDetail extends SekolahNTT {
 
 export interface SekolahNTTFull {
   id: number;
+  name: string | null;
   school_name: string | null;
   npsn: string | null;
   jenjang: Jenjang;
@@ -168,7 +169,10 @@ export interface SekolahNTTFull {
   kecamatan: string | null;
   addr_city: string | null;
   addr_street: string | null;
+  address: string | null;
   operator: string | null;
+  phone: string | null;
+  website: string | null;
   lat: number;
   lon: number;
   total_students: number | null;
