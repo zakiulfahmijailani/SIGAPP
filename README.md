@@ -19,11 +19,29 @@
   <img src="https://img.shields.io/badge/Deployed-Vercel-black?style=flat-square&logo=vercel" />
 </p>
 
+<p align="center">
+  <a href="https://sigapp-dashboard.vercel.app/"><strong>🚀 Live Demo → sigapp-dashboard.vercel.app</strong></a>
+</p>
+
 ---
 
 ## What Is SIGAPP?
 
 SIGAPP is an agentic AI-powered WebGIS decision-support system for educational planning that identifies and prioritizes schools in Jakarta needing immediate intervention. It aggregates structural, academic, spatial, and social data into a composite score — the SIGAPP Index — and surfaces which schools need attention, and why. Built for education planners, government stakeholders, and community partners, SIGAPP moves beyond raw data into targeted, evidence-based action.
+
+---
+
+## Research Context
+
+SIGAPP is developed under **GeoSDS Lab** (Geospatial & Spatial Data Science Laboratory), an independent research lab founded by [Zakiul Fahmi Jailani, MSc](https://github.com/zakiulfahmijailani) at Bakrie University, South Jakarta.
+
+The project addresses a critical gap in Indonesian education planning: the absence of a spatially-aware, data-integrated decision system that can autonomously triage schools and trigger administrative action. SIGAPP combines:
+
+- **PostGIS spatial reasoning** for geographic equity analysis
+- **Agentic AI** (ReportAgent + EmailAgent) for autonomous institutional escalation
+- **Multi-source data fusion** from Dapodik, Rapor Pendidikan, BPS, and OpenStreetMap
+
+> 📝 A research paper describing the SIGAPP methodology and index is currently in preparation (forthcoming).
 
 ---
 
@@ -83,7 +101,7 @@ Only KRITIS schools activate the full agent layer.
 
 When a school crosses into KRITIS, passive monitoring becomes active coordination. The AI agents are the mechanism through which analysis becomes institutional response.
 
-EmailAgent dispatches across the full administrative chain simultaneously and tracks each recipient independently. Every stakeholder's response — or silence — is visible. Accountability is built into the architecture.
+EmailAgent dispatches across the full administrative chain simultaneously and tracks each recipient independently. Every stakeholder’s response — or silence — is visible. Accountability is built into the architecture.
 
 ---
 
@@ -103,6 +121,54 @@ EmailAgent dispatches across the full administrative chain simultaneously and tr
 
 ---
 
+## Getting Started
+
+```bash
+# Clone the repository
+git clone https://github.com/zakiulfahmijailani/SIGAPP.git
+cd SIGAPP
+
+# Install dependencies
+npm install
+
+# Set up environment variables
+cp .env.local.example .env.local
+# Fill in your Supabase URL, anon key, and other required values
+
+# Run the development server
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) to view the app.
+
+---
+
+## Contributing
+
+Contributions, feedback, and collaborations are welcome — especially from researchers, educators, and GIS practitioners working on education equity or urban data in Indonesia.
+
+**Ways to contribute:**
+- 🐛 Report bugs or suggest features via [Issues](https://github.com/zakiulfahmijailani/SIGAPP/issues)
+- 🔍 Improve data pipeline or index methodology
+- 🇮🇮 Extend coverage beyond Jakarta to other provinces
+- 💬 Reach out directly: [zakiul.jailani@bakrie.ac.id](mailto:zakiul.jailani@bakrie.ac.id)
+
+---
+
+## Citation
+
+If you use SIGAPP in your research or reference this system, please cite:
+
+```
+Jailani, Z.F. (2026). SIGAPP: Sistem Informasi Geospasial berbasis AI Agentik
+untuk Perencanaan Pendidikan. GeoSDS Lab, Bakrie University.
+GitHub: https://github.com/zakiulfahmijailani/SIGAPP
+```
+
+> A peer-reviewed paper describing the methodology is forthcoming.
+
+---
+
 ## Status
 
 SIGAPP is an active research and development project. The SIGAPP Index formula, pillar weights, and agent behavior are under continuous refinement as new school data is integrated and validated.
@@ -110,5 +176,5 @@ SIGAPP is an active research and development project. The SIGAPP Index formula, 
 ---
 
 <p align="center">
-  <sub>Built for Jakarta's schools. Grounded in data. Oriented toward equity.</sub>
+  <sub>Built for Jakarta’s schools. Grounded in data. Oriented toward equity.</sub>
 </p>
