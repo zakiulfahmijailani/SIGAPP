@@ -171,7 +171,7 @@ export default function AboutPage() {
       {/* ── 5. Footer Note ────────────────────────────────────── */}
       <footer className="border-t border-slate-200 pt-6 text-center">
         <p className="text-xs text-slate-400 font-medium tracking-widest uppercase">
-          SIGAPP MVP v0.1 · Jakarta · 2025
+          SIGAPP MVP v0.1 · NTT · 2025
         </p>
       </footer>
     </div>
