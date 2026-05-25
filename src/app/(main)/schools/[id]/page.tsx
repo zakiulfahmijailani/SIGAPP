@@ -48,6 +48,11 @@ const TierChangeTimeline = dynamic(
   { ssr: false, loading: () => <div className="h-[280px] skeleton-shimmer rounded-xl mb-6" /> }
 );
 
+const GeoAIAnalysisPanel = dynamic(
+  () => import('@/components/agents/GeoAIAnalysisPanel'),
+  { ssr: false, loading: () => <div className="h-[400px] skeleton-shimmer rounded-xl mb-8" /> }
+);
+
 const PILLARS = [
   { key: "p1_quality_gap",       weight: 35 },
   { key: "p2_spatial_inequity",  weight: 25 },
@@ -81,7 +86,6 @@ function buildTimelineEntries(currentIndex: number, currentTier: string, schoolN
     return "NORMAL";
   };
 
-  // Simulate a realistic progression toward current index
   const seed = schoolName.length % 5;
   const deltas = [-0.06, -0.03, +0.04, +0.02, 0];
   const offsets = deltas.map((d, i) => {
@@ -133,7 +137,6 @@ export default function SchoolDetailPage() {
 
       setSchool(data as SekolahNTTFull);
 
-      // Calculate rank: count schools with higher sigapp_index
       const { count } = await sb
         .from("sekolah_ntt_full")
         .select("id", { count: "exact", head: true })
@@ -209,7 +212,6 @@ export default function SchoolDetailPage() {
   const currentIndex = parseIndex(school.sigapp_index);
   const timelineEntries = buildTimelineEntries(currentIndex, tier, school.school_name || '');
 
-  // Build school_index shape for legacy components (AgentStatusPanel, SchoolSankeyChart)
   const si = {
     id: String(school.id),
     school_id: String(school.id),
@@ -222,7 +224,6 @@ export default function SchoolDetailPage() {
     computed_at: school.computed_at ?? "",
   };
 
-  // Build school shape for AgentStatusPanel
   const schoolShape = {
     id: String(school.id),
     school_name: school.school_name || '-',
@@ -405,7 +406,7 @@ export default function SchoolDetailPage() {
       </div>
 
       {/* Sankey */}
-      <div className="mt-8">
+      <div className="mt-8 mb-8">
         <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wider mb-2">Data Flow — Transparansi Metodologi</h2>
         <p className="text-xs text-slate-400 mb-4">
           Alur nilai dari sumber data → variabel → pilar → SIGAPP Index untuk sekolah ini.
@@ -414,6 +415,9 @@ export default function SchoolDetailPage() {
           <SchoolSankeyChart schoolIndex={si} pillarVariables={null} />
         </div>
       </div>
+
+      {/* GeoAI Analysis Panel — after Sankey */}
+      <GeoAIAnalysisPanel school={school} />
     </div>
   );
 }
