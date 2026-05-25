@@ -105,7 +105,7 @@ export function Sidebar() {
         className="px-5 py-4 text-xs"
         style={{ color: "#94A3B8" }}
       >
-        MVP v0.1 · Jakarta
+        MVP v0.1 · NTT
       </div>
     </aside>
   );
