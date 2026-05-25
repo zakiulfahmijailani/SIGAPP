@@ -101,7 +101,7 @@ Only KRITIS schools activate the full agent layer.
 
 When a school crosses into KRITIS, passive monitoring becomes active coordination. The AI agents are the mechanism through which analysis becomes institutional response.
 
-EmailAgent dispatches across the full administrative chain simultaneously and tracks each recipient independently. Every stakeholder’s response — or silence — is visible. Accountability is built into the architecture.
+EmailAgent dispatches across the full administrative chain simultaneously and tracks each recipient independently. Every stakeholder's response — or silence — is visible. Accountability is built into the architecture.
 
 ---
 
@@ -150,7 +150,7 @@ Contributions, feedback, and collaborations are welcome — especially from rese
 **Ways to contribute:**
 - 🐛 Report bugs or suggest features via [Issues](https://github.com/zakiulfahmijailani/SIGAPP/issues)
 - 🔍 Improve data pipeline or index methodology
-- 🇮🇮 Extend coverage beyond Jakarta to other provinces
+- 🇮🇩 Extend coverage beyond Jakarta to other provinces
 - 💬 Reach out directly: [zakiul.jailani@bakrie.ac.id](mailto:zakiul.jailani@bakrie.ac.id)
 
 ---
@@ -176,5 +176,5 @@ SIGAPP is an active research and development project. The SIGAPP Index formula, 
 ---
 
 <p align="center">
-  <sub>Built for Jakarta’s schools. Grounded in data. Oriented toward equity.</sub>
+  <sub>Built for Jakarta's schools. Grounded in data. Oriented toward equity.</sub>
 </p>
