@@ -20,7 +20,7 @@ export interface EmailMessage {
 // Satu penerima email
 export interface StakeholderRecipient {
   id: string;
-  role: string;           // "Kepala Sekolah", "Lurah", "Camat", dll
+  role: string;           // "Kepala Sekolah", "Kepala Dinas", dll
   name: string;           // nama dummy
   email: string;          // email dummy
   level: "sekolah" | "kelurahan" | "kecamatan" | "kota" | "provinsi";
@@ -37,8 +37,7 @@ export function generateStakeholders(
 ): StakeholderRecipient[] {
   const schoolName = school.school_name;
   const kecamatan = school.kecamatan;
-  const kelurahan = school.kelurahan;
-  const kota = school.kota ?? "Jakarta";
+  const kota = school.kota ?? "Nusa Tenggara Timur";
 
   // Ringkasan untuk isi email
   const tier = getTierFromIndex(schoolIndex.sigapp_index);
@@ -65,7 +64,7 @@ export function generateStakeholders(
       id: "ks",
       role: "Kepala Sekolah",
       name: `Kepala ${schoolName}`,
-      email: `kepala.${schoolName.toLowerCase().replace(/\s+/g, ".")}@disdik.jakarta.go.id`,
+      email: `kepala.${schoolName.toLowerCase().replace(/\s+/g, ".")}@disdik.ntt.go.id`,
       level: "sekolah",
       status: "replied",
       sentAt: "2 Mei 2026, 14:35",
@@ -93,65 +92,10 @@ export function generateStakeholders(
       ],
     },
     {
-      id: "lurah",
-      role: `Lurah ${kelurahan}`,
-      name: `Lurah ${kelurahan}`,
-      email: `lurah.${kelurahan.toLowerCase().replace(/\s+/g, "")}@jakarta.go.id`,
-      level: "kelurahan",
-      status: "sent",
-      sentAt: "2 Mei 2026, 14:35",
-      thread: [
-        {
-          from: "system",
-          senderName: "SIGAPP System",
-          timestamp: "2 Mei 2026, 14:35",
-          body: emailBody(`Lurah ${kelurahan}`),
-        },
-        {
-          from: "system",
-          senderName: "SIGAPP System",
-          timestamp: "4 Mei 2026, 08:00",
-          body: followUpBody,
-          isAuto: true,
-        },
-      ],
-    },
-    {
-      id: "camat",
-      role: `Camat ${kecamatan}`,
-      name: `Camat ${kecamatan}`,
-      email: `camat.${kecamatan.toLowerCase().replace(/\s+/g, "")}@jakarta.go.id`,
-      level: "kecamatan",
-      status: "replied",
-      sentAt: "2 Mei 2026, 14:35",
-      repliedAt: "3 Mei 2026, 09:10",
-      thread: [
-        {
-          from: "system",
-          senderName: "SIGAPP System",
-          timestamp: "2 Mei 2026, 14:35",
-          body: emailBody(`Camat ${kecamatan}`),
-        },
-        {
-          from: "recipient",
-          senderName: `Camat ${kecamatan}`,
-          timestamp: "3 Mei 2026, 09:10",
-          body: "Sudah kami catat. Akan kami masukkan ke agenda rapat koordinasi mingguan dengan kepala wilayah terkait.",
-        },
-        {
-          from: "system",
-          senderName: "SIGAPP System",
-          timestamp: "3 Mei 2026, 09:15",
-          body: "Terima kasih atas respons Bapak/Ibu Camat. Kami akan memantau perkembangannya dan siap memberikan dukungan data jika diperlukan.",
-          isAuto: true,
-        },
-      ],
-    },
-    {
       id: "kadis",
       role: `Kepala Dinas Pendidikan ${kota}`,
       name: `Kepala Disdik ${kota}`,
-      email: `kadisdik@disdik.jakarta.go.id`,
+      email: `kadisdik@disdik.ntt.go.id`,
       level: "kota",
       status: "escalate",
       sentAt: "2 Mei 2026, 14:35",
@@ -173,9 +117,9 @@ export function generateStakeholders(
     },
     {
       id: "bappeda",
-      role: "Bappeda Provinsi DKI Jakarta",
-      name: "Kepala Bappeda Provinsi",
-      email: "bappeda@jakarta.go.id",
+      role: "Bappeda Provinsi NTT",
+      name: "Kepala Bappeda Provinsi NTT",
+      email: "bappeda@nttprov.go.id",
       level: "provinsi",
       status: "replied",
       sentAt: "2 Mei 2026, 14:35",
@@ -185,11 +129,11 @@ export function generateStakeholders(
           from: "system",
           senderName: "SIGAPP System",
           timestamp: "2 Mei 2026, 14:35",
-          body: emailBody("Kepala Bappeda Provinsi DKI Jakarta"),
+          body: emailBody("Kepala Bappeda Provinsi NTT"),
         },
         {
           from: "recipient",
-          senderName: "Bappeda Provinsi DKI",
+          senderName: "Bappeda Provinsi NTT",
           timestamp: "3 Mei 2026, 08:45",
           body: "Laporan telah diterima dan akan dimasukkan ke dalam pertimbangan prioritas RPJMD bidang pendidikan. Terima kasih atas data yang komprehensif.",
         },
