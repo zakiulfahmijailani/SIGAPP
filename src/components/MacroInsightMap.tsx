@@ -10,6 +10,16 @@ import {
   KECAMATAN_CENTROIDS 
 } from "@/lib/macroInsightData";
 
+interface MapMarker {
+  id: string;
+  name: string;
+  lat: number;
+  lon: number;
+  index: number;
+  color: string;
+  isKabupaten: boolean;
+}
+
 interface MacroInsightMapProps {
   kecamatanData: MacroInsightKecamatan[];
   selectedKecamatan: string | null;
@@ -88,7 +98,7 @@ export default function MacroInsightMap({
   const center: [number, number] = [-8.6573, 121.0794]; // NTT center
 
   // Pre-calculate positions and colors
-  const markers = useMemo(() => {
+  const markers = useMemo<Array<MapMarker | null>>(() => {
     if (viewMode === "kecamatan") {
       return kecamatanData.map(kec => {
         const centroid = KECAMATAN_CENTROIDS.find(c => c.kecamatan === kec.kecamatan_name);
@@ -143,7 +153,7 @@ export default function MacroInsightMap({
 
         <LegendControl />
 
-        {markers.map((marker: Record<string, unknown> | null) => {
+        {markers.map((marker: MapMarker | null) => {
           if (!marker) return null;
           const isSelected = selectedKecamatan === marker.name;
           

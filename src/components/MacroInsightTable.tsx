@@ -44,7 +44,9 @@ export default function MacroInsightTable({ data, onRowClick, expandedRow }: Mac
       return sortAsc ? valA.localeCompare(valB) : valB.localeCompare(valA);
     }
     
-    return sortAsc ? (valA > valB ? 1 : -1) : (valA < valB ? 1 : -1);
+    const numA = (valA as number) || 0;
+    const numB = (valB as number) || 0;
+    return sortAsc ? (numA > numB ? 1 : -1) : (numA < numB ? 1 : -1);
   });
 
   const getTrendBgColor = (trend: TrendType) => {
