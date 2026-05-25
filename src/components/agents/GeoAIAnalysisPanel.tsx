@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import {
   MapPin,
   Clock,
@@ -14,6 +15,7 @@ import {
   Mountain,
   Activity,
   Radio,
+  Layers,
 } from "lucide-react";
 import { SekolahNTTFull } from "@/lib/types";
 
@@ -38,21 +40,21 @@ function seededRand(seed: number, offset: number): number {
 function generateSpatialData(school: SekolahNTTFull) {
   const s = makeSeed(school);
   return {
-    distRoad: (0.5 + seededRand(s, 1) * 12).toFixed(1),           // km ke jalan raya
-    distFaskes: (0.8 + seededRand(s, 2) * 18).toFixed(1),          // km ke fasilitas kesehatan
-    distTransport: (1.0 + seededRand(s, 3) * 20).toFixed(1),       // km ke transport umum
+    distRoad: (0.5 + seededRand(s, 1) * 12).toFixed(1),
+    distFaskes: (0.8 + seededRand(s, 2) * 18).toFixed(1),
+    distTransport: (1.0 + seededRand(s, 3) * 20).toFixed(1),
     roadType: ["Jalan Tanah", "Jalan Kerikil", "Jalan Aspal", "Jalan Beton"][
       Math.floor(seededRand(s, 4) * 4)
     ],
-    blankSpot: seededRand(s, 5) > 0.6,                             // boolean blank spot
-    travelTime15: Math.floor(1 + seededRand(s, 6) * 4),            // sekolah lain dlm 15 mnt
-    travelTime30: Math.floor(2 + seededRand(s, 7) * 8),            // sekolah lain dlm 30 mnt
-    travelTime60: Math.floor(5 + seededRand(s, 8) * 15),           // sekolah lain dlm 60 mnt
-    catchmentArea: (5 + seededRand(s, 9) * 95).toFixed(0),         // km² catchment area
-    popGrid: Math.floor(200 + seededRand(s, 10) * 9800),           // populasi dalam grid
-    builtUpArea: (0.5 + seededRand(s, 11) * 29.5).toFixed(1),      // km² area terbangun
-    infraScore: Math.floor(30 + seededRand(s, 12) * 65),           // skor 30–95
-    serviceOverlap: Math.floor(1 + seededRand(s, 13) * 4),         // jumlah sekolah overlap
+    blankSpot: seededRand(s, 5) > 0.6,
+    travelTime15: Math.floor(1 + seededRand(s, 6) * 4),
+    travelTime30: Math.floor(2 + seededRand(s, 7) * 8),
+    travelTime60: Math.floor(5 + seededRand(s, 8) * 15),
+    catchmentArea: (5 + seededRand(s, 9) * 95).toFixed(0),
+    popGrid: Math.floor(200 + seededRand(s, 10) * 9800),
+    builtUpArea: (0.5 + seededRand(s, 11) * 29.5).toFixed(1),
+    infraScore: Math.floor(30 + seededRand(s, 12) * 65),
+    serviceOverlap: Math.floor(1 + seededRand(s, 13) * 4),
   };
 }
 
@@ -62,24 +64,24 @@ function generateRemoteData(school: SekolahNTTFull) {
   const roofConditions = ["Baik", "Perlu Perhatian", "Rusak Ringan", "Tidak Terdeteksi"];
   const landCovers = ["Hutan Primer", "Hutan Sekunder", "Pertanian", "Padang Rumput", "Permukiman", "Lahan Terbuka"];
   return {
-    nightLight: Math.floor(seededRand(s, 20) * 63),                // 0–63 DN
+    nightLight: Math.floor(seededRand(s, 20) * 63),
     electrification: ["Terlistriki Penuh", "Terlistriki Sebagian", "Belum Terlistriki"][
       Math.floor(seededRand(s, 21) * 3)
     ],
-    floodRecurrence: floodYears[Math.floor(seededRand(s, 22) * 6)],// tahun
-    waterOccurrence: (seededRand(s, 23) * 80).toFixed(0),          // %
+    floodRecurrence: floodYears[Math.floor(seededRand(s, 22) * 6)],
+    waterOccurrence: (seededRand(s, 23) * 80).toFixed(0),
     floodCategory: ["Rendah", "Sedang", "Tinggi", "Sangat Tinggi"][
       Math.floor(seededRand(s, 24) * 4)
     ],
-    ndvi: (0.15 + seededRand(s, 25) * 0.65).toFixed(2),            // 0.15–0.80
-    ndviAnomaly: ((seededRand(s, 26) - 0.5) * 0.3).toFixed(2),     // -0.15 ~ +0.15
+    ndvi: (0.15 + seededRand(s, 25) * 0.65).toFixed(2),
+    ndviAnomaly: ((seededRand(s, 26) - 0.5) * 0.3).toFixed(2),
     landCover: landCovers[Math.floor(seededRand(s, 27) * 6)],
-    landCoverChange: (seededRand(s, 28) * 25).toFixed(1),           // % perubahan 5 thn
+    landCoverChange: (seededRand(s, 28) * 25).toFixed(1),
     roofCondition: roofConditions[Math.floor(seededRand(s, 29) * 4)],
-    roofConfidence: Math.floor(55 + seededRand(s, 30) * 44),        // % confidence
-    builtChange: ((seededRand(s, 31) - 0.3) * 20).toFixed(1),      // % perubahan area terbangun
-    elevation: Math.floor(10 + seededRand(s, 32) * 1490),           // meter
-    slope: (seededRand(s, 33) * 35).toFixed(1),                     // derajat
+    roofConfidence: Math.floor(55 + seededRand(s, 30) * 44),
+    builtChange: ((seededRand(s, 31) - 0.3) * 20).toFixed(1),
+    elevation: Math.floor(10 + seededRand(s, 32) * 1490),
+    slope: (seededRand(s, 33) * 35).toFixed(1),
   };
 }
 
@@ -183,6 +185,87 @@ function NightLightGauge({ value }: { value: number }) {
   );
 }
 
+// ── GeoAI Map Image Component ──────────────────────────────────────────────
+function GeoAIMapImage({ school, mode }: { school: SekolahNTTFull; mode: "spatial" | "remote" }) {
+  // Rotate through 10 pre-generated maps, deterministic per school
+  const mapIndex = String((school.id % 10) + 1).padStart(2, "0");
+  const src = `/school-maps/map_${mapIndex}.png`;
+
+  const LAYER_LEGENDS = {
+    spatial: [
+      { color: "#00B4B4", label: "Service Area Ring" },
+      { color: "#8B5CF6", label: "Catchment Zone" },
+      { color: "#F59E0B", label: "Isochrone 30 mnt" },
+      { color: "#22C55E", label: "Infrastruktur Akses" },
+    ],
+    remote: [
+      { color: "#FFD700", label: "Night Light Halo" },
+      { color: "#3B82F6", label: "Flood Risk Zone" },
+      { color: "#166534", label: "NDVI / Vegetasi" },
+      { color: "#EC4899", label: "Built-up Change" },
+    ],
+  };
+
+  return (
+    <div className="mb-6">
+      <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest mb-3 flex items-center gap-2">
+        <Layers size={12} />
+        GeoAI Spatial Map
+      </p>
+
+      {/* Map Image */}
+      <div className="relative w-full rounded-xl overflow-hidden border border-slate-700/60 bg-slate-800">
+        <Image
+          src={src}
+          alt={`GeoAI Map - ${school.school_name ?? "Sekolah"}`}
+          width={800}
+          height={500}
+          className="w-full object-cover"
+          priority
+          unoptimized
+        />
+
+        {/* Top-left: school name overlay */}
+        <div className="absolute top-3 left-3 bg-slate-900/80 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-slate-700/60">
+          <p className="text-[11px] font-semibold text-white leading-tight">
+            {school.school_name ?? "–"}
+          </p>
+          <p className="text-[9px] text-slate-400">
+            {school.lat?.toFixed(4)}, {school.lon?.toFixed(4)}
+          </p>
+        </div>
+
+        {/* Top-right: mode badge */}
+        <div className="absolute top-3 right-3 bg-violet-900/80 backdrop-blur-sm px-2.5 py-1 rounded-lg border border-violet-700/50">
+          <p className="text-[10px] font-mono text-violet-300">
+            {mode === "spatial" ? "📍 Spatial Layers" : "🛰️ Remote Sensing"}
+          </p>
+        </div>
+
+        {/* Bottom: sim disclaimer */}
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-slate-900/90 to-transparent px-4 py-3">
+          <p className="text-[9px] font-mono text-slate-500">
+            ⚡ SIGAPP GeoAI v1.2 · Simulasi Deterministik · Phase 2: Real GEE API
+          </p>
+        </div>
+      </div>
+
+      {/* Layer legend chips */}
+      <div className="flex flex-wrap gap-2 mt-3">
+        {LAYER_LEGENDS[mode].map((item) => (
+          <div key={item.label} className="flex items-center gap-1.5 bg-slate-800/60 border border-slate-700/40 rounded-full px-3 py-1">
+            <span
+              className="w-2.5 h-2.5 rounded-full flex-shrink-0"
+              style={{ backgroundColor: item.color }}
+            />
+            <span className="text-[10px] text-slate-400">{item.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 const TABS = [
   { id: "spatial", label: "📍 Spatial Analysis" },
   { id: "remote", label: "🛰️ Remote Sensing & GeoAI" },
@@ -239,6 +322,9 @@ export default function GeoAIAnalysisPanel({ school }: GeoAIAnalysisPanelProps) 
         {/* ─── TAB 1: SPATIAL ANALYSIS ─── */}
         {activeTab === "spatial" && (
           <div className="space-y-6">
+            {/* GeoAI Map Image */}
+            <GeoAIMapImage school={school} mode="spatial" />
+
             {/* Proximity Metrics */}
             <div>
               <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest mb-3">
@@ -346,7 +432,10 @@ export default function GeoAIAnalysisPanel({ school }: GeoAIAnalysisPanelProps) 
         {/* ─── TAB 2: REMOTE SENSING & GeoAI ─── */}
         {activeTab === "remote" && (
           <div className="space-y-6">
-            {/* Night-time Lights + Electrification */}
+            {/* GeoAI Map Image */}
+            <GeoAIMapImage school={school} mode="remote" />
+
+            {/* Night-time Lights */}
             <div>
               <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest mb-3">
                 Night-time Lights & Elektrifikasi
@@ -377,7 +466,7 @@ export default function GeoAIAnalysisPanel({ school }: GeoAIAnalysisPanelProps) 
               </div>
             </div>
 
-            {/* Satellite Imagery & Computer Vision */}
+            {/* Satellite Imagery */}
             <div>
               <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest mb-3">
                 Citra Satelit & Computer Vision
