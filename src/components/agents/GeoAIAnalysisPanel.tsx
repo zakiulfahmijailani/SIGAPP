@@ -187,8 +187,14 @@ function NightLightGauge({ value }: { value: number }) {
 
 // ── GeoAI Map Image Component ──────────────────────────────────────────────
 function GeoAIMapImage({ school, mode }: { school: SekolahNTTFull; mode: "spatial" | "remote" }) {
-  // Rotate through 10 pre-generated maps, deterministic per school
-  const mapIndex = String((school.id % 10) + 1).padStart(2, "0");
+  // Rotate through currently available pre-generated maps, deterministic per school.
+  // ↓ INCREMENT THIS NUMBER each time new map images are added
+  // Current batches:
+  //   3  = map_s_01~03 + map_r_01~03  (batch 1 — May 2026)
+  //   6  = + map_s_04~06 + map_r_04~06 (batch 2 — coming)
+  //   10 = + map_s_07~10 + map_r_07~10 (batch 3 — final)
+  const AVAILABLE_MAPS = 3;
+  const mapIndex = String((school.id % AVAILABLE_MAPS) + 1).padStart(2, "0");
   const src = mode === "spatial"
     ? `/school-maps/map_s_${mapIndex}.png`
     : `/school-maps/map_r_${mapIndex}.png`;
