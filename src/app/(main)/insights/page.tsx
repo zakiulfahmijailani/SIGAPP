@@ -17,23 +17,24 @@ import {
   Legend,
 } from "recharts";
 import { getSupabase } from "@/lib/supabase";
-import { SchoolWithIndex } from "@/lib/types";
+import { SekolahNTTFull } from "@/lib/types";
 import { formatIndex, getPillarName, getTierFromIndex } from "@/lib/utils";
+import { parseIndex } from "@/lib/utils";
 
 export default function InsightsPage() {
-  const [schools, setSchools] = useState<SchoolWithIndex[]>([]);
+  const [schools, setSchools] = useState<SekolahNTTFull[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // ── Fetch ───────────────────────────────────────────────────
+  // ── Fetch from sekolah_ntt_full (NTT data) ─────────────────
   useEffect(() => {
     async function fetchSchools() {
       setLoading(true);
       setError(null);
 
       const { data, error: fetchErr } = await getSupabase()
-        .from("schools")
-        .select("*, school_index(*)");
+        .from("sekolah_ntt_full")
+        .select("*");
 
       if (fetchErr) {
         setError(fetchErr.message);
@@ -41,14 +42,7 @@ export default function InsightsPage() {
         return;
       }
 
-      const normalized = (data ?? []).map((s: Record<string, unknown>) => ({
-        ...s,
-        school_index: Array.isArray(s.school_index)
-          ? s.school_index[0]
-          : s.school_index,
-      })) as SchoolWithIndex[];
-
-      setSchools(normalized);
+      setSchools((data ?? []) as SekolahNTTFull[]);
       setLoading(false);
     }
 
@@ -59,9 +53,11 @@ export default function InsightsPage() {
   const kecamatanData = useMemo(() => {
     const agg: Record<string, { sum: number; count: number }> = {};
     for (const s of schools) {
-      if (!s.school_index) continue;
+      if (!s.kecamatan) continue;
+      const idx = parseIndex(s.sigapp_index);
+      if (idx === 0) continue;
       if (!agg[s.kecamatan]) agg[s.kecamatan] = { sum: 0, count: 0 };
-      agg[s.kecamatan].sum += s.school_index.sigapp_index;
+      agg[s.kecamatan].sum += idx;
       agg[s.kecamatan].count += 1;
     }
     return Object.entries(agg)
@@ -69,7 +65,8 @@ export default function InsightsPage() {
         name,
         avg: parseFloat((sum / count).toFixed(3)),
       }))
-      .sort((a, b) => b.avg - a.avg);
+      .sort((a, b) => b.avg - a.avg)
+      .slice(0, 15); // top 15 kecamatan only
   }, [schools]);
 
   // ── Derived Data for Chart 2: Avg Pillar per Jenjang ────────
@@ -79,15 +76,18 @@ export default function InsightsPage() {
     jenjangs.forEach((j) => (agg[j] = { p1: 0, p2: 0, p3: 0, p4: 0, count: 0 }));
 
     for (const s of schools) {
-      if (!s.school_index) continue;
-      const j = s.jenjang;
-      if (agg[j]) {
-        agg[j].p1 += s.school_index.p1_quality_gap;
-        agg[j].p2 += s.school_index.p2_spatial_inequity;
-        agg[j].p3 += s.school_index.p3_structural_risk;
-        agg[j].p4 += s.school_index.p4_public_signal;
-        agg[j].count += 1;
-      }
+      const j = s.jenjang ?? "";
+      if (!agg[j]) continue;
+      const p1 = parseIndex(s.p1_quality_gap);
+      const p2 = parseIndex(s.p2_spatial_inequity);
+      const p3 = parseIndex(s.p3_structural_risk);
+      const p4 = parseIndex(s.p4_public_signal);
+      if (p1 === 0 && p2 === 0 && p3 === 0 && p4 === 0) continue;
+      agg[j].p1 += p1;
+      agg[j].p2 += p2;
+      agg[j].p3 += p3;
+      agg[j].p4 += p4;
+      agg[j].count += 1;
     }
 
     return Object.entries(agg).map(([name, totals]) => ({
@@ -109,15 +109,15 @@ export default function InsightsPage() {
     // Weakest Pillar overall
     let p1Sum = 0, p2Sum = 0, p3Sum = 0, p4Sum = 0, count = 0;
     for (const s of schools) {
-      if (s.school_index) {
-        p1Sum += s.school_index.p1_quality_gap;
-        p2Sum += s.school_index.p2_spatial_inequity;
-        p3Sum += s.school_index.p3_structural_risk;
-        p4Sum += s.school_index.p4_public_signal;
-        count++;
-      }
+      const p1 = parseIndex(s.p1_quality_gap);
+      const p2 = parseIndex(s.p2_spatial_inequity);
+      const p3 = parseIndex(s.p3_structural_risk);
+      const p4 = parseIndex(s.p4_public_signal);
+      if (p1 === 0 && p2 === 0 && p3 === 0 && p4 === 0) continue;
+      p1Sum += p1; p2Sum += p2; p3Sum += p3; p4Sum += p4;
+      count++;
     }
-    
+
     let weakestPillarName = "—";
     if (count > 0) {
       const avgs = [
@@ -133,11 +133,11 @@ export default function InsightsPage() {
     // Students in Kritis+Tinggi schools
     let atRiskStudents = 0;
     for (const s of schools) {
-      if (s.school_index) {
-        const tier = getTierFromIndex(s.school_index.sigapp_index);
-        if (tier === "KRITIS" || tier === "TINGGI") {
-          atRiskStudents += s.total_students || 0;
-        }
+      const idx = parseIndex(s.sigapp_index);
+      if (idx === 0) continue;
+      const tier = getTierFromIndex(idx);
+      if (tier === "KRITIS" || tier === "TINGGI") {
+        atRiskStudents += s.total_students || 0;
       }
     }
 
@@ -153,7 +153,7 @@ export default function InsightsPage() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-slate-800">Macro Insights</h1>
         <p className="mt-1 text-sm text-slate-500">
-          Aggregated analytics for regional education prioritization
+          Aggregated analytics for regional education prioritization · NTT
         </p>
       </div>
 
@@ -183,7 +183,7 @@ export default function InsightsPage() {
                   >
                     <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" horizontal={false} />
                     <XAxis type="number" domain={[0, 1]} tickCount={6} tick={{ fontSize: 11, fill: "#94A3B8" }} axisLine={false} />
-                    <YAxis type="category" dataKey="name" width={120} tick={{ fontSize: 11, fill: "#64748B" }} axisLine={false} tickLine={false} />
+                    <YAxis type="category" dataKey="name" width={140} tick={{ fontSize: 11, fill: "#64748B" }} axisLine={false} tickLine={false} />
                     <Tooltip
                       contentStyle={{ background: "#0D2137", border: "none", borderRadius: 8, fontSize: 12, color: "#fff" }}
                       // eslint-disable-next-line @typescript-eslint/no-explicit-any
