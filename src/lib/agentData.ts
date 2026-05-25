@@ -140,3 +140,102 @@ export function generateStakeholders(
     },
   ];
 }
+
+// ─── Macro Insight Stakeholders ───────────────────────────────────
+
+export interface MacroInsightRecipient extends StakeholderRecipient {
+  reportId?: string;
+}
+
+export function generateMacroInsightStakeholders(
+  kabupatenName: string,
+  kabupatenAvgIndex: number,
+  executiveSummary: string
+): MacroInsightRecipient[] {
+  const timestamp = new Date().toLocaleDateString('id-ID', {
+    day: 'numeric', month: 'long', year: 'numeric'
+  }) + ", 08:00";
+
+  const emailBody = (role: string) =>
+    `Yth. ${role},\n\n` +
+    `Bersama ini kami sampaikan Laporan Macro Insight SIGAPP untuk wilayah ${kabupatenName}. ` +
+    `Rata-rata SIGAPP Index saat ini adalah ${kabupatenAvgIndex}.\n\n` +
+    `Ringkasan Eksekutif:\n${executiveSummary}\n\n` +
+    `Laporan lengkap interaktif dapat diakses melalui dashboard SIGAPP.\n\n` +
+    `Hormat kami,\nSIGAPP System \u2014 AI Agentic Planner`;
+
+  return [
+    {
+      id: "kemendikdasmen",
+      role: "Kemendikdasmen Pusat",
+      name: "Sekretariat Kemendikdasmen",
+      email: "sekretariat@kemdikbud.go.id",
+      level: "provinsi", // Changed to valid level since 'pusat' isn't in StakeholderRecipient's level union, or we just type cast it to the expected union.
+      status: "pending",
+      sentAt: timestamp,
+      thread: [
+        {
+          from: "system",
+          senderName: "SIGAPP System",
+          timestamp,
+          body: emailBody("Kemendikdasmen Pusat"),
+          isAuto: true,
+        }
+      ]
+    },
+    {
+      id: "kadisprov",
+      role: "Kepala Dinas Pendidikan Prov. NTT",
+      name: "Kadisdik Provinsi NTT",
+      email: "kadisdik@disdik.nttprov.go.id",
+      level: "provinsi",
+      status: "pending",
+      sentAt: timestamp,
+      thread: [
+        {
+          from: "system",
+          senderName: "SIGAPP System",
+          timestamp,
+          body: emailBody("Kepala Dinas Pendidikan Provinsi NTT"),
+          isAuto: true,
+        }
+      ]
+    },
+    {
+      id: "bappedaprov",
+      role: "Bappeda Provinsi NTT",
+      name: "Kepala Bappeda NTT",
+      email: "bappeda@nttprov.go.id",
+      level: "provinsi",
+      status: "pending",
+      sentAt: timestamp,
+      thread: [
+        {
+          from: "system",
+          senderName: "SIGAPP System",
+          timestamp,
+          body: emailBody("Kepala Bappeda Provinsi NTT"),
+          isAuto: true,
+        }
+      ]
+    },
+    {
+      id: "kadiskab",
+      role: `Kepala Dinas Pendidikan ${kabupatenName}`,
+      name: `Kadisdik ${kabupatenName}`,
+      email: `kadisdik.${kabupatenName.toLowerCase().replace(/\s+/g, "")}@disdik.go.id`,
+      level: "kota",
+      status: "pending",
+      sentAt: timestamp,
+      thread: [
+        {
+          from: "system",
+          senderName: "SIGAPP System",
+          timestamp,
+          body: emailBody(`Kepala Dinas Pendidikan ${kabupatenName}`),
+          isAuto: true,
+        }
+      ]
+    }
+  ];
+}

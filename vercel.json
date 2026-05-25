@@ -1,0 +1,12 @@
+{
+  "crons": [
+    {
+      "path": "/api/macro-insight/generate",
+      "schedule": "0 0 1 1 *"
+    },
+    {
+      "path": "/api/macro-insight/generate",
+      "schedule": "0 0 1 7 *"
+    }
+  ]
+}

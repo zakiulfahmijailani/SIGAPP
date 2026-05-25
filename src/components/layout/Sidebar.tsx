@@ -12,7 +12,7 @@ import {
 const navItems = [
   { label: "Dashboard", href: "/", icon: LayoutDashboard },
   { label: "Schools", href: "/schools", icon: School },
-  { label: "Insights", href: "/insights", icon: BarChart2 },
+  { label: "Macro Insight", href: "/macro-insight", icon: BarChart2 },
   { label: "About", href: "/about", icon: Info },
 ];
 

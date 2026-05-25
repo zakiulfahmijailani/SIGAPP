@@ -186,7 +186,7 @@ function DashboardInner() {
             </div>
             <div className="flex items-center gap-8">
               <Link href="/schools" className="text-[#0D2137]/60 hover:text-[#00B4B4] text-xs uppercase tracking-widest font-bold transition-colors">Schools</Link>
-              <Link href="/insights" className="text-[#0D2137]/60 hover:text-[#00B4B4] text-xs uppercase tracking-widest font-bold transition-colors">Insights</Link>
+              <Link href="/macro-insight" className="text-[#0D2137]/60 hover:text-[#00B4B4] text-xs uppercase tracking-widest font-bold transition-colors">Macro Insight</Link>
               <Link href="/about" className="text-[#0D2137]/60 hover:text-[#00B4B4] text-xs uppercase tracking-widest font-bold transition-colors">About</Link>
             </div>
           </div>
