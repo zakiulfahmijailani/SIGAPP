@@ -25,9 +25,11 @@
 
 ---
 
-## What Is SIGAPP?
+## Apa Itu SIGAPP?
 
-SIGAPP is an agentic AI-powered WebGIS decision-support system for educational planning that identifies and prioritizes schools in Jakarta needing immediate intervention. It aggregates structural, academic, spatial, and social data into a composite score — the SIGAPP Index — and surfaces which schools need attention, and why. Built for education planners, government stakeholders, and community partners, SIGAPP moves beyond raw data into targeted, evidence-based action.
+SIGAPP adalah sistem pendukung keputusan berbasis WebGIS dengan kecerdasan buatan agentik untuk perencanaan pendidikan. Sistem ini mengidentifikasi dan memprioritaskan sekolah-sekolah yang membutuhkan intervensi segera, dengan mengacu pada data dari wilayah Jakarta.
+
+SIGAPP mengintegrasikan data struktural, akademik, spasial, dan sosial ke dalam satu skor komposit yang disebut **SIGAPP Index**, lalu menunjukkan sekolah mana yang perlu mendapat perhatian beserta alasannya. Sistem ini dirancang untuk perencana pendidikan, pemangku kepentingan pemerintah, dan mitra komunitas agar dapat bergerak melampaui data mentah menuju tindakan yang terarah dan berbasis bukti.
 
 ---
 
