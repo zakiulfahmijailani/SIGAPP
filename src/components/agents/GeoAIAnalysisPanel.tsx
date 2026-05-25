@@ -225,6 +225,30 @@ function GeoAIMapImage({ school, mode }: { school: SekolahNTTFull; mode: "spatia
           className="w-full object-cover"
           priority
           unoptimized
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.style.display = "none";
+            const parent = target.parentElement;
+            if (parent) {
+              parent.style.minHeight = "200px";
+              parent.style.display = "flex";
+              parent.style.alignItems = "center";
+              parent.style.justifyContent = "center";
+              const placeholder = document.createElement("div");
+              placeholder.innerHTML = `
+                <div style="text-align:center;color:#475569;padding:40px">
+                  <div style="font-size:32px;margin-bottom:8px">🗺️</div>
+                  <div style="font-size:12px;font-family:monospace">
+                    GeoAI Map · Generating...
+                  </div>
+                  <div style="font-size:10px;margin-top:4px;color:#334155">
+                    ${src}
+                  </div>
+                </div>
+              `;
+              parent.appendChild(placeholder);
+            }
+          }}
         />
 
         {/* Top-left: school name overlay */}
