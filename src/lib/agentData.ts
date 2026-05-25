@@ -36,7 +36,6 @@ export function generateStakeholders(
   schoolIndex: SchoolIndex
 ): StakeholderRecipient[] {
   const schoolName = school.school_name;
-  const kecamatan = school.kecamatan;
   const kota = school.kota ?? "Nusa Tenggara Timur";
 
   // Ringkasan untuk isi email
@@ -52,7 +51,7 @@ export function generateStakeholders(
     `dengan SIGAPP Index ${schoolIndex.sigapp_index.toFixed(3)}.\n\n` +
     `Terlampir laporan lengkap kondisi sekolah dan rekomendasi tindak lanjut.\n\n` +
     `Mohon kiranya dapat ditindaklanjuti sesuai kewenangan Bapak/Ibu.\n\n` +
-    `Hormat kami,\nSIGAPP System — Sistem Informasi Geospasial berbasis AI Agentik untuk Perencanaan Pendidikan`;
+    `Hormat kami,\nSIGAPP System \u2014 Sistem Informasi Geospasial berbasis AI Agentik untuk Perencanaan Pendidikan`;
 
   const followUpBody =
     `Menindaklanjuti laporan yang kami kirimkan sebelumnya, kami ingin menanyakan ` +
