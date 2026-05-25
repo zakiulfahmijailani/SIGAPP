@@ -2,9 +2,9 @@
 """
 SIGAPP GeoAI Map Generator
 
-Regenerates 10 deterministic map overlay images for SIGAPP.
-The generator uses zoom 11, 5x5 OSM tiles, compact overlay geometry,
-and an unclipped in-image legend.
+Renames the 10 approved spatial map images and generates 10 remote
+sensing map images for SIGAPP. Both image families use zoom 11, 5x5
+OSM tiles, deterministic overlays, and unclipped in-image legends.
 """
 
 import math
@@ -28,7 +28,8 @@ GRID = 5
 KM_TO_PX = 72
 CANVAS_W = 800
 CANVAS_H = 500
-DARK_OVERLAY = (13, 33, 55, 180)
+DARK_OVERLAY_SPATIAL = (13, 33, 55, 180)
+DARK_OVERLAY_REMOTE = (8, 18, 40, 200)
 FALLBACK_TILE = (20, 30, 50, 255)
 TILE_URL = "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
 TILE_HEADERS = {"User-Agent": "SIGAPP-GeoAI-Research/2.0"}
@@ -74,6 +75,15 @@ LEGEND_ITEMS = [
     ((34, 120, 60), "NDVI / Vegetasi"),
 ]
 
+REMOTE_LEGEND_ITEMS = [
+    ((255, 200, 50), "Night-time Lights (VIIRS)"),
+    ((34, 120, 60), "NDVI Vegetasi (Sentinel-2)"),
+    ((59, 130, 246), "Flood Risk Zone (JRC)"),
+    ((220, 80, 30), "Built-up Change (GEE)"),
+    ((139, 92, 246), "Catchment Boundary"),
+    ((255, 255, 255), "Titik Sekolah"),
+]
+
 TILE_CACHE = {}
 
 
@@ -90,6 +100,16 @@ def get_vars(i):
         "night_dn": 8 + i * 6,
         "ndvi": 0.22 + i * 0.058,
         "iso_amp": 0.45 + i * 0.04,
+    }
+
+
+def get_vars_remote(i):
+    return {
+        "night_dn": 15 + i * 5,
+        "flood_op": 0.20 + i * 0.025,
+        "ndvi": 0.25 + i * 0.055,
+        "builtup_op": 0.15 + i * 0.022,
+        "catchment_r": 180 + i * 12,
     }
 
 
@@ -180,8 +200,8 @@ def build_basemap(lat, lon, zoom=ZOOM, grid=GRID):
     return cropped, school_cx, school_cy
 
 
-def apply_dark_overlay(img):
-    overlay = Image.new("RGBA", img.size, DARK_OVERLAY)
+def apply_dark_overlay(img, overlay_color=DARK_OVERLAY_SPATIAL):
+    overlay = Image.new("RGBA", img.size, overlay_color)
     return Image.alpha_composite(img.convert("RGBA"), overlay)
 
 
@@ -197,12 +217,38 @@ def draw_night_light(draw, cx, cy, dn):
                      fill=(gold_r, gold_g, gold_b, alpha))
 
 
+def draw_night_light_rs(draw, cx, cy, dn):
+    max_r = int(70 + (dn / 63) * 110)
+    for r in range(max_r, 0, -4):
+        t = r / max_r
+        alpha = int((1 - t ** 1.5) * (dn / 63) * 130)
+        gold_r = int(20 + (1 - t) * 235)
+        gold_g = int(15 + (1 - t) * 170)
+        gold_b = int(50 - (1 - t) * 35)
+        draw.ellipse([cx - r, cy - r, cx + r, cy + r],
+                     fill=(gold_r, gold_g, gold_b, alpha))
+
+
 def draw_ndvi(draw, cx, cy, ndvi_val):
     r = int(30 + ndvi_val * 60)
     g = int(80 + ndvi_val * 100)
     alpha = int(25 + ndvi_val * 35)
     draw.ellipse([cx - r, cy - r, cx + r, cy + r],
                  fill=(20, g, 40, alpha))
+
+
+def draw_ndvi_rs(draw, cx, cy, ndvi_val, seed):
+    rng = random.Random(seed + 700)
+    ox = cx + int(rng.uniform(-30, 30))
+    oy = cy + int(rng.uniform(-25, 25))
+    rx = int(80 + ndvi_val * 90)
+    ry = int(60 + ndvi_val * 70)
+    g = int(90 + ndvi_val * 100)
+    alpha = int(40 + ndvi_val * 55)
+    draw.ellipse([ox - rx, oy - ry, ox + rx, oy + ry],
+                 fill=(15, g, 35, alpha))
+    draw.ellipse([ox - rx // 2, oy - ry // 2, ox + rx // 2, oy + ry // 2],
+                 fill=(20, min(g + 40, 255), 50, min(alpha + 20, 255)))
 
 
 def draw_flood(draw, cx, cy, flood_op, seed):
@@ -216,6 +262,39 @@ def draw_flood(draw, cx, cy, flood_op, seed):
                  fill=(59, 130, 246, alpha),
                  outline=(100, 160, 255, min(alpha + 40, 255)),
                  width=1)
+
+
+def draw_flood_rs(draw, cx, cy, flood_op, seed):
+    rng = random.Random(seed + 500)
+    ox = cx + int(rng.uniform(50, 110))
+    oy = cy + int(rng.uniform(35, 80))
+    rx = int(70 + rng.random() * 55)
+    ry = int(45 + rng.random() * 40)
+    alpha = int(flood_op * 255)
+    draw.ellipse([ox - rx, oy - ry, ox + rx, oy + ry],
+                 fill=(59, 130, 246, alpha))
+    draw.ellipse([ox - rx, oy - ry, ox + rx, oy + ry],
+                 outline=(120, 180, 255, min(alpha + 60, 255)),
+                 width=2)
+    ox2 = ox + int(rng.uniform(20, 50))
+    oy2 = oy + int(rng.uniform(-20, 20))
+    rx2, ry2 = rx // 3, ry // 3
+    draw.ellipse([ox2 - rx2, oy2 - ry2, ox2 + rx2, oy2 + ry2],
+                 fill=(59, 130, 246, max(alpha - 20, 0)))
+
+
+def draw_builtup(draw, cx, cy, builtup_op, seed):
+    rng = random.Random(seed + 900)
+    ox = cx + int(rng.uniform(-60, 60))
+    oy = cy + int(rng.uniform(-50, 50))
+    max_r = int(45 + rng.random() * 40)
+    for r in range(max_r, 0, -3):
+        t = r / max_r
+        alpha = int((1 - t) * builtup_op * 200)
+        red_r = int(180 + (1 - t) * 75)
+        red_g = int(60 + (1 - t) * 60)
+        draw.ellipse([ox - r, oy - r, ox + r, oy + r],
+                     fill=(red_r, red_g, 20, alpha))
 
 
 def draw_rings(draw, cx, cy, r1, r2, r3):
@@ -292,6 +371,19 @@ def draw_infra_lines(draw, cx, cy, seed):
                      fill=color[:3] + (255,))
 
 
+def draw_catchment_rs(draw, cx, cy, radius):
+    circumference = int(2 * math.pi * radius)
+    for k in range(0, circumference, 16):
+        angle = (k / circumference) * 2 * math.pi
+        angle2 = ((k + 8) / circumference) * 2 * math.pi
+        x1 = int(cx + radius * math.cos(angle))
+        y1 = int(cy + radius * math.sin(angle))
+        x2 = int(cx + radius * math.cos(angle2))
+        y2 = int(cy + radius * math.sin(angle2))
+        draw.line([(x1, y1), (x2, y2)],
+                  fill=(139, 92, 246, 120), width=1)
+
+
 def draw_school_marker(draw, cx, cy):
     for r, alpha in [(28, 30), (22, 55), (16, 100), (11, 160)]:
         draw.ellipse([cx - r, cy - r, cx + r, cy + r],
@@ -352,7 +444,7 @@ def draw_panel(draw, box, fill, outline, radius=6, width=1):
         draw.rectangle(box, fill=fill, outline=outline, width=width)
 
 
-def draw_ui(draw, school, fonts):
+def draw_school_info(draw, school, fonts):
     text_shadow(draw, (20, 20), school["name"],
                 fill=(255, 255, 255, 230), font=fonts["bold_15"])
     text_shadow(draw, (20, 38), f"Kab. {school['kab']} - NTT",
@@ -360,6 +452,8 @@ def draw_ui(draw, school, fonts):
     text_shadow(draw, (20, 53), f"{school['lat']:.4f}, {school['lon']:.4f}",
                 fill=(74, 222, 128, 190), font=fonts["mono_9"])
 
+
+def draw_spatial_badge(draw, school, fonts):
     tier_color = TIER_COLORS[school["tier"]]
     badge = [580, 12, 790, 60]
     draw_panel(draw, badge, fill=(*tier_color, 25),
@@ -369,6 +463,19 @@ def draw_ui(draw, school, fonts):
     draw.text((592, 32), f"{school['index']:.2f}   {school['tier']}",
               fill=(*tier_color, 255), font=fonts["bold_14"])
 
+
+def draw_rs_badge(draw, fonts):
+    color = (6, 182, 212)
+    badge = [540, 12, 790, 60]
+    draw_panel(draw, badge, fill=(*color, 20),
+               outline=(*color, 180), radius=7, width=2)
+    draw.text((555, 17), "Remote Sensing - GEE",
+              fill=(*color, 185), font=fonts["small_9"])
+    draw.text((555, 32), "SIGAPP GeoAI v1.2",
+              fill=(*color, 255), font=fonts["bold_14"])
+
+
+def draw_bottom_bar(draw, fonts):
     draw.rectangle([0, CANVAS_H - 22, CANVAS_W, CANVAS_H],
                    fill=(8, 18, 35, 220))
     run_time = datetime.now().strftime("%H:%M WIB")
@@ -380,6 +487,18 @@ def draw_ui(draw, school, fonts):
                  fill=(34, 197, 94, 255))
     draw.text((558, CANVAS_H - 16), "LIVE",
               fill=(34, 197, 94, 210), font=fonts["mono_9"])
+
+
+def draw_ui(draw, school, fonts):
+    draw_school_info(draw, school, fonts)
+    draw_spatial_badge(draw, school, fonts)
+    draw_bottom_bar(draw, fonts)
+
+
+def draw_ui_remote(draw, school, fonts):
+    draw_school_info(draw, school, fonts)
+    draw_rs_badge(draw, fonts)
+    draw_bottom_bar(draw, fonts)
 
 
 def draw_legend(draw, fonts):
@@ -398,6 +517,24 @@ def draw_legend(draw, fonts):
                      fill=(*color, 255))
         draw.text((lx + 26, y), label,
                   fill=(203, 213, 225, 225), font=fonts["small_10"])
+
+
+def draw_legend_rs(draw, fonts):
+    lx, ly = 614, 300
+    width = 176
+    height = 192
+    draw.rectangle([lx, ly, lx + width, ly + height],
+                   fill=(13, 33, 55, 218),
+                   outline=(51, 65, 85, 200), width=1)
+    draw.text((lx + 10, ly + 8), "LAYER LEGEND",
+              fill=(71, 85, 105, 220), font=fonts["mono_9"])
+
+    for j, (color, label) in enumerate(REMOTE_LEGEND_ITEMS):
+        y = ly + 28 + j * 26
+        draw.ellipse([lx + 10, y + 1, lx + 20, y + 11],
+                     fill=(*color, 255))
+        draw.text((lx + 26, y), label,
+                  fill=(203, 213, 225, 225), font=fonts["small_9"])
 
 
 def generate_map(i, school, fonts):
@@ -443,24 +580,91 @@ def generate_map(i, school, fonts):
     return output_path
 
 
+def rename_spatial_maps():
+    print("[RENAME] Spatial maps")
+    renamed = []
+    for i in range(1, 11):
+        old_path = OUTPUT_DIR / f"map_{i:02d}.png"
+        new_path = OUTPUT_DIR / f"map_s_{i:02d}.png"
+        if new_path.exists():
+            print(f"    [SKIP] {new_path.name} already exists")
+            renamed.append(new_path)
+            continue
+        if old_path.exists():
+            old_path.rename(new_path)
+            print(f"    [OK] {old_path.name} -> {new_path.name}")
+            renamed.append(new_path)
+            continue
+        raise FileNotFoundError(
+            f"Missing spatial source: expected {old_path.name} or {new_path.name}"
+        )
+    return renamed
+
+
+def generate_remote_map(i, school, fonts):
+    filename = f"map_r_{i + 1:02d}.png"
+    print(f"[GEN] {filename} - {school['name']}")
+
+    vars_for_school = get_vars_remote(i)
+    seed = make_seed(school, i)
+
+    basemap, school_cx, school_cy = build_basemap(
+        school["lat"], school["lon"], zoom=ZOOM, grid=GRID
+    )
+    base = apply_dark_overlay(basemap, DARK_OVERLAY_REMOTE)
+
+    overlay_img = Image.new("RGBA", base.size, (0, 0, 0, 0))
+    overlay_draw = ImageDraw.Draw(overlay_img)
+
+    draw_ndvi_rs(overlay_draw, school_cx, school_cy,
+                 vars_for_school["ndvi"], seed)
+    draw_night_light_rs(overlay_draw, school_cx, school_cy,
+                        vars_for_school["night_dn"])
+    draw_flood_rs(overlay_draw, school_cx, school_cy,
+                  vars_for_school["flood_op"], seed)
+    draw_builtup(overlay_draw, school_cx, school_cy,
+                 vars_for_school["builtup_op"], seed)
+    draw_catchment_rs(overlay_draw, school_cx, school_cy,
+                      vars_for_school["catchment_r"])
+    draw_school_marker(overlay_draw, school_cx, school_cy)
+
+    result = Image.alpha_composite(base.convert("RGBA"), overlay_img)
+    ui_layer = Image.new("RGBA", result.size, (0, 0, 0, 0))
+    ui_draw = ImageDraw.Draw(ui_layer)
+    draw_ui_remote(ui_draw, school, fonts)
+    draw_legend_rs(ui_draw, fonts)
+    result = Image.alpha_composite(result, ui_layer)
+
+    output_path = OUTPUT_DIR / filename
+    result.convert("RGB").save(output_path, quality=95)
+    size = output_path.stat().st_size
+    print(f"    [OK] {filename} saved ({CANVAS_W}x{CANVAS_H}, {size:,} bytes)")
+    return output_path
+
+
 def main():
     print("=" * 64)
     print("SIGAPP GeoAI Map Generator")
+    print("Split spatial and remote sensing map images")
     print(f"Zoom {ZOOM}, {GRID}x{GRID} tiles, {CANVAS_W}x{CANVAS_H}px output")
     print("=" * 64)
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     fonts = load_fonts()
 
-    generated = []
+    spatial = []
+    generated_remote = []
     for i, school in enumerate(SCHOOLS):
         try:
-            generated.append(generate_map(i, school, fonts))
+            if i == 0:
+                spatial = rename_spatial_maps()
+            generated_remote.append(generate_remote_map(i, school, fonts))
         except Exception as exc:
-            print(f"    [FAIL] map_{i + 1:02d}.png - {exc}")
+            print(f"    [FAIL] map_r_{i + 1:02d}.png - {exc}")
 
     print("=" * 64)
-    print(f"[SUMMARY] {len(generated)}/10 maps saved to {OUTPUT_DIR}")
+    print(f"[SUMMARY] {len(spatial)}/10 spatial maps ready")
+    print(f"[SUMMARY] {len(generated_remote)}/10 remote maps saved to {OUTPUT_DIR}")
     for path in sorted(OUTPUT_DIR.glob("map_*.png")):
         try:
             with Image.open(path) as img:
@@ -469,7 +673,7 @@ def main():
             print(f"  {path.name}: unreadable ({exc})")
     print("=" * 64)
 
-    return 0 if len(generated) == len(SCHOOLS) else 1
+    return 0 if len(spatial) == len(SCHOOLS) and len(generated_remote) == len(SCHOOLS) else 1
 
 
 if __name__ == "__main__":

@@ -189,7 +189,9 @@ function NightLightGauge({ value }: { value: number }) {
 function GeoAIMapImage({ school, mode }: { school: SekolahNTTFull; mode: "spatial" | "remote" }) {
   // Rotate through 10 pre-generated maps, deterministic per school
   const mapIndex = String((school.id % 10) + 1).padStart(2, "0");
-  const src = `/school-maps/map_${mapIndex}.png`;
+  const src = mode === "spatial"
+    ? `/school-maps/map_s_${mapIndex}.png`
+    : `/school-maps/map_r_${mapIndex}.png`;
 
   const LAYER_LEGENDS = {
     spatial: [
