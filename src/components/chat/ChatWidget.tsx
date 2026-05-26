@@ -1,6 +1,6 @@
 "use client";
 
-import { MessageCircle, X, Bot, PanelRight } from "lucide-react";
+import { MessageCircle, Bot, PanelRight } from "lucide-react";
 
 export type ChatState = 'bubble' | 'expanded' | 'docked';
 
@@ -56,7 +56,7 @@ export default function ChatWidget({
                         flex flex-col overflow-hidden">
           
           {/* Header */}
-          <div className="h-12 bg-[#0D2137] flex items-center justify-between px-4 shrink-0">
+          <div className="relative h-12 bg-[#0D2137] flex items-center justify-between px-4 pr-12 shrink-0">
             <div className="flex items-center gap-2">
               <Bot size={18} className="text-[#00B4B4]" />
               <span className="text-white text-sm font-medium">SIGAPP AI</span>
@@ -69,14 +69,28 @@ export default function ChatWidget({
               >
                 <PanelRight size={16} />
               </button>
-              <button
-                onClick={() => onChatStateChange('bubble')}
-                className="text-gray-400 hover:text-white transition-colors"
-                title="Tutup"
-              >
-                <X size={16} />
-              </button>
             </div>
+            <button
+              onClick={() => onChatStateChange('bubble')}
+              className="absolute top-3 right-3 text-white/70 hover:text-white 
+                         transition-colors rounded-full p-1 hover:bg-white/10"
+              aria-label="Tutup chatbot"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
           </div>
 
           {/* Chat UI */}
