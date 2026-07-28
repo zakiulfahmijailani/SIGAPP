@@ -16,7 +16,6 @@ import {
   ResponsiveContainer,
   Legend,
 } from "recharts";
-import { getSupabase } from "@/lib/supabase";
 import { SekolahNTTFull } from "@/lib/types";
 import { formatIndex, getPillarName, getTierFromIndex } from "@/lib/utils";
 import { parseIndex } from "@/lib/utils";
@@ -32,17 +31,14 @@ export default function InsightsPage() {
       setLoading(true);
       setError(null);
 
-      const { data, error: fetchErr } = await getSupabase()
-        .from("sekolah_ntt_full")
-        .select("*");
-
-      if (fetchErr) {
-        setError(fetchErr.message);
+      const response = await fetch("/api/sekolah-ntt", { cache: "no-store" });
+      if (!response.ok) {
+        setError("Gagal memuat data sekolah NTT");
         setLoading(false);
         return;
       }
 
-      setSchools((data ?? []) as SekolahNTTFull[]);
+      setSchools((await response.json()) as SekolahNTTFull[]);
       setLoading(false);
     }
 

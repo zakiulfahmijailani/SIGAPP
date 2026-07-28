@@ -23,7 +23,6 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from "recharts";
-import { getSupabase } from "@/lib/supabase";
 import { SekolahNTTFull } from "@/lib/types";
 import { formatIndex, getTierFromIndex, getPillarName, TIER_BG_COLORS, parseIndex } from "@/lib/utils";
 import dynamic from 'next/dynamic';
@@ -121,28 +120,16 @@ export default function SchoolDetailPage() {
     async function fetchSchool() {
       setLoading(true);
       setError(null);
-      const sb = getSupabase();
-
-      const { data, error: fetchErr } = await sb
-        .from("sekolah_ntt_full")
-        .select("*")
-        .eq("id", Number(id))
-        .single();
-
-      if (fetchErr || !data) {
-        setError(fetchErr?.message ?? "Sekolah tidak ditemukan");
+      const response = await fetch(`/api/sekolah-ntt/${id}`, { cache: "no-store" });
+      if (!response.ok) {
+        setError(response.status === 404 ? "Sekolah tidak ditemukan" : "Gagal memuat detail sekolah");
         setLoading(false);
         return;
       }
 
+      const data = await response.json();
       setSchool(data as SekolahNTTFull);
-
-      const { count } = await sb
-        .from("sekolah_ntt_full")
-        .select("id", { count: "exact", head: true })
-        .gt("sigapp_index", (data as SekolahNTTFull).sigapp_index);
-
-      setRank(count !== null ? count + 1 : null);
+      setRank(typeof data.rank === "number" ? data.rank : null);
       setLoading(false);
     }
     fetchSchool();
