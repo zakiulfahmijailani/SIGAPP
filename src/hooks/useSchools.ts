@@ -1,5 +1,4 @@
 import { useEffect, useState, useCallback } from "react";
-import { getSupabase } from "@/lib/supabase";
 import { SchoolWithIndex } from "@/lib/types";
 import { PriorityTier } from "@/lib/utils";
 
@@ -33,19 +32,12 @@ export function useSchools() {
       setLoading(true);
       setError(null);
 
-      const { data, error: fetchErr } = await getSupabase()
-        .from("schools")
-        .select("*, school_index(*)");
-
-      if (fetchErr) throw new Error(fetchErr.message);
+      const response = await fetch("/api/schools", { cache: "no-store" });
+      if (!response.ok) throw new Error("Failed to fetch schools");
+      const data = await response.json();
 
       // Normalize the data
-      const normalized = (data ?? []).map((s: Record<string, unknown>) => ({
-        ...s,
-        school_index: Array.isArray(s.school_index)
-          ? s.school_index[0]
-          : s.school_index,
-      })) as SchoolWithIndex[];
+      const normalized = (data ?? []) as SchoolWithIndex[];
 
       setSchools(normalized);
     } catch (err: unknown) {

@@ -3,7 +3,6 @@
 import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { Search, ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
-import { getSupabase } from "@/lib/supabase";
 import { SekolahNTTFull } from "@/lib/types";
 import { IndexBadge } from "@/components/ui/IndexBadge";
 import { parseIndex } from "@/lib/utils";
@@ -31,17 +30,14 @@ export default function SchoolsPage() {
       setLoading(true);
       setError(null);
 
-      const { data, error: fetchError } = await getSupabase()
-        .from("sekolah_ntt_full")
-        .select("*");
-
-      if (fetchError) {
-        setError(fetchError.message);
+      const response = await fetch("/api/sekolah-ntt", { cache: "no-store" });
+      if (!response.ok) {
+        setError("Gagal memuat data sekolah NTT");
         setLoading(false);
         return;
       }
 
-      setSchools((data ?? []) as SekolahNTTFull[]);
+      setSchools((await response.json()) as SekolahNTTFull[]);
       setLoading(false);
     }
 

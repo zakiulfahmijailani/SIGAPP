@@ -1,5 +1,4 @@
 import { useEffect, useState, useCallback } from "react";
-import { getSupabase } from "@/lib/supabase";
 import { SekolahNTTFull } from "@/lib/types";
 import { PriorityTier } from "@/lib/utils";
 
@@ -35,11 +34,9 @@ export function useSekolahNTT() {
       setLoading(true);
       setError(null);
 
-      const { data, error: fetchErr } = await getSupabase()
-        .from("sekolah_ntt_full")
-        .select("*");
-
-      if (fetchErr) throw new Error(fetchErr.message);
+      const response = await fetch("/api/sekolah-ntt", { cache: "no-store" });
+      if (!response.ok) throw new Error("Failed to fetch sekolah NTT");
+      const data = await response.json();
 
       setSchools((data ?? []) as SekolahNTTFull[]);
     } catch (err: unknown) {

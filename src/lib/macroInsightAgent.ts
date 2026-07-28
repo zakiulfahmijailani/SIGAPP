@@ -2,7 +2,7 @@
 // SIGAPP Macro Insight — Agentic AI Analysis Engine
 // ============================================================
 
-import { getSupabase } from "./supabase";
+import { getDb } from "./db";
 import {
   MacroInsightKecamatan,
   MacroInsightKabupaten,
@@ -42,13 +42,13 @@ interface TemporalRecord {
 // ─── Step 1: Aggregation ─────────────────────────────────────
 
 async function aggregateSchoolData(): Promise<SchoolAggregate[]> {
-  const supabase = getSupabase();
-  const { data, error } = await supabase
-    .from("sekolah_ntt_full")
-    .select("kecamatan, kabupaten, sigapp_index, p1_quality_gap, p2_spatial_inequity, p3_structural_risk, p4_public_signal");
-
-  if (error) throw new Error(`Failed to fetch school data: ${error.message}`);
-  if (!data || data.length === 0) return [];
+  const sql = getDb();
+  const data = await sql`
+    SELECT kecamatan, kabupaten, sigapp_index,
+      p1_quality_gap, p2_spatial_inequity, p3_structural_risk, p4_public_signal
+    FROM public.sekolah_ntt_full;
+  `;
+  if (data.length === 0) return [];
 
   const groups: Record<string, SchoolAggregate> = {};
 
@@ -135,13 +135,13 @@ function detectSpatialPattern(
 async function analyzeTemporalTrends(
   aggregates: SchoolAggregate[]
 ): Promise<TemporalRecord[]> {
-  const supabase = getSupabase();
-
   // Fetch historical data from previous reports
-  const { data: prevReports } = await supabase
-    .from("macro_insight_kecamatan")
-    .select("kecamatan_name, sigapp_index, report_id")
-    .order("report_id", { ascending: true });
+  const sql = getDb();
+  const prevReports = await sql`
+    SELECT kecamatan_name, sigapp_index, report_id
+    FROM public.macro_insight_kecamatan
+    ORDER BY report_id ASC;
+  `;
 
   const historicalMap: Record<string, number[]> = {};
   if (prevReports) {
@@ -278,7 +278,7 @@ function rollUpToKabupaten(
     const domTrend = Object.entries(trendCounts).sort((a, b) => b[1] - a[1])[0][0] as TrendType;
 
     return {
-      id: `mikab-gen-${kabName.toLowerCase().replace(/[\s.]+/g, "-")}`,
+      id: crypto.randomUUID(),
       report_id: reportId,
       kabupaten_name: kabName,
       sigapp_index_avg: avgIndex,
@@ -301,7 +301,7 @@ export async function generateMacroInsight(
   triggerType: "auto" | "manual",
   generatedBy?: string
 ): Promise<{ reportId: string; kecamatanCount: number; kabupatenCount: number }> {
-  const supabase = getSupabase();
+  const sql = getDb();
 
   // Determine current semester
   const now = new Date();
@@ -374,31 +374,50 @@ export async function generateMacroInsight(
     status: "draft",
   };
 
-  const { error: reportErr } = await supabase
-    .from("macro_insight_reports")
-    .insert(report);
-  if (reportErr) throw new Error(`Failed to insert report: ${reportErr.message}`);
+  await sql`
+    INSERT INTO public.macro_insight_reports
+      (id, semester_label, semester_date, generated_at, trigger_type, generated_by, status)
+    VALUES
+      (${report.id}, ${report.semester_label}, ${report.semester_date}, ${report.generated_at},
+       ${report.trigger_type}, ${report.generated_by}, ${report.status});
+  `;
 
   if (kecResults.length > 0) {
-    const { error: kecErr } = await supabase
-      .from("macro_insight_kecamatan")
-      .insert(kecResults);
-    if (kecErr) throw new Error(`Failed to insert kecamatan data: ${kecErr.message}`);
+    for (const row of kecResults) {
+      await sql`
+        INSERT INTO public.macro_insight_kecamatan
+          (id, report_id, kecamatan_name, kabupaten_name, sigapp_index,
+           total_schools, critical_schools, stable_schools, dominant_dimension,
+           spatial_pattern, trend_type, delta_from_prev, agent_summary, agent_recommendation)
+        VALUES
+          (${row.id}, ${row.report_id}, ${row.kecamatan_name}, ${row.kabupaten_name}, ${row.sigapp_index},
+           ${row.total_schools}, ${row.critical_schools}, ${row.stable_schools}, ${row.dominant_dimension},
+           ${row.spatial_pattern}, ${row.trend_type}, ${row.delta_from_prev}, ${row.agent_summary}, ${row.agent_recommendation});
+      `;
+    }
   }
 
   if (kabResults.length > 0) {
-    const { error: kabErr } = await supabase
-      .from("macro_insight_kabupaten")
-      .insert(kabResults);
-    if (kabErr) throw new Error(`Failed to insert kabupaten data: ${kabErr.message}`);
+    for (const row of kabResults) {
+      await sql`
+        INSERT INTO public.macro_insight_kabupaten
+          (id, report_id, kabupaten_name, sigapp_index_avg, total_kecamatan,
+           critical_kecamatan, best_kecamatan, worst_kecamatan, dominant_dimension,
+           trend_type, delta_from_prev, agent_executive_summary, agent_recommendation)
+        VALUES
+          (${row.id}, ${row.report_id}, ${row.kabupaten_name}, ${row.sigapp_index_avg}, ${row.total_kecamatan},
+           ${row.critical_kecamatan}, ${row.best_kecamatan}, ${row.worst_kecamatan}, ${row.dominant_dimension},
+           ${row.trend_type}, ${row.delta_from_prev}, ${row.agent_executive_summary}, ${row.agent_recommendation});
+      `;
+    }
   }
 
   // Step 7: Update status to published
-  const { error: updateErr } = await supabase
-    .from("macro_insight_reports")
-    .update({ status: "published" })
-    .eq("id", reportId);
-  if (updateErr) throw new Error(`Failed to update report status: ${updateErr.message}`);
+  await sql`
+    UPDATE public.macro_insight_reports
+    SET status = 'published'
+    WHERE id = ${reportId};
+  `;
 
   return {
     reportId,
