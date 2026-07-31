@@ -51,8 +51,8 @@ export function formatIndex(index: number): string {
 }
 
 /**
- * Safely parses a Supabase numeric/string value to a float.
- * Supabase returns `numeric` columns as strings (e.g. "0.7423").
+ * Safely parses a PostgreSQL numeric/string value to a float.
+ * Database clients may return `numeric` columns as strings (e.g. "0.7423").
  * Handles null, undefined, empty string, and NaN gracefully.
  */
 export function parseIndex(value: string | number | null | undefined): number {

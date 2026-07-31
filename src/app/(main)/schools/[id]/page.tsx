@@ -65,14 +65,32 @@ function pillarBarColor(score: number): string {
   return TIER_BG_COLORS[getTierFromIndex(score)];
 }
 
+type KeyVariableValue = string | number | null | undefined;
+
+function parseOptionalNumber(value: KeyVariableValue): number | null {
+  if (value == null || value === "") return null;
+  const parsed = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function formatDecimal(value: KeyVariableValue, digits: number, suffix = ""): string {
+  const parsed = parseOptionalNumber(value);
+  return parsed === null ? "—" : `${parsed.toFixed(digits)}${suffix}`;
+}
+
+function formatInteger(value: KeyVariableValue): string {
+  const parsed = parseOptionalNumber(value);
+  return parsed === null ? "—" : parsed.toLocaleString("id-ID", { maximumFractionDigits: 0 });
+}
+
 // NTT-specific key variables (from sekolah_ntt_full columns)
 const KEY_VARS = [
-  { key: "teacher_ratio",        label: "Rasio Guru/Siswa",  icon: BookOpen,            format: (v: number | null) => v != null ? v.toFixed(2) : "—" },
-  { key: "facility_score",       label: "Skor Fasilitas",    icon: Calculator,          format: (v: number | null) => v != null ? formatIndex(v) : "—" },
-  { key: "nearest_school_km",    label: "Sekolah Terdekat",  icon: Clock,               format: (v: number | null) => v != null ? `${v.toFixed(1)} km` : "—" },
-  { key: "disaster_risk_score",  label: "Risiko Bencana",    icon: Building2,           format: (v: number | null) => v != null ? formatIndex(v) : "—" },
-  { key: "total_students",       label: "Total Siswa",       icon: Percent,             format: (v: number | null) => v != null ? v.toLocaleString('id-ID') : "—" },
-  { key: "total_teachers",       label: "Total Guru",        icon: MessageSquareWarning,format: (v: number | null) => v != null ? v.toLocaleString('id-ID') : "—" },
+  { key: "teacher_ratio",        label: "Rasio Guru/Siswa",  icon: BookOpen,             format: (v: KeyVariableValue) => formatDecimal(v, 2) },
+  { key: "facility_score",       label: "Skor Fasilitas",    icon: Calculator,           format: (v: KeyVariableValue) => formatDecimal(v, 2) },
+  { key: "nearest_school_km",    label: "Sekolah Terdekat",  icon: Clock,                format: (v: KeyVariableValue) => formatDecimal(v, 1, " km") },
+  { key: "disaster_risk_score",  label: "Risiko Bencana",    icon: Building2,            format: (v: KeyVariableValue) => formatDecimal(v, 2) },
+  { key: "total_students",       label: "Total Siswa",       icon: Percent,              format: (v: KeyVariableValue) => formatInteger(v) },
+  { key: "total_teachers",       label: "Total Guru",        icon: MessageSquareWarning, format: (v: KeyVariableValue) => formatInteger(v) },
 ] as const;
 
 // Generate simulated 5-month index history based on current sigapp_index
@@ -380,7 +398,7 @@ export default function SchoolDetailPage() {
         <h2 className="text-sm font-semibold text-slate-700 uppercase tracking-wider mb-4">Key Variables</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
           {KEY_VARS.map(({ key, label, icon: Icon, format }) => {
-            const value = school[key as keyof SekolahNTTFull] as number | null;
+            const value = school[key as keyof SekolahNTTFull] as KeyVariableValue;
             return (
               <div key={key} className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
                 <Icon size={18} className="text-teal-500 mb-2" />
